@@ -1324,8 +1324,8 @@ function generateSignal(sym,tf){
   const absScore=Math.abs(score);
   let conf=score===0?48:Math.min(96,Math.round(38+(absScore/maxPossible)*58));
 
-  // MTF alignment boost to confidence
-  if(tfsAligned>=5)conf=Math.min(96,conf+12);
+  // MTF alignment boost to confidence (now out of 6 other TFs)
+  if(tfsAligned>=5)conf=Math.min(96,conf+14);
   else if(tfsAligned>=4)conf=Math.min(96,conf+10);
   else if(tfsAligned>=3)conf=Math.min(96,conf+7);
   else if(tfsAligned>=2)conf=Math.min(96,conf+4);
@@ -2062,7 +2062,7 @@ function copySignalSummary(){
   const a=ASSETS.find(x=>x.sym===sym);
   const sig=S.signals[sym]?.[tf],ind=S.indicators[sym]?.[tf],px=S.prices[sym];
   if(!sig||!px){alert('No data to copy');return;}
-  const txt=`${a?.tk}/USDT [${tf.toUpperCase()}] — ${sig.signal} | Conf: ${sig.conf}% | Score: ${sig.score>0?'+':''}${sig.score} | Price: $${fmtP(px.price)} | RSI: ${ind?.rsi?.toFixed(1)??'--'} | MTF: ${sig.tfsAligned}/4 aligned\n${sig.reasons.join('\n')}`;
+  const txt=`${a?.tk}/USDT [${tf.toUpperCase()}] — ${sig.signal} | Conf: ${sig.conf}% | Score: ${sig.score>0?'+':''}${sig.score} | Price: $${fmtP(px.price)} | RSI: ${ind?.rsi?.toFixed(1)??'--'} | MTF: ${sig.tfsAligned}/6 aligned | Quality: ${sig.quality||'--'} | Regime: ${sig.regime||'--'}\n${sig.reasons.join('\n')}`;
   navigator.clipboard?.writeText(txt).then(()=>{const b=document.querySelector('.copy-btn');b.textContent='✓ COPIED';setTimeout(()=>b.textContent='⎘ COPY',1500);});
 }
 
