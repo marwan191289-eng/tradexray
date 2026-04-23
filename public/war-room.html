@@ -529,6 +529,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
   <button class="tab-btn" onclick="switchTab('perf',this)">📈 Performance</button>
   <button class="tab-btn" onclick="switchTab('news',this)">📰 News</button>
   <button class="tab-btn" onclick="switchTab('briefing',this)">🤖 AI Brief</button>
+  <button class="tab-btn" onclick="switchTab('chart',this)">📊 SuperChart</button>
 </div>
 
 <!-- TIMEFRAME SELECTOR -->
@@ -700,6 +701,43 @@ The briefing includes:
 
 Available in Arabic and English.</div>
       </div>
+    </div>
+
+    <!-- TRADINGVIEW SUPERCHART TAB -->
+    <div class="tab-content" id="tab-chart">
+      <div class="section-bar">
+        <span class="section-title">TradingView SuperChart</span>
+        <span class="live-tag" style="background:rgba(74,171,255,0.1);border-color:rgba(74,171,255,0.25);color:var(--b0)">LIVE CHART</span>
+      </div>
+      <div class="chart-controls" style="display:flex;gap:8px;padding:8px 12px;background:var(--bg2);border-bottom:1px solid var(--br);flex-wrap:wrap;align-items:center">
+        <select id="tvSymbol" onchange="loadTVChart()" style="background:var(--bg3);color:var(--t);border:1px solid var(--br2);padding:5px 10px;border-radius:4px;font-family:var(--mono);font-size:11px;cursor:pointer">
+          <option value="BINANCE:BTCUSDT">BTC/USDT</option>
+          <option value="BINANCE:ETHUSDT">ETH/USDT</option>
+          <option value="BINANCE:SOLUSDT">SOL/USDT</option>
+          <option value="BINANCE:BNBUSDT">BNB/USDT</option>
+          <option value="BINANCE:XRPUSDT">XRP/USDT</option>
+          <option value="BINANCE:ADAUSDT">ADA/USDT</option>
+          <option value="BINANCE:DOGEUSDT">DOGE/USDT</option>
+          <option value="BINANCE:AVAXUSDT">AVAX/USDT</option>
+          <option value="BINANCE:AAVEUSDT">AAVE/USDT</option>
+          <option value="BINANCE:DOTUSDT">DOT/USDT</option>
+        </select>
+        <div style="display:flex;gap:4px">
+          <button class="tv-tf-btn active" onclick="setTVInterval('1',this)">1m</button>
+          <button class="tv-tf-btn" onclick="setTVInterval('5',this)">5m</button>
+          <button class="tv-tf-btn" onclick="setTVInterval('15',this)">15m</button>
+          <button class="tv-tf-btn" onclick="setTVInterval('60',this)">1H</button>
+          <button class="tv-tf-btn" onclick="setTVInterval('240',this)">4H</button>
+          <button class="tv-tf-btn" onclick="setTVInterval('D',this)">1D</button>
+          <button class="tv-tf-btn" onclick="setTVInterval('W',this)">1W</button>
+          <button class="tv-tf-btn" onclick="setTVInterval('M',this)">1M</button>
+        </div>
+        <div style="display:flex;gap:4px">
+          <button class="tv-tf-btn" onclick="setTVTheme('dark',this)" style="color:var(--b0)">🌙 Dark</button>
+          <button class="tv-tf-btn" onclick="setTVTheme('light',this)" style="color:var(--a)">☀️ Light</button>
+        </div>
+      </div>
+      <div id="tvChartContainer" style="width:100%;height:calc(100vh - 200px);min-height:500px;background:var(--bg)"></div>
     </div>
 
   </div>
