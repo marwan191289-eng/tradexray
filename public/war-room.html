@@ -2227,13 +2227,18 @@ function renderDetail(sym){
     const rr=Math.abs((tp1-price)/(price-sl));
     targetsHTML=`<div class="ind-section">
       <div class="ind-section-title">Risk Management (ATR-Based)</div>
+      <div style="font-size:10px;color:var(--t2);margin-bottom:8px;line-height:1.6;padding:6px 8px;background:var(--bg4);border-left:2px solid var(--a)">
+        <b style="color:var(--a)">TP = Take Profit</b> (أهداف الربح) — السعر المتوقع للخروج بربح.<br>
+        <b style="color:var(--r)">SL = Stop Loss</b> (وقف الخسارة) — نقطة الخروج لتقليل الخسائر.<br>
+        <b style="color:var(--t)">ATR</b> = متوسط المدى الحقيقي — وحدة قياس التقلب. كلما زاد ATR زادت المسافة بين النقاط.
+      </div>
       <div class="targets-grid">
-        <div class="tg-cell"><div class="tg-label">TP1 (1.5 ATR)</div><div class="tg-val ${sUp?'bull':'bear'}">$${fmtP(tp1)}</div></div>
-        <div class="tg-cell"><div class="tg-label">TP2 (2.5 ATR)</div><div class="tg-val ${sUp?'bull':'bear'}">$${fmtP(tp2)}</div></div>
-        <div class="tg-cell"><div class="tg-label">TP3 (4.0 ATR)</div><div class="tg-val ${sUp?'bull':'bear'}">$${fmtP(tp3)}</div></div>
-        <div class="tg-cell"><div class="tg-label">Stop Loss</div><div class="tg-val ${sUp?'bear':'bull'}">$${fmtP(sl)}</div></div>
-        <div class="tg-cell"><div class="tg-label">Risk:Reward</div><div class="tg-val neu">1:${rr.toFixed(2)}</div></div>
-        <div class="tg-cell"><div class="tg-label">ATR Value</div><div class="tg-val neu">$${fmtP(atrV)}</div></div>
+        <div class="tg-cell"><div class="tg-label" style="color:var(--t);font-size:8px;font-weight:700">🎯 TP1 (1.5× ATR)</div><div class="tg-val ${sUp?'bull':'bear'}" style="font-size:13px">$${fmtP(tp1)}</div><div style="font-size:8px;color:var(--t3);margin-top:2px">هدف أول — محافظ</div></div>
+        <div class="tg-cell"><div class="tg-label" style="color:var(--t);font-size:8px;font-weight:700">🎯 TP2 (2.5× ATR)</div><div class="tg-val ${sUp?'bull':'bear'}" style="font-size:13px">$${fmtP(tp2)}</div><div style="font-size:8px;color:var(--t3);margin-top:2px">هدف ثاني — متوسط</div></div>
+        <div class="tg-cell"><div class="tg-label" style="color:var(--t);font-size:8px;font-weight:700">🎯 TP3 (4.0× ATR)</div><div class="tg-val ${sUp?'bull':'bear'}" style="font-size:13px">$${fmtP(tp3)}</div><div style="font-size:8px;color:var(--t3);margin-top:2px">هدف طموح</div></div>
+        <div class="tg-cell"><div class="tg-label" style="color:var(--r);font-size:8px;font-weight:700">🛑 Stop Loss (1× ATR)</div><div class="tg-val ${sUp?'bear':'bull'}" style="font-size:13px">$${fmtP(sl)}</div><div style="font-size:8px;color:var(--t3);margin-top:2px">نقطة وقف الخسارة</div></div>
+        <div class="tg-cell"><div class="tg-label" style="color:var(--t);font-size:8px;font-weight:700">⚖️ Risk:Reward</div><div class="tg-val neu" style="font-size:13px">1:${rr.toFixed(2)}</div><div style="font-size:8px;color:var(--t3);margin-top:2px">نسبة المخاطرة/العائد</div></div>
+        <div class="tg-cell"><div class="tg-label" style="color:var(--t);font-size:8px;font-weight:700">📏 ATR Value</div><div class="tg-val neu" style="font-size:13px">$${fmtP(atrV)}</div><div style="font-size:8px;color:var(--t3);margin-top:2px">وحدة التقلب</div></div>
       </div>
       <div class="pos-calc">
         <div class="pos-calc-title">Position Size Calculator</div>
