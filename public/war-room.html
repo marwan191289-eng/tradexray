@@ -66,14 +66,15 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .cmd{display:grid;grid-template-columns:repeat(8,1fr);border-bottom:1px solid var(--br2);background:var(--bg2);position:relative;z-index:10}
 @media(max-width:1200px){.cmd{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:700px){.cmd{grid-template-columns:repeat(2,1fr)}}
-.cmd-cell{padding:10px 14px;border-right:1px solid var(--br);position:relative;overflow:hidden;cursor:default}
+.cmd-cell{padding:12px 14px;border-right:1px solid var(--br);position:relative;overflow:hidden;cursor:default;background:linear-gradient(180deg,var(--bg2),var(--bg3))}
 .cmd-cell:last-child{border-right:none}
+.cmd-cell:hover{background:var(--bg3)}
 .cmd-cell::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:transparent;transition:background 0.4s}
-.cmd-label{font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:var(--t3);margin-bottom:4px;font-family:var(--raj)}
-.cmd-val{font-family:var(--orb);font-size:16px;font-weight:700;line-height:1.1;color:var(--t);transition:color 0.3s}
-.cmd-sub{font-size:9px;color:var(--t2);margin-top:3px;letter-spacing:0.04em}
-.cmd-accent{position:absolute;bottom:0;left:0;height:2px;transition:width 0.8s ease,background 0.4s}
-.fg-xfear{color:#FF3E3E!important}.fg-fear{color:#FF7F3E!important}.fg-neu{color:#FFB020!important}.fg-greed{color:#90D840!important}.fg-xgreed{color:#00E5A0!important}
+.cmd-label{font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--t2);margin-bottom:5px;font-family:var(--raj);font-weight:600}
+.cmd-val{font-family:var(--orb);font-size:18px;font-weight:900;line-height:1.1;color:#fff;transition:color 0.3s;text-shadow:0 0 8px rgba(200,220,240,0.15)}
+.cmd-sub{font-size:10px;color:var(--t);margin-top:4px;letter-spacing:0.04em;font-weight:500}
+.cmd-accent{position:absolute;bottom:0;left:0;height:3px;transition:width 0.8s ease,background 0.4s;box-shadow:0 0 6px currentColor}
+.fg-xfear{color:#FF3E3E!important;text-shadow:0 0 12px rgba(255,62,62,0.5)!important}.fg-fear{color:#FF7F3E!important;text-shadow:0 0 10px rgba(255,127,62,0.4)!important}.fg-neu{color:#FFB020!important;text-shadow:0 0 10px rgba(255,176,32,0.4)!important}.fg-greed{color:#90D840!important;text-shadow:0 0 10px rgba(144,216,64,0.4)!important}.fg-xgreed{color:#00E5A0!important;text-shadow:0 0 12px rgba(0,229,160,0.5)!important}
 
 /* TABS */
 .tabs{display:flex;border-bottom:1px solid var(--br2);background:var(--bg2);position:relative;z-index:10}
@@ -113,7 +114,8 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 
 .card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
 .card-assetinfo{display:flex;align-items:center;gap:8px}
-.card-icon{width:30px;height:30px;border:1px solid;display:flex;align-items:center;justify-content:center;font-family:var(--raj);font-size:11px;font-weight:700;background:var(--bg4);flex-shrink:0}
+.card-logo{width:28px;height:28px;border-radius:50%;flex-shrink:0;object-fit:contain;background:var(--bg4)}
+.card-icon{width:30px;height:30px;border:1px solid;display:flex;align-items:center;justify-content:center;font-family:var(--raj);font-size:11px;font-weight:700;background:var(--bg4);flex-shrink:0;border-radius:4px}
 .card-ticker{font-family:var(--raj);font-size:16px;font-weight:700;letter-spacing:0.04em;color:var(--t)}
 .card-name{font-size:9px;color:var(--t2);margin-top:1px;letter-spacing:0.04em}
 .sig-badge{padding:3px 7px;font-family:var(--raj);font-size:8px;font-weight:700;letter-spacing:0.1em;white-space:nowrap;text-transform:uppercase}
@@ -816,26 +818,29 @@ Available in Arabic and English.</div>
 // CONFIG
 // ═══════════════════════════════════════════════════════════
 const ASSETS = [
-  { sym:'BTCUSDT',  name:'Bitcoin',     tk:'BTC',  color:'#F7931A' },
-  { sym:'ETHUSDT',  name:'Ethereum',    tk:'ETH',  color:'#627EEA' },
-  { sym:'SOLUSDT',  name:'Solana',      tk:'SOL',  color:'#9945FF' },
-  { sym:'BNBUSDT',  name:'BNB',         tk:'BNB',  color:'#F3BA2F' },
-  { sym:'XRPUSDT',  name:'XRP',         tk:'XRP',  color:'#00AAE4' },
-  { sym:'ADAUSDT',  name:'Cardano',     tk:'ADA',  color:'#0033AD' },
-  { sym:'DOGEUSDT', name:'Dogecoin',    tk:'DOGE', color:'#C2A633' },
-  { sym:'AVAXUSDT', name:'Avalanche',   tk:'AVAX', color:'#E84142' },
-  { sym:'BCHUSDT',  name:'Bitcoin Cash',tk:'BCH',  color:'#8DC351' },
-  { sym:'AAVEUSDT', name:'Aave',        tk:'AAVE', color:'#B6509E' },
-  { sym:'LTCUSDT',  name:'Litecoin',    tk:'LTC',  color:'#A6A9AA' },
-  // External assets (CoinGecko-only, no Binance feed → limited TA)
-  { sym:'PIEVERSE', name:'PieVerse',    tk:'PIEVERSE', color:'#FF6B9D', external:true, geckoId:'pieverse' },
+  { sym:'BTCUSDT',  name:'Bitcoin',     tk:'BTC',  color:'#F7931A', logo:'https://assets.coingecko.com/coins/images/1/small/bitcoin.png' },
+  { sym:'ETHUSDT',  name:'Ethereum',    tk:'ETH',  color:'#627EEA', logo:'https://assets.coingecko.com/coins/images/279/small/ethereum.png' },
+  { sym:'SOLUSDT',  name:'Solana',      tk:'SOL',  color:'#9945FF', logo:'https://assets.coingecko.com/coins/images/4128/small/solana.png' },
+  { sym:'BNBUSDT',  name:'BNB',         tk:'BNB',  color:'#F3BA2F', logo:'https://assets.coingecko.com/coins/images/825/small/bnb-icon2_2x.png' },
+  { sym:'XRPUSDT',  name:'XRP',         tk:'XRP',  color:'#00AAE4', logo:'https://assets.coingecko.com/coins/images/44/small/xrp-symbol-white-128.png' },
+  { sym:'ADAUSDT',  name:'Cardano',     tk:'ADA',  color:'#0033AD', logo:'https://assets.coingecko.com/coins/images/975/small/cardano.png' },
+  { sym:'DOGEUSDT', name:'Dogecoin',    tk:'DOGE', color:'#C2A633', logo:'https://assets.coingecko.com/coins/images/5/small/dogecoin.png' },
+  { sym:'AVAXUSDT', name:'Avalanche',   tk:'AVAX', color:'#E84142', logo:'https://assets.coingecko.com/coins/images/12559/small/Avalanche_Circle_RedWhite_Trans.png' },
+  { sym:'BCHUSDT',  name:'Bitcoin Cash',tk:'BCH',  color:'#8DC351', logo:'https://assets.coingecko.com/coins/images/780/small/bitcoin-cash-circle.png' },
+  { sym:'AAVEUSDT', name:'Aave',        tk:'AAVE', color:'#B6509E', logo:'https://assets.coingecko.com/coins/images/12645/small/AAVE.png' },
+  { sym:'LTCUSDT',  name:'Litecoin',    tk:'LTC',  color:'#A6A9AA', logo:'https://assets.coingecko.com/coins/images/2/small/litecoin.png' },
+  { sym:'PIEVERSE', name:'PieVerse',    tk:'PIEVERSE', color:'#FF6B9D', external:true, geckoId:'pieverse', logo:'' },
 ];
 
 const BREST = 'https://api.binance.com/api/v3';
 const BWS   = 'wss://stream.binance.com:9443/stream?streams=';
 const GECKO = 'https://api.coingecko.com/api/v3';
 const FNG   = 'https://api.alternative.me/fng/?limit=1';
-const NEWS_URL = 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fcointelegraph.com%2Frss&api_key=free&count=30';
+const NEWS_FEEDS = [
+  'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fcointelegraph.com%2Frss&count=20',
+  'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.coindesk.com%2Farc%2Foutboundfeeds%2Frss%2F&count=20',
+  'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fcryptonews.com%2Fnews%2Ffeed%2F&count=15',
+];
 
 // ═══════════════════════════════════════════════════════════
 // STATE
@@ -1413,21 +1418,47 @@ async function fetchMarket(){
 
 async function fetchNews(){
   try{
-    const r=await fetch(NEWS_URL);const d=await r.json();
-    if(d?.items?.length){
-      S.news=d.items.map(item=>{
-        const title=item.title||'';
-        const tl=title.toLowerCase();
-        let sentiment='neu';
-        const bullW=['bull','pump','surge','soar','rally','gain','breakout','ath','rise','moon','spike','positive'];
-        const bearW=['bear','dump','crash','fall','drop','plunge','sell','fear','risk','warn','loss','ban','hack'];
-        if(bullW.some(w=>tl.includes(w)))sentiment='pos';
-        else if(bearW.some(w=>tl.includes(w)))sentiment='neg';
-        return{title,link:item.link,pubDate:item.pubDate,source:item.author||'CoinTelegraph',thumbnail:item.thumbnail,sentiment};
-      });
-      renderNews();
+    const allItems = [];
+    for (const url of NEWS_FEEDS) {
+      try {
+        const r = await fetch(url);
+        const d = await r.json();
+        if (d?.items?.length) {
+          d.items.forEach(item => {
+            const title = item.title || '';
+            const tl = title.toLowerCase();
+            let sentiment = 'neu';
+            const bullW = ['bull','pump','surge','soar','rally','gain','breakout','ath','rise','moon','spike','positive','adoption','approve','etf','launch','partner','upgrade'];
+            const bearW = ['bear','dump','crash','fall','drop','plunge','sell','fear','risk','warn','loss','ban','hack','fraud','lawsuit','sec','fine','regulation','sanctions','war','conflict','attack'];
+            const geoW = ['war','sanctions','tariff','election','fed','rate','inflation','gdp','recession','geopolit','opec','treasury','congress','eu','china','trump','biden','powell'];
+            if (bullW.some(w => tl.includes(w))) sentiment = 'pos';
+            else if (bearW.some(w => tl.includes(w))) sentiment = 'neg';
+            const isGeo = geoW.some(w => tl.includes(w));
+            allItems.push({
+              title,
+              link: item.link,
+              pubDate: item.pubDate,
+              source: item.author || (url.includes('coindesk') ? 'CoinDesk' : url.includes('cryptonews') ? 'CryptoNews' : 'CoinTelegraph'),
+              thumbnail: item.thumbnail || item.enclosure?.link || '',
+              sentiment,
+              isGeo,
+            });
+          });
+        }
+      } catch(e) { console.warn('News feed error:', e); }
     }
-  }catch{}
+    // Remove duplicates by title
+    const seen = new Set();
+    S.news = allItems.filter(n => {
+      const key = n.title.slice(0,50).toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    // Sort by date, newest first
+    S.news.sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate));
+    renderNews();
+  } catch(e) { console.warn('News fetch failed:', e); }
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1785,11 +1816,13 @@ function buildCard(a){
   if(sig?.counterTrend)tags.push(`<span class="ctag ctag-bear">⚠CT</span>`);
   if(sig?.regime && sig.regime !== 'UNKNOWN')tags.push(`<span class="ctag ctag-${sig.regime.includes('BULL')?'bull':sig.regime.includes('BEAR')?'bear':'neu'}" style="font-size:6px">${sig.regime.replace('_',' ').slice(0,8)}</span>`);
 
+  const logoHTML = a.logo ? `<img class="card-logo" src="${a.logo}" alt="${a.tk}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="card-icon" style="border-color:${a.color}55;color:${a.color};display:none">${a.tk.slice(0,4)}</div>` : `<div class="card-icon" style="border-color:${a.color}55;color:${a.color}">${a.tk.slice(0,4)}</div>`;
+
   return`<div class="asset-card${selCls}" id="card-${a.sym}" onclick="selectCard('${a.sym}')">
   <div class="card-accent" style="background:${accentColor}"></div>
   <div class="card-top">
     <div class="card-assetinfo">
-      <div class="card-icon" style="border-color:${a.color}55;color:${a.color}">${a.tk.slice(0,4)}</div>
+      ${logoHTML}
       <div><div class="card-ticker">${a.tk}</div><div class="card-name">${a.name}</div></div>
     </div>
     <span class="sig-badge sig-${sc}">${sig?.signal??'WAIT'}</span>
@@ -2238,7 +2271,8 @@ function generateAndShowBriefing(){
   },400);
 }
 
-function buildBriefing(sym,tf){
+function buildBriefing(sym,tf,lang){
+  if (lang === 'ar') return buildBriefingAR(sym, tf);
   const ind=S.indicators[sym]?.[tf];
   const sig=S.signals[sym]?.[tf];
   const px=S.prices[sym];
@@ -2397,6 +2431,133 @@ function buildBriefing(sym,tf){
   b+=ln;
   b+=h(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`)+ln;
   b+=`<span style="color:var(--t3)">Generated: ${new Date().toLocaleString()} | Powered by live Binance data | ${reasons_count(sym,tf)} factors analyzed</span>`;
+  return b;
+}
+
+// ═══════════════════════════════════════════════════════════
+// ARABIC BRIEFING
+// ═══════════════════════════════════════════════════════════
+function buildBriefingAR(sym, tf) {
+  const ind = S.indicators[sym]?.[tf];
+  const sig = S.signals[sym]?.[tf];
+  const px = S.prices[sym];
+  const a = ASSETS.find(x => x.sym === sym);
+  if (!ind || !px || !sig) return '<span style="color:var(--r)">بيانات غير كافية. يرجى الانتظار حتى يتم تحميل البيانات.</span>';
+
+  const price = px.price, ch24 = px.change;
+  const sc = sigClass(sig.signal);
+  const fg = S.fg?.val || 50;
+  const fgDesc = fg < 20 ? 'خوف شديد' : fg < 40 ? 'خوف' : fg < 60 ? 'محايد' : fg < 80 ? 'جشع' : 'جشع شديد';
+  const trendStr = sig.score >= 10 ? 'صعود قوي' : sig.score >= 4 ? 'صعود معتدل' : sig.score <= -10 ? 'هبوط قوي' : sig.score <= -4 ? 'هبوط معتدل' : 'تذبذب';
+
+  const h = (t) => `<span style="color:var(--g);font-family:var(--orb);font-size:10px;letter-spacing:0.1em;font-weight:700">${t}</span>`;
+  const sec = (t) => `<span style="color:var(--a);font-weight:600">${t}</span>`;
+  const bull = (t) => `<span style="color:var(--g)">${t}</span>`;
+  const bear = (t) => `<span style="color:var(--r)">${t}</span>`;
+  const val = (t) => `<span style="color:var(--t)">${t}</span>`;
+  const ln = '\n';
+
+  const sigAr = { 'STRONG BUY': 'شراء قوي', 'BUY': 'شراء', 'WEAK BUY': 'شراء ضعيف', 'STRONG SELL': 'بيع قوي', 'SELL': 'بيع', 'WEAK SELL': 'بيع ضعيف', 'HOLD': 'انتظار', 'NO TRADE': 'لا تداول' };
+  const sigColor = sc === 'buy' ? 'var(--g)' : sc === 'sell' ? 'var(--r)' : 'var(--a)';
+
+  let b = '';
+  b += h(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`) + ln;
+  b += h(`  التقرير التكتيكي — ${a?.tk} / USDT  [${tf.toUpperCase()}]`) + ln;
+  b += h(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`) + ln + ln;
+
+  b += `<span style="color:${sigColor};font-family:var(--raj);font-size:14px;font-weight:700;direction:rtl">◉ ${sigAr[sig.signal] || sig.signal}</span>  النقاط: ${sig.score > 0 ? '+' : ''}${sig.score} | الثقة: ${sig.conf}% | توافق الأطر الزمنية: ${sig.tfsAligned}/6` + ln + ln;
+
+  b += sec(`[ حركة السعر ]`) + ln;
+  b += `السعر الحالي:  ${val('$' + fmtP(price))}  |  التغير 24 ساعة: ${ch24 >= 0 ? bull('+' + ch24.toFixed(2) + '%') : bear(ch24.toFixed(2) + '%')}` + ln;
+  b += `الاتجاه العام: ${trendStr}` + ln;
+  if (ind.ichimoku) {
+    if (ind.ichimoku.priceAboveCloud) b += bull(`السعر فوق سحابة إيشيموكو — تأكيد صعودي هيكلي`) + ln;
+    else if (ind.ichimoku.priceBelowCloud) b += bear(`السعر تحت سحابة إيشيموكو — هيمنة هبوطية`) + ln;
+    else b += `<span style="color:var(--a)">السعر داخل السحابة — منطقة تذبذب</span>` + ln;
+  }
+  b += ln;
+
+  b += sec(`[ تحليل الزخم ]`) + ln;
+  if (ind.rsi !== null) {
+    const rState = ind.rsi < 30 ? bear('تشبع بيعي — احتمال ارتداد مرتفع') : ind.rsi > 70 ? bear('تشبع شرائي — احتمال تصحيح') : 'نطاق محايد';
+    b += `RSI (14):       ${val(ind.rsi.toFixed(2))} — ${rState}` + ln;
+  }
+  if (ind.stochRSI) {
+    const kv = ind.stochRSI.k;
+    const sState = kv < 20 ? bull('تشبع بيعي') : kv > 80 ? bear('تشبع شرائي') : 'محايد';
+    b += `Stoch RSI:      ${val(kv.toFixed(1) + ' / ' + ind.stochRSI.d.toFixed(1))} — ${sState}` + ln;
+  }
+  if (ind.macd) {
+    const mState = ind.macd.bullCross ? bull('🚀 تقاطع صعودي') : ind.macd.bearCross ? bear('🔴 تقاطع هبوطي') : ind.macd.hist > 0 ? bull('مدرج تكراري إيجابي') : bear('مدرج تكراري سلبي');
+    b += `MACD:           ${mState}` + ln;
+  }
+  if (ind.williamsR !== null) {
+    const wState = ind.williamsR <= -80 ? bull('تشبع بيعي') : ind.williamsR >= -20 ? bear('تشبع شرائي') : 'محايد';
+    b += `Williams %R:    ${val(ind.williamsR.toFixed(1))} — ${wState}` + ln;
+  }
+  if (ind.cci !== null) {
+    const cState = ind.cci < -100 ? bull('تشبع بيعي') : ind.cci > 100 ? bear('تشبع شرائي') : 'محايد';
+    b += `CCI (20):       ${val(ind.cci.toFixed(1))} — ${cState}` + ln;
+  }
+  if (ind.mfi !== null) {
+    const mState = ind.mfi < 25 ? bull('تدفق أموال خارج — تشبع بيعي') : ind.mfi > 75 ? bear('تدفق أموال داخل — تشبع شرائي') : 'متوازن';
+    b += `MFI (14):       ${val(ind.mfi.toFixed(1))} — ${mState}` + ln;
+  }
+  b += ln;
+
+  b += sec(`[ هيكل الاتجاه ]`) + ln;
+  const emaAligned = ind.ema9 > ind.ema21 && ind.ema21 > ind.ema50;
+  const emaBearAligned = ind.ema9 < ind.ema21 && ind.ema21 < ind.ema50;
+  b += `ترتيب المتوسطات: ${emaAligned ? bull('صعودي (9>21>50)') : emaBearAligned ? bear('هبوطي (9<21<50)') : '<span style="color:var(--a)">مختلط</span>'}` + ln;
+  if (ind.adx) {
+    const adxStr = ind.adx.adx > 40 ? 'قوي' : ind.adx.adx > 25 ? 'معتدل' : 'ضعيف';
+    const adxDir = ind.adx.plusDI > ind.adx.minusDI ? bull('هيمنة صعودية +DI') : bear('هيمنة هبوطية -DI');
+    b += `ADX (14):       ${val(ind.adx.adx.toFixed(1))} — اتجاه ${adxStr} | ${adxDir}` + ln;
+  }
+  if (ind.sar) b += `Parabolic SAR:  ${ind.sar.bull ? bull('صعودي ↑ @ $' + fmtP(ind.sar.sar)) : bear('هبوطي ↓ @ $' + fmtP(ind.sar.sar))}` + ln;
+  b += ln;
+
+  b += sec(`[ الحجم والتقلب ]`) + ln;
+  b += `الحجم:          ${val((ind.volRatio?.toFixed(2) ?? '--') + 'x المتوسط')} — ${ind.volRatio > 2.5 ? bear('مرتفع جداً') : ind.volRatio > 1.4 ? '<span style="color:var(--a)">مرتفع</span>' : 'طبيعي'}` + ln;
+  if (ind.atr) b += `ATR (14):       ${val('$' + fmtP(ind.atr))} (وحدة التقلب)` + ln;
+  b += ln;
+
+  if (ind.divergence) {
+    b += `<span style="background:rgba(255,176,32,0.1);border:1px solid rgba(255,176,32,0.3);padding:4px 8px;display:inline-block;margin-bottom:8px">⚡ تنبيه انحراف: انحراف RSI ${ind.divergence === 'bullish' ? 'صعودي' : 'هبوطي'} — إشارة انعكاس محتملة</span>` + ln + ln;
+  }
+
+  b += sec(`[ إدارة المخاطر — مخاطرة ثابتة 1% على حساب $10,000 ]`) + ln;
+  const plan = (typeof riskPlan === 'function') ? riskPlan(sym, tf, 10000, 1) : null;
+  if (plan) {
+    b += `الاتجاه: ${plan.direction === 'LONG' ? bull('شراء (LONG)') : bear('بيع (SHORT)')}  |  نقطة الدخول: ${val('$' + fmtP(plan.entry))}` + ln;
+    b += `وقف الخسارة: ${bear('$' + fmtP(plan.stop))}  (${plan.invalidationPct.toFixed(2)}% من الدخول)` + ln;
+    b += `TP1: ${bull('$' + fmtP(plan.tp1))} · TP2: ${bull('$' + fmtP(plan.tp2))} · TP3: ${bull('$' + fmtP(plan.tp3))}` + ln;
+    b += `نسبة المخاطرة/العائد: ${val('1 : ' + plan.rr.toFixed(2))}` + ln;
+  }
+  b += ln;
+
+  b += sec(`[ سياق السوق ]`) + ln;
+  b += `مؤشر الخوف والجشع:  ${val(fg + ' — ' + fgDesc)}` + ln;
+  b += `نظام السوق:          ${val(REGIME.current.replace('_', ' '))}` + ln;
+  b += ln;
+
+  b += sec(`[ التوصية التكتيكية ]`) + ln;
+  if (sc === 'buy') {
+    b += `→ ${bull('المركز: شراء / فتح مركز طويل')}` + ln;
+    b += `→ الاستراتيجية: ${sig.score >= 10 ? bull('تجميع قوي مع زخم مؤكد') : bull('دخول تدريجي')}` + ln;
+    b += `→ راقب: فشل الاختراق، انخفاض الحجم، ظهور انحراف هبوطي` + ln;
+  } else if (sc === 'sell') {
+    b += `→ ${bear('المركز: بيع / فتح مركز قصير')}` + ln;
+    b += `→ الاستراتيجية: ${sig.score <= -10 ? bear('بيع قوي مع زخم هبوطي') : bear('تقليل التعرض')}` + ln;
+    b += `→ راقب: شمعة انعكاس صعودية، ارتداد RSI من التشبع البيعي` + ln;
+  } else {
+    b += `→ <span style="color:var(--a)">المركز: محايد / نقدي</span>` + ln;
+    b += `→ الاستراتيجية: انتظر اختراق واضح مع تأكيد حجم` + ln;
+    b += `→ راقب: ارتفاع الحجم، توافق الأطر الزمنية المتعددة` + ln;
+  }
+  b += ln;
+  b += h(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`) + ln;
+  b += `<span style="color:var(--t3)">تم التوليد: ${new Date().toLocaleString('ar-EG')} | مدعوم ببيانات Binance الحية | ${reasons_count(sym, tf)} عامل تحليلي</span>`;
   return b;
 }
 
@@ -3218,7 +3379,7 @@ async function generateAIBriefing() {
 
   // Use the comprehensive template briefing (AI edge function can be connected later)
   setTimeout(() => {
-    const brief = buildBriefing(sym, tf);
+    const brief = buildBriefing(sym, tf, lang);
     
     // Add Volume Delta section
     const k = S.klines[sym]?.[tf];
@@ -3374,5 +3535,18 @@ async function init(){
 
 init();
 </script>
+
+<!-- DEVELOPER BADGE -->
+<div style="text-align:center;padding:18px 0 22px;background:linear-gradient(180deg,var(--bg),var(--bg2));border-top:1px solid var(--br2)">
+  <div style="display:inline-block;padding:10px 28px;border:1px solid rgba(0,229,160,0.3);background:rgba(0,229,160,0.04);position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(0,229,160,0.08),transparent);animation:devShine 3s ease-in-out infinite"></div>
+    <span style="font-family:var(--orb);font-size:10px;letter-spacing:0.2em;color:var(--g);text-shadow:0 0 15px rgba(0,229,160,0.6),0 0 30px rgba(0,229,160,0.3);animation:devGlow 2s ease-in-out infinite alternate">DEVELOPER: MARWAN NEGM</span>
+  </div>
+  <div style="margin-top:6px;font-size:9px;color:var(--t3);letter-spacing:0.1em;font-family:var(--raj)">WAR ROOM · Decision Intelligence Platform · v2.0</div>
+</div>
+<style>
+@keyframes devShine{0%{transform:translateX(-100%)}50%{transform:translateX(100%)}100%{transform:translateX(100%)}}
+@keyframes devGlow{0%{text-shadow:0 0 10px rgba(0,229,160,0.4),0 0 20px rgba(0,229,160,0.2)}100%{text-shadow:0 0 20px rgba(0,229,160,0.8),0 0 40px rgba(0,229,160,0.4),0 0 60px rgba(0,229,160,0.2)}}
+</style>
 </body>
 </html>
