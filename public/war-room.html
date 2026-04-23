@@ -3252,7 +3252,7 @@ async function generateAIBriefing() {
 
   // Use the comprehensive template briefing (AI edge function can be connected later)
   setTimeout(() => {
-    const brief = buildBriefing(sym, tf);
+    const brief = buildBriefing(sym, tf, lang);
     
     // Add Volume Delta section
     const k = S.klines[sym]?.[tf];
