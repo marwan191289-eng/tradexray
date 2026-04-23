@@ -2115,6 +2115,11 @@ function patchCard(sym,prevP){
   if(sym===S.selected)renderDetail(sym);
 }
 
+function toggleIndicatorTooltip(sym){
+  const el=document.getElementById('tooltip-'+sym);
+  if(el)el.classList.toggle('show');
+}
+
 function selectCard(sym){
   const prev=document.getElementById('card-'+S.selected);
   if(prev)prev.classList.remove('sel');
