@@ -700,7 +700,18 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 
     <!-- CORRELATION TAB -->
     <div class="tab-content" id="tab-corr">
-      <div class="section-bar"><span class="section-title">Rolling Correlation Matrix (20-bar)</span></div>
+      <div class="section-bar"><span class="section-title">Rolling Correlation Matrix</span></div>
+      <div class="corr-controls" style="display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid var(--br);background:var(--bg2);align-items:center;flex-wrap:wrap">
+        <span style="font-size:9px;color:var(--t3);letter-spacing:0.12em;text-transform:uppercase;font-family:var(--raj)">TF</span>
+        <button class="tf-btn active" onclick="setCorrTF('1h',this)">1H</button>
+        <button class="tf-btn" onclick="setCorrTF('4h',this)">4H</button>
+        <button class="tf-btn" onclick="setCorrTF('1d',this)">1D</button>
+        <span style="flex:1"></span>
+        <span style="font-size:9px;color:var(--t3);letter-spacing:0.12em;text-transform:uppercase;font-family:var(--raj)">Window</span>
+        <button class="tf-btn active" onclick="setCorrWindow(20,this)">20</button>
+        <button class="tf-btn" onclick="setCorrWindow(40,this)">40</button>
+        <button class="tf-btn" onclick="setCorrWindow(60,this)">60</button>
+      </div>
       <div class="corr-matrix" id="corrMatrix"><div class="loading"><div class="ld-bar"><div class="ld-prog"></div></div><div class="ld-txt">Computing correlations...</div></div></div>
     </div>
 
