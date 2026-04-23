@@ -3839,15 +3839,47 @@ init();
 </script>
 
 <!-- DEVELOPER BADGE -->
-<div style="text-align:center;padding:24px 0 30px;background:linear-gradient(180deg,var(--bg),rgba(0,229,160,0.02),var(--bg2));border-top:1px solid var(--br2)">
-  <div style="display:inline-block;padding:14px 36px;border:1px solid rgba(0,229,160,0.25);background:linear-gradient(135deg,rgba(0,229,160,0.04),rgba(74,171,255,0.03));position:relative;overflow:hidden;border-radius:4px;box-shadow:0 0 30px rgba(0,229,160,0.08)">
-    <div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(0,229,160,0.12) 50%,transparent 100%);animation:devShine 4s ease-in-out infinite"></div>
-    <div style="position:absolute;inset:-1px;border-radius:4px;background:linear-gradient(45deg,rgba(0,229,160,0.3),transparent,rgba(74,171,255,0.3),transparent);animation:devBorder 6s linear infinite;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:xor;-webkit-mask-composite:xor;padding:1px"></div>
-    <div style="font-family:var(--orb);font-size:8px;letter-spacing:0.3em;color:var(--t3);margin-bottom:6px">ENGINEERED BY</div>
-    <span style="font-family:var(--orb);font-size:14px;letter-spacing:0.25em;color:var(--g);text-shadow:0 0 20px rgba(0,229,160,0.7),0 0 40px rgba(0,229,160,0.3),0 0 80px rgba(0,229,160,0.1);animation:devGlow 2.5s ease-in-out infinite alternate;font-weight:900">✦ MARWAN NEGM ✦</span>
-    <div style="margin-top:6px;font-family:var(--raj);font-size:9px;letter-spacing:0.15em;color:var(--b0);text-shadow:0 0 10px rgba(74,171,255,0.3)">FULL-STACK DEVELOPER & QUANT ANALYST</div>
+<div class="footer-bar" style="text-align:center;padding:24px 0 30px;background:linear-gradient(180deg,var(--bg),rgba(0,229,160,0.03) 40%,rgba(74,171,255,0.02) 70%,var(--bg2));border-top:1px solid rgba(0,229,160,0.12)">
+  <div style="display:inline-block;padding:16px 42px;border:1px solid rgba(0,229,160,0.2);background:linear-gradient(135deg,rgba(0,229,160,0.05),rgba(74,171,255,0.04),rgba(176,96,255,0.03));position:relative;overflow:hidden;border-radius:6px;box-shadow:0 0 40px rgba(0,229,160,0.06),0 8px 32px rgba(0,0,0,0.4)">
+    <div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(0,229,160,0.1) 50%,transparent 100%);animation:devShine 4s ease-in-out infinite"></div>
+    <div style="position:absolute;inset:-1px;border-radius:6px;background:conic-gradient(from 0deg,rgba(0,229,160,0.3),rgba(74,171,255,0.2),rgba(176,96,255,0.2),rgba(0,229,160,0.3));animation:devBorder 6s linear infinite;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:xor;-webkit-mask-composite:xor;padding:1px"></div>
+    <div style="font-family:var(--orb);font-size:7px;letter-spacing:0.4em;color:var(--t3);margin-bottom:8px;text-transform:uppercase">Engineered & Designed By</div>
+    <span style="font-family:var(--orb);font-size:16px;letter-spacing:0.3em;background:linear-gradient(135deg,#00E5A0,#4AABFF,#B060FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 20px rgba(0,229,160,0.5));font-weight:900">✦ MARWAN NEGM ✦</span>
+    <div style="margin-top:8px;font-family:var(--raj);font-size:9px;letter-spacing:0.18em;color:var(--b0);text-shadow:0 0 10px rgba(74,171,255,0.3)">FULL-STACK DEVELOPER · QUANT ANALYST · SYSTEM ARCHITECT</div>
   </div>
-  <div style="margin-top:8px;font-size:9px;color:var(--t3);letter-spacing:0.1em;font-family:var(--raj)">WAR ROOM · Decision Intelligence Platform · v3.0</div>
+  <div style="margin-top:10px;font-size:9px;color:var(--t3);letter-spacing:0.12em;font-family:var(--raj)">WAR ROOM · Decision Intelligence Platform · v4.0 · Built with precision</div>
+</div>
+
+<!-- SEO PREVIEW MODAL -->
+<div id="seoPreviewModal" class="seo-preview-modal" onclick="if(event.target===this)this.style.display='none'">
+  <div class="seo-preview-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <span style="font-family:var(--orb);color:var(--g);font-size:14px;letter-spacing:0.14em;font-weight:900">🔍 SEO & SOCIAL PREVIEW</span>
+      <button onclick="document.getElementById('seoPreviewModal').style.display='none'" style="background:transparent;border:1px solid var(--br2);color:var(--t);padding:4px 12px;cursor:pointer;font-family:var(--mono)">CLOSE ✕</button>
+    </div>
+    <div id="seoPreviewContent"></div>
+  </div>
+</div>
+
+<!-- INDICATOR DICTIONARY MODAL -->
+<div id="dictModal" class="dict-modal" onclick="if(event.target===this)this.style.display='none'">
+  <div class="dict-box">
+    <div class="dict-head">
+      <span style="font-family:var(--orb);color:var(--g);font-size:14px;letter-spacing:0.14em;font-weight:900">📖 قاموس المؤشرات — Indicator Dictionary</span>
+      <button onclick="document.getElementById('dictModal').style.display='none'" style="background:transparent;border:1px solid var(--br2);color:var(--t);padding:4px 12px;cursor:pointer;font-family:var(--mono)">CLOSE ✕</button>
+    </div>
+    <div style="padding:10px 20px;background:var(--bg4);font-size:10px;color:var(--t2);border-bottom:1px solid var(--br)">
+      <select id="dictAsset" onchange="renderDictionary()" style="background:var(--bg3);border:1px solid var(--br2);color:var(--t);font-family:var(--mono);font-size:11px;padding:5px 10px;cursor:pointer">
+        <option value="BTCUSDT">BTC / USDT</option>
+        <option value="ETHUSDT">ETH / USDT</option>
+        <option value="SOLUSDT">SOL / USDT</option>
+        <option value="BNBUSDT">BNB / USDT</option>
+        <option value="XRPUSDT">XRP / USDT</option>
+      </select>
+      <span style="margin-left:8px;color:var(--t3)">اضغط على أي مؤشر لعرض الشرح التفصيلي والقيم الحية</span>
+    </div>
+    <div id="dictContent"></div>
+  </div>
 </div>
 <style>
 .tv-tf-btn{background:var(--bg3);color:var(--t2);border:1px solid var(--br);padding:4px 10px;border-radius:4px;font-family:var(--mono);font-size:10px;cursor:pointer;transition:all 0.2s;font-weight:600}
