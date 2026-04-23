@@ -3583,8 +3583,95 @@ init();
   <div style="margin-top:6px;font-size:9px;color:var(--t3);letter-spacing:0.1em;font-family:var(--raj)">WAR ROOM · Decision Intelligence Platform · v2.0</div>
 </div>
 <style>
-@keyframes devShine{0%{transform:translateX(-100%)}50%{transform:translateX(100%)}100%{transform:translateX(100%)}}
-@keyframes devGlow{0%{text-shadow:0 0 10px rgba(0,229,160,0.4),0 0 20px rgba(0,229,160,0.2)}100%{text-shadow:0 0 20px rgba(0,229,160,0.8),0 0 40px rgba(0,229,160,0.4),0 0 60px rgba(0,229,160,0.2)}}
+.tv-tf-btn{background:var(--bg3);color:var(--t2);border:1px solid var(--br);padding:4px 10px;border-radius:4px;font-family:var(--mono);font-size:10px;cursor:pointer;transition:all 0.2s;font-weight:600}
+.tv-tf-btn:hover{color:var(--t);border-color:var(--br2)}
+.tv-tf-btn.active{color:var(--g);border-color:var(--g);background:rgba(0,229,160,0.08)}
 </style>
+<script>
+// ═══════════════════════════════════════════════════════════
+// TRADINGVIEW SUPERCHART
+// ═══════════════════════════════════════════════════════════
+let tvWidget = null;
+let tvInterval = '1';
+let tvTheme = 'dark';
+
+function loadTVChart() {
+  const container = document.getElementById('tvChartContainer');
+  if (!container) return;
+  const symbol = document.getElementById('tvSymbol')?.value || 'BINANCE:BTCUSDT';
+  
+  container.innerHTML = '';
+  
+  const widgetConfig = {
+    "autosize": true,
+    "symbol": symbol,
+    "interval": tvInterval,
+    "timezone": "Etc/UTC",
+    "theme": tvTheme,
+    "style": "1",
+    "locale": "ar_AE",
+    "enable_publishing": false,
+    "allow_symbol_change": true,
+    "hide_top_toolbar": false,
+    "hide_legend": false,
+    "save_image": true,
+    "calendar": true,
+    "hide_volume": false,
+    "support_host": "https://www.tradingview.com",
+    "container_id": "tvChartContainer",
+    "studies": [
+      "MASimple@tv-basicstudies",
+      "RSI@tv-basicstudies",
+      "MACD@tv-basicstudies",
+      "BB@tv-basicstudies"
+    ],
+    "show_popup_button": true,
+    "popup_width": "1000",
+    "popup_height": "650",
+    "withdateranges": true,
+    "details": true,
+    "hotlist": true
+  };
+
+  const script = document.createElement('script');
+  script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
+  script.type = 'text/javascript';
+  script.async = true;
+  script.textContent = JSON.stringify(widgetConfig);
+
+  const widgetDiv = document.createElement('div');
+  widgetDiv.className = 'tradingview-widget-container';
+  widgetDiv.style.cssText = 'height:100%;width:100%';
+  
+  const innerDiv = document.createElement('div');
+  innerDiv.className = 'tradingview-widget-container__widget';
+  innerDiv.style.cssText = 'height:100%;width:100%';
+  
+  widgetDiv.appendChild(innerDiv);
+  widgetDiv.appendChild(script);
+  container.appendChild(widgetDiv);
+}
+
+function setTVInterval(interval, btn) {
+  tvInterval = interval;
+  document.querySelectorAll('.chart-controls .tv-tf-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  loadTVChart();
+}
+
+function setTVTheme(theme) {
+  tvTheme = theme;
+  loadTVChart();
+}
+
+// Auto-load chart when tab is switched to chart
+const _origSwitchTab2 = switchTab;
+switchTab = function(tab, btn) {
+  _origSwitchTab2(tab, btn);
+  if (tab === 'chart' && !document.getElementById('tvChartContainer')?.children.length) {
+    setTimeout(loadTVChart, 100);
+  }
+};
+</script>
 </body>
 </html>
