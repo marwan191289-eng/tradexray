@@ -1679,7 +1679,7 @@ function updateCmdStats(){
   });
   const avgMTF=mtfScores.length?Math.round(mtfScores.reduce((a,b)=>a+b,0)/mtfScores.length*10)/10:0;
   document.getElementById('mtfConVal').textContent=avgMTF+'/5';
-  document.getElementById('mtfConSub').textContent=avgMTF>=4?'Strong Consensus':avgMTF>=3?'Good Alignment':'Mixed Signals';
+  document.getElementById('mtfConSub').textContent=avgMTF>=5?'Strong Consensus':avgMTF>=3?'Good Alignment':'Mixed Signals';
 
   // Volume spike
   document.getElementById('volSpikeVal').textContent=maxVr>0?maxVrSym+' '+maxVr.toFixed(1)+'x':'--';
