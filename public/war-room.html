@@ -4504,75 +4504,52 @@ const debouncedRenderCorrelation = debounce(renderCorrelation, 300);
 const debouncedRenderHeatmap = debounce(renderHeatmap, 200);
 const debouncedRenderRadar = debounce(renderRadar, 200);
 
-</script>
-</body>
-</html>
+// ═══════════════════════════════════════════════════════════
+// NEWS FIX — Enhanced fetchNews override with fallback
+// ═══════════════════════════════════════════════════════════
+const _origFetchNews = fetchNews;
+fetchNews = async function() {
   try {
     const allItems = [];
     const bullW = ['bull','pump','surge','soar','rally','gain','breakout','ath','rise','moon','spike','positive','adoption','approve','etf','launch','partner','upgrade','bullish','highs','growth'];
     const bearW = ['bear','dump','crash','fall','drop','plunge','sell','fear','risk','warn','loss','ban','hack','fraud','lawsuit','sec','fine','regulation','sanctions','war','conflict','attack','bearish','lows','decline'];
     const geoW = ['war','sanctions','tariff','election','fed','rate','inflation','gdp','recession','geopolit','opec','treasury','congress','eu','china','trump','biden','powell','military','nuclear'];
-    
     for (const url of NEWS_FEEDS_V2) {
       try {
         let r = await fetch(url);
-        if (!r.ok) {
-          r = await fetch(NEWS_PROXY + encodeURIComponent(url.replace('api.rss2json.com/v1/api.json?rss_url=', '')));
-        }
+        if (!r.ok) r = await fetch(NEWS_PROXY + encodeURIComponent(url.replace('api.rss2json.com/v1/api.json?rss_url=', '')));
         const d = await r.json();
         if (d?.items?.length) {
           d.items.forEach(item => {
-            const title = item.title || '';
-            const tl = title.toLowerCase();
+            const title = item.title || '', tl = title.toLowerCase();
             let sentiment = 'neu';
             if (bullW.some(w => tl.includes(w))) sentiment = 'pos';
             else if (bearW.some(w => tl.includes(w))) sentiment = 'neg';
-            const isGeo = geoW.some(w => tl.includes(w));
-            allItems.push({
-              title, link: item.link, pubDate: item.pubDate,
+            allItems.push({ title, link: item.link, pubDate: item.pubDate,
               source: item.author || (url.includes('coindesk') ? 'CoinDesk' : url.includes('cryptonews') ? 'CryptoNews' : 'CoinTelegraph'),
-              thumbnail: item.thumbnail || item.enclosure?.link || '',
-              sentiment, isGeo,
-            });
+              thumbnail: item.thumbnail || item.enclosure?.link || '', sentiment, isGeo: geoW.some(w => tl.includes(w)) });
           });
         }
       } catch(e) { console.warn('News feed error:', e); }
     }
-    
-    // If RSS failed, generate synthetic news from market data
     if (allItems.length === 0) {
       ASSETS.filter(a => !a.external).forEach(a => {
-        const px = S.prices[a.sym];
-        const sig = S.signals[a.sym]?.[S.currentTF];
+        const px = S.prices[a.sym], sig = S.signals[a.sym]?.[S.currentTF];
         if (!px || !sig) return;
-        const ch = px.change;
-        allItems.push({
-          title: `${a.tk} ${ch >= 0 ? 'up' : 'down'} ${Math.abs(ch).toFixed(2)}% — Signal: ${sig.signal} (${sig.conf}% confidence)`,
-          link: '#', pubDate: new Date().toISOString(),
-          source: 'WAR ROOM Analytics',
-          thumbnail: a.logo, sentiment: ch > 3 ? 'pos' : ch < -3 ? 'neg' : 'neu', isGeo: false,
-        });
+        allItems.push({ title: `${a.tk} ${px.change>=0?'up':'down'} ${Math.abs(px.change).toFixed(2)}% — Signal: ${sig.signal} (${sig.conf}%)`,
+          link:'#', pubDate:new Date().toISOString(), source:'WAR ROOM Analytics', thumbnail:a.logo,
+          sentiment:px.change>3?'pos':px.change<-3?'neg':'neu', isGeo:false });
       });
-      // Add market context
-      if (S.fg) {
-        allItems.unshift({
-          title: `Crypto Fear & Greed Index at ${S.fg.val} — ${S.fg.label}. Market regime: ${REGIME.current?.replace('_',' ')||'Scanning'}`,
-          link: '#', pubDate: new Date().toISOString(),
-          source: 'Market Data', thumbnail: '', sentiment: S.fg.val > 60 ? 'pos' : S.fg.val < 40 ? 'neg' : 'neu', isGeo: false,
-        });
-      }
+      if (S.fg) allItems.unshift({ title:`Fear & Greed: ${S.fg.val} — ${S.fg.label}. Regime: ${REGIME.current?.replace('_',' ')||'Scanning'}`,
+        link:'#', pubDate:new Date().toISOString(), source:'Market Data', thumbnail:'', sentiment:S.fg.val>60?'pos':S.fg.val<40?'neg':'neu', isGeo:false });
     }
-    
     const seen = new Set();
-    S.news = allItems.filter(n => {
-      const key = n.title.slice(0,50).toLowerCase();
-      if (seen.has(key)) return false;
-      seen.add(key); return true;
-    });
+    S.news = allItems.filter(n => { const key=n.title.slice(0,50).toLowerCase(); if(seen.has(key))return false; seen.add(key); return true; });
     S.news.sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate));
     renderNews();
   } catch(e) { console.warn('News fetch failed:', e); }
 };
+
 </script>
 </body>
 </html>
