@@ -3,9 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WAR ROOM ∷ Decision Intelligence for Crypto Traders</title>
-<meta name="description" content="Probability-driven crypto market intelligence: real-time data, multi-layer signal scoring, regime-filtered analysis, transparent confidence, and explicit risk management. Educational tool — not financial advice.">
+<title>WAR ROOM — Crypto Trading Intelligence Platform</title>
+<meta name="description" content="Real-time probability-driven crypto market intelligence: multi-layer signal scoring, regime-filtered analysis, 20+ technical indicators, and ATR-based risk management. By Marwan Negm.">
 <meta name="robots" content="index,follow">
+<link rel="icon" href="/logo.png" type="image/png">
+<link rel="apple-touch-icon" href="/logo.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="WAR ROOM — Crypto Trading Intelligence Platform">
+<meta property="og:description" content="Real-time crypto signals with 20+ indicators, multi-timeframe analysis, and AI-powered tactical briefings.">
+<meta property="og:image" content="/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="WAR ROOM — Crypto Trading Intelligence">
+<meta name="twitter:image" content="/og-image.jpg">
+<meta name="theme-color" content="#010308">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
@@ -34,10 +46,11 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 ::-webkit-scrollbar-thumb{background:var(--gd);border-radius:2px}
 
 /* NAV */
-.nav{position:sticky;top:0;z-index:500;background:rgba(1,3,8,0.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--br2);height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem;gap:1rem}
+.nav{position:sticky;top:0;z-index:500;background:linear-gradient(180deg,rgba(1,3,8,0.98),rgba(5,10,20,0.96));backdrop-filter:blur(24px);border-bottom:1px solid var(--br2);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;gap:1rem;box-shadow:0 2px 20px rgba(0,0,0,0.5)}
 .nav-brand{display:flex;align-items:center;gap:12px;flex-shrink:0}
-.nav-logo{font-family:var(--orb);font-size:16px;font-weight:900;letter-spacing:0.18em;color:var(--g);text-transform:uppercase;white-space:nowrap;text-shadow:0 0 20px rgba(0,229,160,0.4)}
-.nav-sep{width:1px;height:20px;background:var(--br2)}
+.nav-logo-img{width:32px;height:32px;border-radius:6px;object-fit:contain;filter:drop-shadow(0 0 8px rgba(0,229,160,0.3))}
+.nav-logo{font-family:var(--orb);font-size:17px;font-weight:900;letter-spacing:0.2em;color:var(--g);text-transform:uppercase;white-space:nowrap;text-shadow:0 0 24px rgba(0,229,160,0.5),0 0 60px rgba(0,229,160,0.15)}
+.nav-sep{width:1px;height:22px;background:linear-gradient(180deg,transparent,var(--br2),transparent)}
 .nav-sub{font-size:9px;color:var(--t2);letter-spacing:0.14em;text-transform:uppercase;font-family:var(--raj)}
 .nav-ticker{flex:1;overflow:hidden;mask-image:linear-gradient(90deg,transparent,black 10%,black 90%,transparent)}
 .ticker-wrap{display:flex;gap:2rem;animation:tickerScroll 40s linear infinite;white-space:nowrap;width:max-content}
@@ -61,6 +74,13 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .alert-bell:hover{opacity:1}
 .alert-bell .badge{position:absolute;top:-2px;right:-2px;background:var(--r);color:white;font-size:7px;font-family:var(--raj);font-weight:700;padding:1px 3px;border-radius:2px;min-width:14px;text-align:center;display:none}
 .alert-bell .badge.show{display:block}
+
+/* INDICATOR TOOLTIP */
+.ind-tooltip{display:none;background:var(--bg3);border:1px solid var(--br2);padding:10px 12px;margin-top:8px;font-size:10px;color:var(--t2);line-height:1.7;border-left:3px solid var(--g);animation:tooltipIn 0.2s ease}
+.ind-tooltip.show{display:block}
+@keyframes tooltipIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.ind-tooltip-title{font-family:var(--raj);font-size:11px;font-weight:700;color:var(--g);margin-bottom:4px;letter-spacing:0.08em}
+.ind-tooltip p{margin:3px 0;color:var(--t2)}
 
 /* COMMAND BAR */
 .cmd{display:grid;grid-template-columns:repeat(8,1fr);border-bottom:1px solid var(--br2);background:var(--bg2);position:relative;z-index:10}
