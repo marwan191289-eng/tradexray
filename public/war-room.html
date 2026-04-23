@@ -1359,7 +1359,7 @@ async function initKlines(){
     S.klines[a.sym]={};S.indicators[a.sym]={};S.signals[a.sym]={};
     if(a.external) continue; // External assets (CoinGecko) handled separately
     for(const tf of tfs){
-      const limit=tf==='5m'?60:tf==='15m'?100:tf==='4h'?100:tf==='1d'?200:120;
+      const limit=tf==='5m'?60:tf==='15m'?100:tf==='4h'?100:tf==='1d'?200:tf==='1w'?100:tf==='1M'?60:120;
       const k=await fetchKlines(a.sym,tf,limit);
       if(k){
         S.klines[a.sym][tf]=k;
