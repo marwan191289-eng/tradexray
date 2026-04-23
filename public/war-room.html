@@ -2434,6 +2434,133 @@ function buildBriefing(sym,tf,lang){
   return b;
 }
 
+// ═══════════════════════════════════════════════════════════
+// ARABIC BRIEFING
+// ═══════════════════════════════════════════════════════════
+function buildBriefingAR(sym, tf) {
+  const ind = S.indicators[sym]?.[tf];
+  const sig = S.signals[sym]?.[tf];
+  const px = S.prices[sym];
+  const a = ASSETS.find(x => x.sym === sym);
+  if (!ind || !px || !sig) return '<span style="color:var(--r)">بيانات غير كافية. يرجى الانتظار حتى يتم تحميل البيانات.</span>';
+
+  const price = px.price, ch24 = px.change;
+  const sc = sigClass(sig.signal);
+  const fg = S.fg?.val || 50;
+  const fgDesc = fg < 20 ? 'خوف شديد' : fg < 40 ? 'خوف' : fg < 60 ? 'محايد' : fg < 80 ? 'جشع' : 'جشع شديد';
+  const trendStr = sig.score >= 10 ? 'صعود قوي' : sig.score >= 4 ? 'صعود معتدل' : sig.score <= -10 ? 'هبوط قوي' : sig.score <= -4 ? 'هبوط معتدل' : 'تذبذب';
+
+  const h = (t) => `<span style="color:var(--g);font-family:var(--orb);font-size:10px;letter-spacing:0.1em;font-weight:700">${t}</span>`;
+  const sec = (t) => `<span style="color:var(--a);font-weight:600">${t}</span>`;
+  const bull = (t) => `<span style="color:var(--g)">${t}</span>`;
+  const bear = (t) => `<span style="color:var(--r)">${t}</span>`;
+  const val = (t) => `<span style="color:var(--t)">${t}</span>`;
+  const ln = '\n';
+
+  const sigAr = { 'STRONG BUY': 'شراء قوي', 'BUY': 'شراء', 'WEAK BUY': 'شراء ضعيف', 'STRONG SELL': 'بيع قوي', 'SELL': 'بيع', 'WEAK SELL': 'بيع ضعيف', 'HOLD': 'انتظار', 'NO TRADE': 'لا تداول' };
+  const sigColor = sc === 'buy' ? 'var(--g)' : sc === 'sell' ? 'var(--r)' : 'var(--a)';
+
+  let b = '';
+  b += h(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`) + ln;
+  b += h(`  التقرير التكتيكي — ${a?.tk} / USDT  [${tf.toUpperCase()}]`) + ln;
+  b += h(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`) + ln + ln;
+
+  b += `<span style="color:${sigColor};font-family:var(--raj);font-size:14px;font-weight:700;direction:rtl">◉ ${sigAr[sig.signal] || sig.signal}</span>  النقاط: ${sig.score > 0 ? '+' : ''}${sig.score} | الثقة: ${sig.conf}% | توافق الأطر الزمنية: ${sig.tfsAligned}/6` + ln + ln;
+
+  b += sec(`[ حركة السعر ]`) + ln;
+  b += `السعر الحالي:  ${val('$' + fmtP(price))}  |  التغير 24 ساعة: ${ch24 >= 0 ? bull('+' + ch24.toFixed(2) + '%') : bear(ch24.toFixed(2) + '%')}` + ln;
+  b += `الاتجاه العام: ${trendStr}` + ln;
+  if (ind.ichimoku) {
+    if (ind.ichimoku.priceAboveCloud) b += bull(`السعر فوق سحابة إيشيموكو — تأكيد صعودي هيكلي`) + ln;
+    else if (ind.ichimoku.priceBelowCloud) b += bear(`السعر تحت سحابة إيشيموكو — هيمنة هبوطية`) + ln;
+    else b += `<span style="color:var(--a)">السعر داخل السحابة — منطقة تذبذب</span>` + ln;
+  }
+  b += ln;
+
+  b += sec(`[ تحليل الزخم ]`) + ln;
+  if (ind.rsi !== null) {
+    const rState = ind.rsi < 30 ? bear('تشبع بيعي — احتمال ارتداد مرتفع') : ind.rsi > 70 ? bear('تشبع شرائي — احتمال تصحيح') : 'نطاق محايد';
+    b += `RSI (14):       ${val(ind.rsi.toFixed(2))} — ${rState}` + ln;
+  }
+  if (ind.stochRSI) {
+    const kv = ind.stochRSI.k;
+    const sState = kv < 20 ? bull('تشبع بيعي') : kv > 80 ? bear('تشبع شرائي') : 'محايد';
+    b += `Stoch RSI:      ${val(kv.toFixed(1) + ' / ' + ind.stochRSI.d.toFixed(1))} — ${sState}` + ln;
+  }
+  if (ind.macd) {
+    const mState = ind.macd.bullCross ? bull('🚀 تقاطع صعودي') : ind.macd.bearCross ? bear('🔴 تقاطع هبوطي') : ind.macd.hist > 0 ? bull('مدرج تكراري إيجابي') : bear('مدرج تكراري سلبي');
+    b += `MACD:           ${mState}` + ln;
+  }
+  if (ind.williamsR !== null) {
+    const wState = ind.williamsR <= -80 ? bull('تشبع بيعي') : ind.williamsR >= -20 ? bear('تشبع شرائي') : 'محايد';
+    b += `Williams %R:    ${val(ind.williamsR.toFixed(1))} — ${wState}` + ln;
+  }
+  if (ind.cci !== null) {
+    const cState = ind.cci < -100 ? bull('تشبع بيعي') : ind.cci > 100 ? bear('تشبع شرائي') : 'محايد';
+    b += `CCI (20):       ${val(ind.cci.toFixed(1))} — ${cState}` + ln;
+  }
+  if (ind.mfi !== null) {
+    const mState = ind.mfi < 25 ? bull('تدفق أموال خارج — تشبع بيعي') : ind.mfi > 75 ? bear('تدفق أموال داخل — تشبع شرائي') : 'متوازن';
+    b += `MFI (14):       ${val(ind.mfi.toFixed(1))} — ${mState}` + ln;
+  }
+  b += ln;
+
+  b += sec(`[ هيكل الاتجاه ]`) + ln;
+  const emaAligned = ind.ema9 > ind.ema21 && ind.ema21 > ind.ema50;
+  const emaBearAligned = ind.ema9 < ind.ema21 && ind.ema21 < ind.ema50;
+  b += `ترتيب المتوسطات: ${emaAligned ? bull('صعودي (9>21>50)') : emaBearAligned ? bear('هبوطي (9<21<50)') : '<span style="color:var(--a)">مختلط</span>'}` + ln;
+  if (ind.adx) {
+    const adxStr = ind.adx.adx > 40 ? 'قوي' : ind.adx.adx > 25 ? 'معتدل' : 'ضعيف';
+    const adxDir = ind.adx.plusDI > ind.adx.minusDI ? bull('هيمنة صعودية +DI') : bear('هيمنة هبوطية -DI');
+    b += `ADX (14):       ${val(ind.adx.adx.toFixed(1))} — اتجاه ${adxStr} | ${adxDir}` + ln;
+  }
+  if (ind.sar) b += `Parabolic SAR:  ${ind.sar.bull ? bull('صعودي ↑ @ $' + fmtP(ind.sar.sar)) : bear('هبوطي ↓ @ $' + fmtP(ind.sar.sar))}` + ln;
+  b += ln;
+
+  b += sec(`[ الحجم والتقلب ]`) + ln;
+  b += `الحجم:          ${val((ind.volRatio?.toFixed(2) ?? '--') + 'x المتوسط')} — ${ind.volRatio > 2.5 ? bear('مرتفع جداً') : ind.volRatio > 1.4 ? '<span style="color:var(--a)">مرتفع</span>' : 'طبيعي'}` + ln;
+  if (ind.atr) b += `ATR (14):       ${val('$' + fmtP(ind.atr))} (وحدة التقلب)` + ln;
+  b += ln;
+
+  if (ind.divergence) {
+    b += `<span style="background:rgba(255,176,32,0.1);border:1px solid rgba(255,176,32,0.3);padding:4px 8px;display:inline-block;margin-bottom:8px">⚡ تنبيه انحراف: انحراف RSI ${ind.divergence === 'bullish' ? 'صعودي' : 'هبوطي'} — إشارة انعكاس محتملة</span>` + ln + ln;
+  }
+
+  b += sec(`[ إدارة المخاطر — مخاطرة ثابتة 1% على حساب $10,000 ]`) + ln;
+  const plan = (typeof riskPlan === 'function') ? riskPlan(sym, tf, 10000, 1) : null;
+  if (plan) {
+    b += `الاتجاه: ${plan.direction === 'LONG' ? bull('شراء (LONG)') : bear('بيع (SHORT)')}  |  نقطة الدخول: ${val('$' + fmtP(plan.entry))}` + ln;
+    b += `وقف الخسارة: ${bear('$' + fmtP(plan.stop))}  (${plan.invalidationPct.toFixed(2)}% من الدخول)` + ln;
+    b += `TP1: ${bull('$' + fmtP(plan.tp1))} · TP2: ${bull('$' + fmtP(plan.tp2))} · TP3: ${bull('$' + fmtP(plan.tp3))}` + ln;
+    b += `نسبة المخاطرة/العائد: ${val('1 : ' + plan.rr.toFixed(2))}` + ln;
+  }
+  b += ln;
+
+  b += sec(`[ سياق السوق ]`) + ln;
+  b += `مؤشر الخوف والجشع:  ${val(fg + ' — ' + fgDesc)}` + ln;
+  b += `نظام السوق:          ${val(REGIME.current.replace('_', ' '))}` + ln;
+  b += ln;
+
+  b += sec(`[ التوصية التكتيكية ]`) + ln;
+  if (sc === 'buy') {
+    b += `→ ${bull('المركز: شراء / فتح مركز طويل')}` + ln;
+    b += `→ الاستراتيجية: ${sig.score >= 10 ? bull('تجميع قوي مع زخم مؤكد') : bull('دخول تدريجي')}` + ln;
+    b += `→ راقب: فشل الاختراق، انخفاض الحجم، ظهور انحراف هبوطي` + ln;
+  } else if (sc === 'sell') {
+    b += `→ ${bear('المركز: بيع / فتح مركز قصير')}` + ln;
+    b += `→ الاستراتيجية: ${sig.score <= -10 ? bear('بيع قوي مع زخم هبوطي') : bear('تقليل التعرض')}` + ln;
+    b += `→ راقب: شمعة انعكاس صعودية، ارتداد RSI من التشبع البيعي` + ln;
+  } else {
+    b += `→ <span style="color:var(--a)">المركز: محايد / نقدي</span>` + ln;
+    b += `→ الاستراتيجية: انتظر اختراق واضح مع تأكيد حجم` + ln;
+    b += `→ راقب: ارتفاع الحجم، توافق الأطر الزمنية المتعددة` + ln;
+  }
+  b += ln;
+  b += h(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`) + ln;
+  b += `<span style="color:var(--t3)">تم التوليد: ${new Date().toLocaleString('ar-EG')} | مدعوم ببيانات Binance الحية | ${reasons_count(sym, tf)} عامل تحليلي</span>`;
+  return b;
+}
+
 function reasons_count(sym,tf){
   return S.signals[sym]?.[tf]?.reasons?.length??0;
 }
