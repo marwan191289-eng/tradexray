@@ -2271,7 +2271,8 @@ function generateAndShowBriefing(){
   },400);
 }
 
-function buildBriefing(sym,tf){
+function buildBriefing(sym,tf,lang){
+  if (lang === 'ar') return buildBriefingAR(sym, tf);
   const ind=S.indicators[sym]?.[tf];
   const sig=S.signals[sym]?.[tf];
   const px=S.prices[sym];
