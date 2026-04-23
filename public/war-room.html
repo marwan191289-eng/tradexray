@@ -451,6 +451,68 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 
 @media(max-width:900px){.perf-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:600px){.perf-entry{grid-template-columns:60px 50px 1fr 60px 60px}}
+
+/* SEO PREVIEW MODAL */
+.seo-preview-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(12px)}
+.seo-preview-box{background:var(--bg2);border:1px solid var(--br3);max-width:680px;width:100%;max-height:90vh;overflow-y:auto;padding:24px;border-radius:8px}
+.seo-card{background:#fff;border-radius:8px;overflow:hidden;margin:12px 0;box-shadow:0 1px 8px rgba(0,0,0,0.15)}
+.seo-card-dark{background:#1a1a2e;border:1px solid #333}
+.seo-card-img{width:100%;height:auto;max-height:260px;object-fit:cover;background:#222}
+.seo-card-body{padding:12px 14px}
+.seo-card-title{font-size:14px;font-weight:700;color:#1a1a1a;margin-bottom:4px;line-height:1.3}
+.seo-card-desc{font-size:12px;color:#666;line-height:1.5}
+.seo-card-url{font-size:11px;color:#999;margin-top:4px;text-transform:uppercase;letter-spacing:0.04em}
+.seo-platform{font-family:var(--raj);font-size:11px;font-weight:700;color:var(--t2);margin:14px 0 4px;letter-spacing:0.12em;text-transform:uppercase}
+.seo-tag{display:inline-block;padding:2px 8px;background:var(--bg4);border:1px solid var(--br2);color:var(--t2);font-size:9px;margin:2px;border-radius:3px;font-family:var(--mono)}
+.seo-tag.ok{border-color:var(--g);color:var(--g);background:rgba(0,229,160,0.06)}
+.seo-tag.warn{border-color:var(--a);color:var(--a);background:rgba(255,176,32,0.06)}
+.seo-tag.err{border-color:var(--r);color:var(--r);background:rgba(255,62,62,0.06)}
+
+/* INDICATOR DICTIONARY MODAL */
+.dict-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9998;align-items:flex-start;justify-content:center;padding:20px;backdrop-filter:blur(12px);overflow-y:auto}
+.dict-box{background:var(--bg2);border:1px solid var(--br3);max-width:800px;width:100%;margin:40px auto;border-radius:8px}
+.dict-head{padding:16px 20px;border-bottom:1px solid var(--br2);background:var(--bg3);display:flex;justify-content:space-between;align-items:center;border-radius:8px 8px 0 0;position:sticky;top:0;z-index:1}
+.dict-entry{border-bottom:1px solid var(--br);padding:14px 20px;cursor:pointer;transition:background 0.15s}
+.dict-entry:hover{background:var(--bg3)}
+.dict-entry-head{display:flex;justify-content:space-between;align-items:center}
+.dict-entry-name{font-family:var(--raj);font-size:13px;font-weight:700;color:var(--g);letter-spacing:0.06em}
+.dict-entry-val{font-family:var(--orb);font-size:12px;font-weight:700;color:var(--t)}
+.dict-entry-body{display:none;margin-top:10px;font-size:11px;color:var(--t2);line-height:1.8;padding:10px;background:var(--bg4);border-left:3px solid var(--g)}
+.dict-entry.open .dict-entry-body{display:block}
+
+/* CORR INTERACTIVE */
+.corr-detail-popup{background:var(--bg3);border:1px solid var(--br2);padding:12px;margin-top:8px;font-size:10px;color:var(--t2);line-height:1.7;border-radius:4px}
+.corr-mini-scatter{display:flex;gap:1px;align-items:flex-end;height:40px}
+.corr-mini-scatter .bar{width:3px;background:var(--g);border-radius:1px}
+
+/* RAW DATA OVERLAY */
+.raw-data-overlay{position:absolute;inset:0;background:rgba(1,3,8,0.95);display:none;padding:10px;font-size:10px;color:var(--t2);overflow-y:auto;z-index:5;border-radius:4px}
+.raw-data-overlay.show{display:block}
+
+/* NAV ENHANCED */
+.nav{background:linear-gradient(180deg,rgba(1,3,8,0.99) 0%,rgba(5,10,20,0.97) 100%)!important;border-bottom:1px solid rgba(0,229,160,0.15)!important;box-shadow:0 4px 30px rgba(0,0,0,0.6),0 1px 0 rgba(0,229,160,0.08)!important}
+.nav-logo{background:linear-gradient(135deg,#00E5A0,#4AABFF)!important;-webkit-background-clip:text!important;-webkit-text-fill-color:transparent!important;background-clip:text!important}
+
+/* CMD CELLS GLOW */
+.cmd-cell{background:linear-gradient(180deg,rgba(5,10,20,0.9),rgba(9,16,32,0.9))!important;transition:background 0.3s,box-shadow 0.3s}
+.cmd-cell:hover{background:rgba(0,229,160,0.04)!important;box-shadow:inset 0 0 30px rgba(0,229,160,0.03)}
+
+/* TAB BUTTONS ENHANCED */
+.tab-btn{transition:all 0.25s!important;border-bottom:2px solid transparent!important}
+.tab-btn:hover{color:var(--g)!important;background:rgba(0,229,160,0.04)!important}
+.tab-btn.active{color:var(--g)!important;background:linear-gradient(180deg,rgba(0,229,160,0.06),transparent)!important;border-bottom:2px solid var(--g)!important}
+.tab-btn.active::after{display:none!important}
+
+/* CARD ENHANCED */
+.asset-card{background:linear-gradient(180deg,rgba(5,10,20,0.95),rgba(9,16,32,0.95))!important;border:1px solid rgba(0,229,160,0.04)!important;border-radius:4px!important;transition:all 0.2s!important}
+.asset-card:hover{border-color:rgba(0,229,160,0.12)!important;transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,0,0,0.3)}
+.asset-card.sel{border-color:rgba(0,229,160,0.3)!important;box-shadow:0 0 20px rgba(0,229,160,0.08)}
+
+/* ATR EXPAND */
+.atr-expand-btn{background:transparent;border:1px solid var(--br2);color:var(--t2);font-size:9px;font-family:var(--raj);font-weight:700;padding:3px 8px;cursor:pointer;transition:all 0.15s;letter-spacing:0.08em;display:flex;align-items:center;gap:4px}
+.atr-expand-btn:hover{border-color:var(--g);color:var(--g)}
+.atr-explanation{display:none;margin:8px 0;padding:10px 12px;background:var(--bg4);border-left:3px solid var(--a);font-size:10px;color:var(--t2);line-height:1.8;animation:tooltipIn 0.2s ease}
+.atr-explanation.show{display:block}
 </style>
 </head>
 <body>
@@ -480,6 +542,8 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
     </div>
   </div>
   <div class="nav-right">
+    <button class="tf-btn" onclick="openDictionary()" title="قاموس المؤشرات" style="font-size:10px;padding:3px 8px;border-radius:3px">📖 Dictionary</button>
+    <button class="tf-btn" onclick="openSEOPreview()" title="SEO & OG Preview" style="font-size:10px;padding:3px 8px;border-radius:3px">🔍 SEO</button>
     <div class="ws-status"><div class="ws-dot" id="wsDot"></div><span class="ws-label" id="wsLabel">Init...</span></div>
     <div class="alert-bell" id="alertBell" onclick="toggleAlerts()">🔔<span class="badge" id="alertBadge">0</span></div>
     <div class="nav-clock" id="clock">00:00:00</div>
@@ -2226,11 +2290,24 @@ function renderDetail(sym){
     const sl =sUp?price-atrV*1.0:price+atrV*1.0;
     const rr=Math.abs((tp1-price)/(price-sl));
     targetsHTML=`<div class="ind-section">
-      <div class="ind-section-title">Risk Management (ATR-Based)</div>
+      <div class="ind-section-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Risk Management (ATR-Based)</span>
+        <button class="atr-expand-btn" onclick="event.stopPropagation();document.getElementById('atrExplain').classList.toggle('show')">📐 شرح المعادلة ▼</button>
+      </div>
+      <div class="atr-explanation" id="atrExplain">
+        <b style="color:var(--g)">كيف تُحسب الأهداف ووقف الخسارة؟</b><br>
+        <b>ATR (Average True Range)</b> = متوسط المدى الحقيقي لآخر 14 شمعة على فريم <b style="color:var(--b0)">${tf.toUpperCase()}</b>.<br>
+        القيمة الحالية: <b style="color:var(--t)">$${fmtP(atrV)}</b><br><br>
+        <b style="color:var(--a)">المعادلات:</b><br>
+        • <b>TP1</b> = Entry ${sUp?'+':'-'} (ATR × 1.5) = $${fmtP(price)} ${sUp?'+':'-'} ($${fmtP(atrV)} × 1.5) = <b style="color:var(--g)">$${fmtP(tp1)}</b> — هدف محافظ<br>
+        • <b>TP2</b> = Entry ${sUp?'+':'-'} (ATR × 2.5) = $${fmtP(price)} ${sUp?'+':'-'} ($${fmtP(atrV)} × 2.5) = <b style="color:var(--g)">$${fmtP(tp2)}</b> — هدف متوسط<br>
+        • <b>TP3</b> = Entry ${sUp?'+':'-'} (ATR × 4.0) = $${fmtP(price)} ${sUp?'+':'-'} ($${fmtP(atrV)} × 4.0) = <b style="color:var(--g)">$${fmtP(tp3)}</b> — هدف طموح<br>
+        • <b style="color:var(--r)">SL</b> = Entry ${sUp?'-':'+'} (ATR × 1.0) = $${fmtP(price)} ${sUp?'-':'+'} $${fmtP(atrV)} = <b style="color:var(--r)">$${fmtP(sl)}</b><br><br>
+        <b style="color:var(--t3)">الافتراضات:</b> الفريم الزمني: ${tf.toUpperCase()} · فترة ATR: 14 شمعة · نسبة المخاطرة المقترحة: 1-2% من رأس المال<br>
+        <span style="color:var(--t3);font-size:9px">⚠ هذه مستويات مبنية على التقلب الحالي وليست ضمانات. عدّل حسب استراتيجيتك.</span>
+      </div>
       <div style="font-size:10px;color:var(--t2);margin-bottom:8px;line-height:1.6;padding:6px 8px;background:var(--bg4);border-left:2px solid var(--a)">
-        <b style="color:var(--a)">TP = Take Profit</b> (أهداف الربح) — السعر المتوقع للخروج بربح.<br>
-        <b style="color:var(--r)">SL = Stop Loss</b> (وقف الخسارة) — نقطة الخروج لتقليل الخسائر.<br>
-        <b style="color:var(--t)">ATR</b> = متوسط المدى الحقيقي — وحدة قياس التقلب. كلما زاد ATR زادت المسافة بين النقاط.
+        <b style="color:var(--a)">TP = Take Profit</b> (أهداف الربح) · <b style="color:var(--r)">SL = Stop Loss</b> (وقف الخسارة) · <b style="color:var(--t)">ATR = $${fmtP(atrV)}</b> وحدة التقلب
       </div>
       <div class="targets-grid">
         <div class="tg-cell"><div class="tg-label" style="color:var(--t);font-size:8px;font-weight:700">🎯 TP1 (1.5× ATR)</div><div class="tg-val ${sUp?'bull':'bear'}" style="font-size:13px">$${fmtP(tp1)}</div><div style="font-size:8px;color:var(--t3);margin-top:2px">هدف أول — محافظ</div></div>
@@ -2238,7 +2315,7 @@ function renderDetail(sym){
         <div class="tg-cell"><div class="tg-label" style="color:var(--t);font-size:8px;font-weight:700">🎯 TP3 (4.0× ATR)</div><div class="tg-val ${sUp?'bull':'bear'}" style="font-size:13px">$${fmtP(tp3)}</div><div style="font-size:8px;color:var(--t3);margin-top:2px">هدف طموح</div></div>
         <div class="tg-cell"><div class="tg-label" style="color:var(--r);font-size:8px;font-weight:700">🛑 Stop Loss (1× ATR)</div><div class="tg-val ${sUp?'bear':'bull'}" style="font-size:13px">$${fmtP(sl)}</div><div style="font-size:8px;color:var(--t3);margin-top:2px">نقطة وقف الخسارة</div></div>
         <div class="tg-cell"><div class="tg-label" style="color:var(--t);font-size:8px;font-weight:700">⚖️ Risk:Reward</div><div class="tg-val neu" style="font-size:13px">1:${rr.toFixed(2)}</div><div style="font-size:8px;color:var(--t3);margin-top:2px">نسبة المخاطرة/العائد</div></div>
-        <div class="tg-cell"><div class="tg-label" style="color:var(--t);font-size:8px;font-weight:700">📏 ATR Value</div><div class="tg-val neu" style="font-size:13px">$${fmtP(atrV)}</div><div style="font-size:8px;color:var(--t3);margin-top:2px">وحدة التقلب</div></div>
+        <div class="tg-cell"><div class="tg-label" style="color:var(--t);font-size:8px;font-weight:700">📏 ATR Value</div><div class="tg-val neu" style="font-size:13px">$${fmtP(atrV)}</div><div style="font-size:8px;color:var(--t3);margin-top:2px">وحدة التقلب (${tf.toUpperCase()})</div></div>
       </div>
       <div class="pos-calc">
         <div class="pos-calc-title">Position Size Calculator</div>
@@ -3775,15 +3852,47 @@ init();
 </script>
 
 <!-- DEVELOPER BADGE -->
-<div style="text-align:center;padding:24px 0 30px;background:linear-gradient(180deg,var(--bg),rgba(0,229,160,0.02),var(--bg2));border-top:1px solid var(--br2)">
-  <div style="display:inline-block;padding:14px 36px;border:1px solid rgba(0,229,160,0.25);background:linear-gradient(135deg,rgba(0,229,160,0.04),rgba(74,171,255,0.03));position:relative;overflow:hidden;border-radius:4px;box-shadow:0 0 30px rgba(0,229,160,0.08)">
-    <div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(0,229,160,0.12) 50%,transparent 100%);animation:devShine 4s ease-in-out infinite"></div>
-    <div style="position:absolute;inset:-1px;border-radius:4px;background:linear-gradient(45deg,rgba(0,229,160,0.3),transparent,rgba(74,171,255,0.3),transparent);animation:devBorder 6s linear infinite;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:xor;-webkit-mask-composite:xor;padding:1px"></div>
-    <div style="font-family:var(--orb);font-size:8px;letter-spacing:0.3em;color:var(--t3);margin-bottom:6px">ENGINEERED BY</div>
-    <span style="font-family:var(--orb);font-size:14px;letter-spacing:0.25em;color:var(--g);text-shadow:0 0 20px rgba(0,229,160,0.7),0 0 40px rgba(0,229,160,0.3),0 0 80px rgba(0,229,160,0.1);animation:devGlow 2.5s ease-in-out infinite alternate;font-weight:900">✦ MARWAN NEGM ✦</span>
-    <div style="margin-top:6px;font-family:var(--raj);font-size:9px;letter-spacing:0.15em;color:var(--b0);text-shadow:0 0 10px rgba(74,171,255,0.3)">FULL-STACK DEVELOPER & QUANT ANALYST</div>
+<div class="footer-bar" style="text-align:center;padding:24px 0 30px;background:linear-gradient(180deg,var(--bg),rgba(0,229,160,0.03) 40%,rgba(74,171,255,0.02) 70%,var(--bg2));border-top:1px solid rgba(0,229,160,0.12)">
+  <div style="display:inline-block;padding:16px 42px;border:1px solid rgba(0,229,160,0.2);background:linear-gradient(135deg,rgba(0,229,160,0.05),rgba(74,171,255,0.04),rgba(176,96,255,0.03));position:relative;overflow:hidden;border-radius:6px;box-shadow:0 0 40px rgba(0,229,160,0.06),0 8px 32px rgba(0,0,0,0.4)">
+    <div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(0,229,160,0.1) 50%,transparent 100%);animation:devShine 4s ease-in-out infinite"></div>
+    <div style="position:absolute;inset:-1px;border-radius:6px;background:conic-gradient(from 0deg,rgba(0,229,160,0.3),rgba(74,171,255,0.2),rgba(176,96,255,0.2),rgba(0,229,160,0.3));animation:devBorder 6s linear infinite;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:xor;-webkit-mask-composite:xor;padding:1px"></div>
+    <div style="font-family:var(--orb);font-size:7px;letter-spacing:0.4em;color:var(--t3);margin-bottom:8px;text-transform:uppercase">Engineered & Designed By</div>
+    <span style="font-family:var(--orb);font-size:16px;letter-spacing:0.3em;background:linear-gradient(135deg,#00E5A0,#4AABFF,#B060FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 20px rgba(0,229,160,0.5));font-weight:900">✦ MARWAN NEGM ✦</span>
+    <div style="margin-top:8px;font-family:var(--raj);font-size:9px;letter-spacing:0.18em;color:var(--b0);text-shadow:0 0 10px rgba(74,171,255,0.3)">FULL-STACK DEVELOPER · QUANT ANALYST · SYSTEM ARCHITECT</div>
   </div>
-  <div style="margin-top:8px;font-size:9px;color:var(--t3);letter-spacing:0.1em;font-family:var(--raj)">WAR ROOM · Decision Intelligence Platform · v3.0</div>
+  <div style="margin-top:10px;font-size:9px;color:var(--t3);letter-spacing:0.12em;font-family:var(--raj)">WAR ROOM · Decision Intelligence Platform · v4.0 · Built with precision</div>
+</div>
+
+<!-- SEO PREVIEW MODAL -->
+<div id="seoPreviewModal" class="seo-preview-modal" onclick="if(event.target===this)this.style.display='none'">
+  <div class="seo-preview-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <span style="font-family:var(--orb);color:var(--g);font-size:14px;letter-spacing:0.14em;font-weight:900">🔍 SEO & SOCIAL PREVIEW</span>
+      <button onclick="document.getElementById('seoPreviewModal').style.display='none'" style="background:transparent;border:1px solid var(--br2);color:var(--t);padding:4px 12px;cursor:pointer;font-family:var(--mono)">CLOSE ✕</button>
+    </div>
+    <div id="seoPreviewContent"></div>
+  </div>
+</div>
+
+<!-- INDICATOR DICTIONARY MODAL -->
+<div id="dictModal" class="dict-modal" onclick="if(event.target===this)this.style.display='none'">
+  <div class="dict-box">
+    <div class="dict-head">
+      <span style="font-family:var(--orb);color:var(--g);font-size:14px;letter-spacing:0.14em;font-weight:900">📖 قاموس المؤشرات — Indicator Dictionary</span>
+      <button onclick="document.getElementById('dictModal').style.display='none'" style="background:transparent;border:1px solid var(--br2);color:var(--t);padding:4px 12px;cursor:pointer;font-family:var(--mono)">CLOSE ✕</button>
+    </div>
+    <div style="padding:10px 20px;background:var(--bg4);font-size:10px;color:var(--t2);border-bottom:1px solid var(--br)">
+      <select id="dictAsset" onchange="renderDictionary()" style="background:var(--bg3);border:1px solid var(--br2);color:var(--t);font-family:var(--mono);font-size:11px;padding:5px 10px;cursor:pointer">
+        <option value="BTCUSDT">BTC / USDT</option>
+        <option value="ETHUSDT">ETH / USDT</option>
+        <option value="SOLUSDT">SOL / USDT</option>
+        <option value="BNBUSDT">BNB / USDT</option>
+        <option value="XRPUSDT">XRP / USDT</option>
+      </select>
+      <span style="margin-left:8px;color:var(--t3)">اضغط على أي مؤشر لعرض الشرح التفصيلي والقيم الحية</span>
+    </div>
+    <div id="dictContent"></div>
+  </div>
 </div>
 <style>
 .tv-tf-btn{background:var(--bg3);color:var(--t2);border:1px solid var(--br);padding:4px 10px;border-radius:4px;font-family:var(--mono);font-size:10px;cursor:pointer;transition:all 0.2s;font-weight:600}
@@ -3874,6 +3983,226 @@ switchTab = function(tab, btn) {
   if (tab === 'chart' && !document.getElementById('tvChartContainer')?.children.length) {
     setTimeout(loadTVChart, 100);
   }
+  if (tab === 'news' && !S.news.length) fetchNews();
+};
+
+// ═══════════════════════════════════════════════════════════
+// SEO/OG PREVIEW TOOL
+// ═══════════════════════════════════════════════════════════
+function openSEOPreview() {
+  const modal = document.getElementById('seoPreviewModal');
+  modal.style.display = 'flex';
+  const content = document.getElementById('seoPreviewContent');
+  
+  const title = document.querySelector('title')?.textContent || 'No title';
+  const desc = document.querySelector('meta[name="description"]')?.content || 'No description';
+  const ogTitle = document.querySelector('meta[property="og:title"]')?.content || title;
+  const ogDesc = document.querySelector('meta[property="og:description"]')?.content || desc;
+  const ogImage = document.querySelector('meta[property="og:image"]')?.content || '';
+  const twTitle = document.querySelector('meta[name="twitter:title"]')?.content || ogTitle;
+  const twImage = document.querySelector('meta[name="twitter:image"]')?.content || ogImage;
+  const twCard = document.querySelector('meta[name="twitter:card"]')?.content || 'summary';
+  const favicon = document.querySelector('link[rel="icon"]')?.href || '';
+  const canonical = document.querySelector('link[rel="canonical"]')?.href || window.location.href;
+  const themeColor = document.querySelector('meta[name="theme-color"]')?.content || '';
+  const jsonLD = document.querySelector('script[type="application/ld+json"]')?.textContent ? true : false;
+  
+  const fullOgImage = ogImage.startsWith('http') ? ogImage : window.location.origin + ogImage;
+  const domain = new URL(canonical || window.location.href).hostname;
+  
+  // Validation checks
+  const checks = [];
+  checks.push({name: 'Title', ok: title.length > 0 && title.length <= 60, val: `${title.length} chars`});
+  checks.push({name: 'Description', ok: desc.length > 0 && desc.length <= 160, val: `${desc.length} chars`});
+  checks.push({name: 'OG Title', ok: !!ogTitle, val: ogTitle ? '✓' : '✗'});
+  checks.push({name: 'OG Description', ok: !!ogDesc, val: ogDesc ? '✓' : '✗'});
+  checks.push({name: 'OG Image', ok: !!ogImage, val: ogImage ? '✓' : '✗'});
+  checks.push({name: 'Twitter Card', ok: !!twCard, val: twCard || '✗'});
+  checks.push({name: 'Favicon', ok: !!favicon, val: favicon ? '✓' : '✗'});
+  checks.push({name: 'Canonical', ok: !!canonical, val: canonical ? '✓' : '✗'});
+  checks.push({name: 'Theme Color', ok: !!themeColor, val: themeColor || '✗'});
+  checks.push({name: 'JSON-LD', ok: jsonLD, val: jsonLD ? '✓' : '✗'});
+  
+  let html = '<div style="margin-bottom:16px">';
+  html += '<div style="font-family:var(--raj);font-size:11px;color:var(--t2);letter-spacing:0.1em;margin-bottom:8px">META TAG VALIDATION</div>';
+  html += checks.map(c => `<span class="seo-tag ${c.ok?'ok':'err'}">${c.name}: ${c.val}</span>`).join('');
+  html += '</div>';
+  
+  // WhatsApp Preview
+  html += '<div class="seo-platform">📱 WhatsApp Preview</div>';
+  html += `<div class="seo-card" style="max-width:400px;border-radius:12px">
+    ${ogImage ? `<img class="seo-card-img" src="${fullOgImage}" alt="OG" onerror="this.style.display='none'">` : ''}
+    <div class="seo-card-body" style="background:#DCF8C6;border-radius:0 0 12px 12px">
+      <div class="seo-card-url" style="color:#128C7E;font-size:10px">${domain}</div>
+      <div class="seo-card-title" style="color:#000">${ogTitle}</div>
+      <div class="seo-card-desc" style="color:#333">${ogDesc.slice(0,120)}${ogDesc.length>120?'...':''}</div>
+    </div>
+  </div>`;
+  
+  // Twitter/X Preview
+  html += '<div class="seo-platform">🐦 X (Twitter) Preview — Summary Large Image</div>';
+  html += `<div class="seo-card" style="max-width:500px;border-radius:16px">
+    ${twImage ? `<img class="seo-card-img" src="${twImage.startsWith('http')?twImage:window.location.origin+twImage}" alt="Twitter" onerror="this.style.display='none'" style="border-radius:16px 16px 0 0">` : ''}
+    <div class="seo-card-body" style="background:#15202b;border-radius:0 0 16px 16px">
+      <div class="seo-card-url" style="color:#8899a6;font-size:10px">${domain}</div>
+      <div class="seo-card-title" style="color:#ffffff">${twTitle}</div>
+      <div class="seo-card-desc" style="color:#8899a6">${ogDesc.slice(0,200)}</div>
+    </div>
+  </div>`;
+  
+  // Facebook Preview
+  html += '<div class="seo-platform">📘 Facebook Preview</div>';
+  html += `<div class="seo-card" style="max-width:500px;border:1px solid #ddd">
+    ${ogImage ? `<img class="seo-card-img" src="${fullOgImage}" alt="Facebook" onerror="this.style.display='none'">` : ''}
+    <div class="seo-card-body" style="background:#f0f2f5;border-top:1px solid #ddd">
+      <div class="seo-card-url" style="color:#65676b;font-size:10px;text-transform:uppercase">${domain}</div>
+      <div class="seo-card-title" style="color:#1c1e21;font-size:15px">${ogTitle}</div>
+      <div class="seo-card-desc" style="color:#606770">${ogDesc.slice(0,150)}</div>
+    </div>
+  </div>`;
+  
+  // Google Search Preview
+  html += '<div class="seo-platform">🔎 Google Search Preview</div>';
+  html += `<div style="max-width:600px;padding:12px;background:#fff;border-radius:8px;font-family:Arial,sans-serif">
+    <div style="color:#1a0dab;font-size:18px;cursor:pointer;margin-bottom:2px">${title}</div>
+    <div style="color:#006621;font-size:13px;margin-bottom:4px">${canonical || domain}</div>
+    <div style="color:#545454;font-size:13px;line-height:1.5">${desc.slice(0,160)}</div>
+  </div>`;
+  
+  content.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════
+// INDICATOR DICTIONARY
+// ═══════════════════════════════════════════════════════════
+const INDICATOR_DICT = [
+  {id:'rsi', name:'RSI (14)', nameAr:'مؤشر القوة النسبية', desc:'Relative Strength Index measures momentum on a 0-100 scale. Below 30 = oversold (potential bounce), above 70 = overbought (potential correction).', descAr:'يقيس زخم السعر من 0 إلى 100. تحت 30 = تشبع بيعي (احتمال ارتداد). فوق 70 = تشبع شرائي (احتمال تصحيح). الفترة: 14 شمعة.', getValue: (ind) => ind?.rsi?.toFixed(2) ?? '--', getColor: (ind) => ind?.rsi < 30 ? 'var(--g)' : ind?.rsi > 70 ? 'var(--r)' : 'var(--t)'},
+  {id:'stoch', name:'Stochastic RSI', nameAr:'ستوكاستيك RSI', desc:'Combines RSI with stochastic formula for extra sensitivity. K below 20 = oversold, K above 80 = overbought. K crossing above D = bullish.', descAr:'يجمع بين RSI والصيغة الاحتمالية. K تحت 20 = تشبع بيعي. K فوق 80 = تشبع شرائي. تقاطع K فوق D = إشارة صعودية.', getValue: (ind) => ind?.stochRSI ? `K: ${ind.stochRSI.k.toFixed(1)} / D: ${ind.stochRSI.d.toFixed(1)}` : '--', getColor: (ind) => ind?.stochRSI?.k < 20 ? 'var(--g)' : ind?.stochRSI?.k > 80 ? 'var(--r)' : 'var(--t)'},
+  {id:'macd', name:'MACD', nameAr:'ماكد — التقارب والتباعد', desc:'Moving Average Convergence Divergence. Bullish cross = MACD line crosses above signal. Histogram expanding = momentum increasing. Uses 12/26/9 EMAs.', descAr:'يكشف تحولات الزخم. تقاطع صعودي = خط MACD يعبر فوق خط الإشارة. الهيستوجرام المتزايد = زخم متصاعد. يستخدم EMA 12/26/9.', getValue: (ind) => ind?.macd ? `Hist: ${ind.macd.hist?.toFixed(5)}` : '--', getColor: (ind) => ind?.macd?.hist > 0 ? 'var(--g)' : ind?.macd?.hist < 0 ? 'var(--r)' : 'var(--t)'},
+  {id:'ema', name:'EMA Stack (9/21/50/200)', nameAr:'متوسطات متحركة أسية', desc:'Exponential Moving Averages at 4 periods. Bull alignment: 9>21>50>200. Bear alignment: reverse. Price above EMA200 = long-term bull structure.', descAr:'EMA9 > EMA21 > EMA50 = هيكل صعودي. العكس = هبوطي. السعر فوق EMA200 = بنية صعودية طويلة المدى.', getValue: (ind) => ind?.ema9 && ind?.ema21 ? (ind.ema9 > ind.ema21 ? '▲ Bull' : '▼ Bear') : '--', getColor: (ind) => ind?.ema9 > ind?.ema21 ? 'var(--g)' : 'var(--r)'},
+  {id:'bb', name:'Bollinger Bands (20,2)', nameAr:'بولينجر باندز', desc:'Price bands based on standard deviation. Price at lower band = oversold, upper band = overbought. Bandwidth squeeze signals breakout ahead.', descAr:'نطاقات سعرية تعتمد على الانحراف المعياري. السعر عند النطاق السفلي = تشبع بيعي. ضيق النطاق = انفجار سعري قادم.', getValue: (ind,px) => ind?.bb && px ? `${((px.price-ind.bb.lower)/(ind.bb.upper-ind.bb.lower)*100).toFixed(0)}% | BW: ${ind.bb.bw?.toFixed(2)}%` : '--', getColor: () => 'var(--t)'},
+  {id:'adx', name:'ADX (14)', nameAr:'متوسط مؤشر الاتجاه', desc:'Average Directional Index measures trend STRENGTH (not direction). Above 25 = trending, above 40 = strong trend, below 20 = ranging/choppy.', descAr:'يقيس قوة الاتجاه (ليس الاتجاه نفسه). فوق 25 = اتجاه، فوق 40 = اتجاه قوي، تحت 20 = تذبذب.', getValue: (ind) => ind?.adx ? `${ind.adx.adx.toFixed(1)} (+DI: ${ind.adx.plusDI.toFixed(1)} / -DI: ${ind.adx.minusDI.toFixed(1)})` : '--', getColor: (ind) => ind?.adx?.adx > 25 ? 'var(--g)' : 'var(--t3)'},
+  {id:'ich', name:'Ichimoku Cloud', nameAr:'سحابة إيشيموكو', desc:'Comprehensive indicator: Tenkan (9), Kijun (26), Senkou spans form the cloud. Price above cloud = bullish, below = bearish, inside = consolidation.', descAr:'مؤشر شامل. السعر فوق السحابة = صعودي. تحت = هبوطي. داخل = تذبذب. يحدد الدعم والمقاومة والاتجاه.', getValue: (ind) => ind?.ichimoku ? (ind.ichimoku.priceAboveCloud ? 'Above Cloud ↑' : ind.ichimoku.priceBelowCloud ? 'Below Cloud ↓' : 'Inside Cloud ◈') : '--', getColor: (ind) => ind?.ichimoku?.priceAboveCloud ? 'var(--g)' : ind?.ichimoku?.priceBelowCloud ? 'var(--r)' : 'var(--a)'},
+  {id:'wr', name:'Williams %R (14)', nameAr:'ويليامز %R', desc:'Momentum oscillator ranging -100 to 0. Below -80 = oversold, above -20 = overbought. Similar to inverse Stochastic.', descAr:'يتراوح من -100 إلى 0. تحت -80 = تشبع بيعي. فوق -20 = تشبع شرائي.', getValue: (ind) => ind?.williamsR?.toFixed(1) ?? '--', getColor: (ind) => ind?.williamsR < -80 ? 'var(--g)' : ind?.williamsR > -20 ? 'var(--r)' : 'var(--t)'},
+  {id:'cci', name:'CCI (20)', nameAr:'مؤشر قناة السلعة', desc:'Commodity Channel Index. Below -100 = oversold, above +100 = overbought. Measures deviation from statistical mean price.', descAr:'يقيس انحراف السعر عن المتوسط. تحت -100 = تشبع بيعي. فوق +100 = تشبع شرائي.', getValue: (ind) => ind?.cci?.toFixed(1) ?? '--', getColor: (ind) => ind?.cci < -100 ? 'var(--g)' : ind?.cci > 100 ? 'var(--r)' : 'var(--t)'},
+  {id:'mfi', name:'MFI (14)', nameAr:'مؤشر تدفق الأموال', desc:'Money Flow Index combines price AND volume. Below 20 = money outflow (oversold), above 80 = money inflow (overbought). Volume-weighted RSI.', descAr:'يجمع السعر والحجم. تحت 20 = تدفق خارجي. فوق 80 = تدفق داخلي. RSI مرجّح بالحجم.', getValue: (ind) => ind?.mfi?.toFixed(1) ?? '--', getColor: (ind) => ind?.mfi < 25 ? 'var(--g)' : ind?.mfi > 75 ? 'var(--r)' : 'var(--t)'},
+  {id:'sar', name:'Parabolic SAR', nameAr:'بارابوليك سار', desc:'Stop And Reverse. Dots below price = bullish, above = bearish. Used for trailing stops and trend direction. AF accelerates with trend.', descAr:'نقاط تحت السعر = صعودي. فوق = هبوطي. يستخدم لوقف الخسائر المتحرك وتحديد الاتجاه.', getValue: (ind) => ind?.sar ? `${ind.sar.bull ? '▲ Bull' : '▼ Bear'} @ $${fmtP(ind.sar.sar)}` : '--', getColor: (ind) => ind?.sar?.bull ? 'var(--g)' : 'var(--r)'},
+  {id:'vwap', name:'VWAP (24)', nameAr:'متوسط السعر المرجح بالحجم', desc:'Volume Weighted Average Price. Price above VWAP = bullish institutional bias, below = bearish. Key intraday reference.', descAr:'متوسط السعر المرجح بحجم التداول. السعر فوقه = ميل مؤسسي صعودي. تحته = هبوطي.', getValue: (ind) => ind?.vwap ? '$' + fmtP(ind.vwap) : '--', getColor: () => 'var(--t)'},
+  {id:'obv', name:'OBV', nameAr:'حجم التداول المتراكم', desc:'On Balance Volume. Rising OBV = volume confirms price rally. Falling OBV = volume confirms selloff. Divergence = reversal signal.', descAr:'ارتفاع OBV = الحجم يؤكد الصعود. انخفاض = يؤكد الهبوط. التباعد = إشارة انعكاس.', getValue: (ind) => ind?.obvTrend > 0 ? 'Rising ▲' : ind?.obvTrend < 0 ? 'Falling ▼' : 'Neutral', getColor: (ind) => ind?.obvTrend > 0 ? 'var(--g)' : ind?.obvTrend < 0 ? 'var(--r)' : 'var(--t2)'},
+  {id:'atr', name:'ATR (14)', nameAr:'متوسط المدى الحقيقي', desc:'Average True Range measures volatility in price units. Used for stop-loss and take-profit calculation. Higher ATR = wider stops needed.', descAr:'يقيس التقلب بوحدات السعر. يستخدم لحساب وقف الخسارة والأهداف. ATR أعلى = وقف خسارة أوسع.', getValue: (ind) => ind?.atr ? '$' + fmtP(ind.atr) : '--', getColor: () => 'var(--t)'},
+  {id:'div', name:'RSI Divergence', nameAr:'تباعد RSI', desc:'When price makes new low but RSI makes higher low = bullish divergence (reversal up). Price new high but RSI lower high = bearish divergence.', descAr:'السعر يسجل قاع جديد و RSI يسجل قاع أعلى = تباعد صعودي. العكس = تباعد هبوطي. إشارة انعكاس قوية.', getValue: (ind) => ind?.divergence ? `⚡ ${ind.divergence.toUpperCase()}` : 'None', getColor: (ind) => ind?.divergence === 'bullish' ? 'var(--g)' : ind?.divergence === 'bearish' ? 'var(--r)' : 'var(--t3)'},
+];
+
+function openDictionary() {
+  document.getElementById('dictModal').style.display = 'flex';
+  renderDictionary();
+}
+
+function renderDictionary() {
+  const sym = document.getElementById('dictAsset')?.value || 'BTCUSDT';
+  const tf = S.currentTF;
+  const ind = S.indicators[sym]?.[tf];
+  const px = S.prices[sym];
+  const content = document.getElementById('dictContent');
+  
+  content.innerHTML = INDICATOR_DICT.map(d => {
+    const val = d.getValue(ind, px);
+    const color = d.getColor(ind);
+    return `<div class="dict-entry" onclick="this.classList.toggle('open')">
+      <div class="dict-entry-head">
+        <div>
+          <span class="dict-entry-name">${d.name}</span>
+          <span style="color:var(--t3);font-size:10px;margin-left:8px">${d.nameAr}</span>
+        </div>
+        <span class="dict-entry-val" style="color:${color}">${val}</span>
+      </div>
+      <div class="dict-entry-body">
+        <p style="color:var(--t);margin-bottom:6px"><b>English:</b> ${d.desc}</p>
+        <p style="color:var(--g);direction:rtl;text-align:right"><b>العربية:</b> ${d.descAr}</p>
+        <p style="margin-top:8px;color:var(--t3);font-size:9px">📊 Live value on ${S.currentTF.toUpperCase()}: <span style="color:${color};font-weight:700">${val}</span></p>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+// NEWS FIX — Enhanced with fallback and CORS proxy
+// ═══════════════════════════════════════════════════════════
+const NEWS_PROXY = 'https://api.allorigins.win/raw?url=';
+const NEWS_FEEDS_V2 = [
+  'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fcointelegraph.com%2Frss&count=20',
+  'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.coindesk.com%2Farc%2Foutboundfeeds%2Frss%2F&count=15',
+  'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fcryptonews.com%2Fnews%2Ffeed%2F&count=15',
+];
+
+// Override fetchNews with improved version
+const _origFetchNews = fetchNews;
+fetchNews = async function() {
+  try {
+    const allItems = [];
+    const bullW = ['bull','pump','surge','soar','rally','gain','breakout','ath','rise','moon','spike','positive','adoption','approve','etf','launch','partner','upgrade','bullish','highs','growth'];
+    const bearW = ['bear','dump','crash','fall','drop','plunge','sell','fear','risk','warn','loss','ban','hack','fraud','lawsuit','sec','fine','regulation','sanctions','war','conflict','attack','bearish','lows','decline'];
+    const geoW = ['war','sanctions','tariff','election','fed','rate','inflation','gdp','recession','geopolit','opec','treasury','congress','eu','china','trump','biden','powell','military','nuclear'];
+    
+    for (const url of NEWS_FEEDS_V2) {
+      try {
+        let r = await fetch(url);
+        if (!r.ok) {
+          r = await fetch(NEWS_PROXY + encodeURIComponent(url.replace('api.rss2json.com/v1/api.json?rss_url=', '')));
+        }
+        const d = await r.json();
+        if (d?.items?.length) {
+          d.items.forEach(item => {
+            const title = item.title || '';
+            const tl = title.toLowerCase();
+            let sentiment = 'neu';
+            if (bullW.some(w => tl.includes(w))) sentiment = 'pos';
+            else if (bearW.some(w => tl.includes(w))) sentiment = 'neg';
+            const isGeo = geoW.some(w => tl.includes(w));
+            allItems.push({
+              title, link: item.link, pubDate: item.pubDate,
+              source: item.author || (url.includes('coindesk') ? 'CoinDesk' : url.includes('cryptonews') ? 'CryptoNews' : 'CoinTelegraph'),
+              thumbnail: item.thumbnail || item.enclosure?.link || '',
+              sentiment, isGeo,
+            });
+          });
+        }
+      } catch(e) { console.warn('News feed error:', e); }
+    }
+    
+    // If RSS failed, generate synthetic news from market data
+    if (allItems.length === 0) {
+      ASSETS.filter(a => !a.external).forEach(a => {
+        const px = S.prices[a.sym];
+        const sig = S.signals[a.sym]?.[S.currentTF];
+        if (!px || !sig) return;
+        const ch = px.change;
+        allItems.push({
+          title: `${a.tk} ${ch >= 0 ? 'up' : 'down'} ${Math.abs(ch).toFixed(2)}% — Signal: ${sig.signal} (${sig.conf}% confidence)`,
+          link: '#', pubDate: new Date().toISOString(),
+          source: 'WAR ROOM Analytics',
+          thumbnail: a.logo, sentiment: ch > 3 ? 'pos' : ch < -3 ? 'neg' : 'neu', isGeo: false,
+        });
+      });
+      // Add market context
+      if (S.fg) {
+        allItems.unshift({
+          title: `Crypto Fear & Greed Index at ${S.fg.val} — ${S.fg.label}. Market regime: ${REGIME.current?.replace('_',' ')||'Scanning'}`,
+          link: '#', pubDate: new Date().toISOString(),
+          source: 'Market Data', thumbnail: '', sentiment: S.fg.val > 60 ? 'pos' : S.fg.val < 40 ? 'neg' : 'neu', isGeo: false,
+        });
+      }
+    }
+    
+    const seen = new Set();
+    S.news = allItems.filter(n => {
+      const key = n.title.slice(0,50).toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key); return true;
+    });
+    S.news.sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate));
+    renderNews();
+  } catch(e) { console.warn('News fetch failed:', e); }
 };
 </script>
 </body>
