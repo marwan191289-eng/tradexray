@@ -1308,7 +1308,7 @@ function generateSignal(sym,tf){
 
   // ── MULTI-TF ALIGNMENT BONUS ─────────────────────────────
   let tfsAligned=0;
-  const allTFs=['5m','15m','1h','4h','1d'];
+  const allTFs=['5m','15m','1h','4h','1d','1w','1M'];
   const dir=score>0?'bull':score<0?'bear':'neutral';
   allTFs.forEach(t=>{
     if(t===tf)return;
@@ -1354,7 +1354,7 @@ async function fetchKlines(sym,interval='1h',limit=100){
 }
 
 async function initKlines(){
-  const tfs=['5m','15m','1h','4h','1d'];
+  const tfs=['5m','15m','1h','4h','1d','1w','1M'];
   for(const a of ASSETS){
     S.klines[a.sym]={};S.indicators[a.sym]={};S.signals[a.sym]={};
     if(a.external) continue; // External assets (CoinGecko) handled separately
@@ -1373,7 +1373,7 @@ async function initKlines(){
 }
 
 async function refreshKlines(){
-  const tfs=['5m','15m','1h','4h','1d'];
+  const tfs=['5m','15m','1h','4h','1d','1w','1M'];
   for(const a of ASSETS){
     if(a.external) continue;
     for(const tf of tfs){
@@ -1454,7 +1454,7 @@ function connectWS(){
       if(!S.history[sym])S.history[sym]=[];
       S.history[sym].push(price);
       if(S.history[sym].length>120)S.history[sym].shift();
-      const tfs=['5m','15m','1h','4h','1d'];
+      const tfs=['5m','15m','1h','4h','1d','1w','1M'];
       tfs.forEach(tf=>{
         const k=S.klines[sym]?.[tf];
         if(k?.length){const last=k[k.length-1];last.c=price;if(price>last.h)last.h=price;if(price<last.l)last.l=price;last.v=+d.v;}
@@ -1670,7 +1670,7 @@ function updateCmdStats(){
   // MTF Consensus
   const mtfScores=ASSETS.map(a=>{
     const sigs=S.signals[a.sym];if(!sigs)return 0;
-    let aligned=0;const tfs=['5m','15m','1h','4h','1d'];
+    let aligned=0;const tfs=['5m','15m','1h','4h','1d','1w','1M'];
     const dirs=tfs.map(t=>{const s=sigs[t];return s?s.score>0?1:s.score<0?-1:0:0;});
     const bullC=dirs.filter(d=>d>0).length,bearC=dirs.filter(d=>d<0).length;
     return Math.max(bullC,bearC);
@@ -1751,7 +1751,7 @@ function buildCard(a){
   const selCls=S.selected===a.sym?' sel':'';
 
   // MTF grid
-  const tfs=['5m','15m','1h','4h','1d'];
+  const tfs=['5m','15m','1h','4h','1d','1w','1M'];
   const mtfCells=tfs.map(t=>{
     const s=S.signals[a.sym]?.[t];
     const sClass=s?sigClass(s.signal):'wait';
@@ -1980,7 +1980,7 @@ function renderDetail(sym){
     setTimeout(()=>calcPos(sym),100);
   }
 
-  const tfs=['5m','15m','1h','4h','1d'];
+  const tfs=['5m','15m','1h','4h','1d','1w','1M'];
   const mtfRows=tfs.map(t=>{
     const s=S.signals[sym]?.[t];
     const sClass=s?sigClass(s.signal):'';
@@ -2696,7 +2696,7 @@ async function pollExternalAssets(){
       }
       // Mark as a "no-trade" external — signals engine should not run on it
       S.signals[a.sym] = S.signals[a.sym] || {};
-      ['5m','15m','1h','4h','1d'].forEach(tf => {
+      ['5m','15m','1h','4h','1d','1w','1M'].forEach(tf => {
         S.signals[a.sym][tf] = {
           signal:'NO-TRADE',
           conf:0,
@@ -2844,7 +2844,7 @@ function renderScreener() {
     const px  = S.prices[a.sym];
     const sig = S.signals[a.sym]?.[tf];
     const ind = S.indicators[a.sym]?.[tf];
-    const tfs  = ['5m','15m','1h','4h','1d'];
+    const tfs  = ['5m','15m','1h','4h','1d','1w','1M'];
     const dir  = sig?.score > 0 ? 1 : sig?.score < 0 ? -1 : 0;
     const mtf  = tfs.filter(t=>{ const s=S.signals[a.sym]?.[t]; return s?(s.score>0?1:s.score<0?-1:0)===dir:false; }).length;
     return { a, px, sig, ind, mtf };
@@ -3277,7 +3277,7 @@ function buildBriefingContext(sym, tf) {
   const px  = S.prices[sym];
   if (!ind || !px) return { error: 'Insufficient data' };
 
-  const tfs = ['5m','15m','1h','4h','1d'];
+  const tfs = ['5m','15m','1h','4h','1d','1w','1M'];
   const mtf = {};
   tfs.forEach(t => {
     const s = S.signals[sym]?.[t];
@@ -3343,7 +3343,7 @@ async function init(){
   classifyRegime();
   ASSETS.forEach(a => {
     if (a.external) return;
-    ['5m','15m','1h','4h','1d'].forEach(tf => {
+    ['5m','15m','1h','4h','1d','1w','1M'].forEach(tf => {
       if (S.indicators[a.sym]?.[tf]) S.signals[a.sym][tf] = generateSignal(a.sym, tf);
     });
   });
