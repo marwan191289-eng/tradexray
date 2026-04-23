@@ -507,6 +507,49 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 /* RAW DATA OVERLAY */
 .raw-data-overlay{position:absolute;inset:0;background:rgba(2,5,16,0.95);display:none;padding:10px;font-size:10px;color:var(--t2);overflow-y:auto;z-index:5;border-radius:var(--card-radius)}
 .raw-data-overlay.show{display:block}
+
+/* UNIFIED RAW DATA MODAL */
+.raw-modal-backdrop{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center}
+.raw-modal-backdrop.show{display:flex}
+.raw-modal{background:var(--bg2);border:1px solid var(--br2);border-radius:12px;max-width:520px;width:95%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.6);animation:tooltipIn 0.2s ease}
+.raw-modal-head{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--br2);position:sticky;top:0;background:var(--bg2);z-index:1;border-radius:12px 12px 0 0}
+.raw-modal-head h3{font-family:var(--raj);font-size:14px;font-weight:700;color:var(--g);letter-spacing:0.1em}
+.raw-modal-close{background:transparent;border:1px solid var(--br2);color:var(--t2);padding:4px 10px;cursor:pointer;font-family:var(--mono);font-size:10px;border-radius:4px;transition:all 0.15s}
+.raw-modal-close:hover{border-color:var(--g);color:var(--g)}
+.raw-modal-body{padding:18px}
+.raw-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--br);gap:12px}
+.raw-row:last-child{border-bottom:none}
+.raw-row-name{font-size:11px;color:var(--t2);font-weight:600;letter-spacing:0.04em}
+.raw-row-val{font-family:var(--orb);font-size:13px;font-weight:700;text-align:right}
+.raw-row-desc{font-size:9px;color:var(--t3);direction:rtl;text-align:right;line-height:1.5;margin-top:2px}
+
+/* LIGHT THEME */
+body.light{--bg:#F5F7FA;--bg2:#FFFFFF;--bg3:#F0F2F5;--bg4:#E8ECF0;--bg5:#DCE0E6;--t:#1A2030;--t2:#4A5568;--t3:#8A99A8;--t4:#B0BCC4;--br:rgba(0,0,0,0.06);--br2:rgba(0,0,0,0.12);--br3:rgba(0,0,0,0.2);--glass:rgba(255,255,255,0.90);--glass-border:rgba(0,0,0,0.06);--shadow:0 4px 20px rgba(0,0,0,0.08)}
+body.light{background:var(--bg);color:var(--t)}
+body.light::before{background:none}
+body.light::after{opacity:0}
+body.light .nav{background:linear-gradient(180deg,rgba(255,255,255,0.98),rgba(245,247,250,0.95));border-bottom-color:rgba(0,0,0,0.08);box-shadow:0 2px 20px rgba(0,0,0,0.06)}
+body.light .cmd-cell{background:linear-gradient(180deg,rgba(255,255,255,0.95),rgba(245,247,250,0.98))}
+body.light .cmd-val{color:#1A2030;text-shadow:none}
+body.light .asset-card{background:linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,249,252,0.95));border-color:rgba(0,0,0,0.06)}
+body.light .asset-card:hover{border-color:rgba(0,229,160,0.25);box-shadow:0 8px 30px rgba(0,0,0,0.08)}
+body.light .card-price{color:#1A2030}
+body.light .hm-cell{background:linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,249,252,0.95));border-color:rgba(0,0,0,0.06)}
+body.light .radar-cell{background:linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,249,252,0.95));border-color:rgba(0,0,0,0.06)}
+body.light .tabs{background:linear-gradient(180deg,rgba(255,255,255,0.95),rgba(248,249,252,0.98))}
+body.light .tab-btn{color:var(--t2)}
+body.light .tab-btn.active{color:var(--g);background:linear-gradient(180deg,rgba(0,229,160,0.06),transparent)}
+body.light .briefing-output{background:#fff;border-color:rgba(0,0,0,0.08);color:#4A5568}
+body.light .raw-modal{background:#fff;border-color:rgba(0,0,0,0.1)}
+body.light .raw-modal-head{background:#fff}
+body.light .corr-table td{background:rgba(255,255,255,0.8)}
+body.light ::-webkit-scrollbar-track{background:#F5F7FA}
+body.light ::-webkit-scrollbar-thumb{background:#C4CDD5}
+
+/* CORR LOADING BAR */
+.corr-loading{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg2);border-bottom:1px solid var(--br);font-size:10px;color:var(--t2)}
+.corr-loading-bar{flex:1;height:3px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.corr-loading-fill{height:100%;background:var(--g);width:0%;transition:width 0.3s;border-radius:2px}
 </style>
 </head>
 <body>
