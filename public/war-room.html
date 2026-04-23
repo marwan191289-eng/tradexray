@@ -3970,6 +3970,226 @@ switchTab = function(tab, btn) {
   if (tab === 'chart' && !document.getElementById('tvChartContainer')?.children.length) {
     setTimeout(loadTVChart, 100);
   }
+  if (tab === 'news' && !S.news.length) fetchNews();
+};
+
+// ═══════════════════════════════════════════════════════════
+// SEO/OG PREVIEW TOOL
+// ═══════════════════════════════════════════════════════════
+function openSEOPreview() {
+  const modal = document.getElementById('seoPreviewModal');
+  modal.style.display = 'flex';
+  const content = document.getElementById('seoPreviewContent');
+  
+  const title = document.querySelector('title')?.textContent || 'No title';
+  const desc = document.querySelector('meta[name="description"]')?.content || 'No description';
+  const ogTitle = document.querySelector('meta[property="og:title"]')?.content || title;
+  const ogDesc = document.querySelector('meta[property="og:description"]')?.content || desc;
+  const ogImage = document.querySelector('meta[property="og:image"]')?.content || '';
+  const twTitle = document.querySelector('meta[name="twitter:title"]')?.content || ogTitle;
+  const twImage = document.querySelector('meta[name="twitter:image"]')?.content || ogImage;
+  const twCard = document.querySelector('meta[name="twitter:card"]')?.content || 'summary';
+  const favicon = document.querySelector('link[rel="icon"]')?.href || '';
+  const canonical = document.querySelector('link[rel="canonical"]')?.href || window.location.href;
+  const themeColor = document.querySelector('meta[name="theme-color"]')?.content || '';
+  const jsonLD = document.querySelector('script[type="application/ld+json"]')?.textContent ? true : false;
+  
+  const fullOgImage = ogImage.startsWith('http') ? ogImage : window.location.origin + ogImage;
+  const domain = new URL(canonical || window.location.href).hostname;
+  
+  // Validation checks
+  const checks = [];
+  checks.push({name: 'Title', ok: title.length > 0 && title.length <= 60, val: `${title.length} chars`});
+  checks.push({name: 'Description', ok: desc.length > 0 && desc.length <= 160, val: `${desc.length} chars`});
+  checks.push({name: 'OG Title', ok: !!ogTitle, val: ogTitle ? '✓' : '✗'});
+  checks.push({name: 'OG Description', ok: !!ogDesc, val: ogDesc ? '✓' : '✗'});
+  checks.push({name: 'OG Image', ok: !!ogImage, val: ogImage ? '✓' : '✗'});
+  checks.push({name: 'Twitter Card', ok: !!twCard, val: twCard || '✗'});
+  checks.push({name: 'Favicon', ok: !!favicon, val: favicon ? '✓' : '✗'});
+  checks.push({name: 'Canonical', ok: !!canonical, val: canonical ? '✓' : '✗'});
+  checks.push({name: 'Theme Color', ok: !!themeColor, val: themeColor || '✗'});
+  checks.push({name: 'JSON-LD', ok: jsonLD, val: jsonLD ? '✓' : '✗'});
+  
+  let html = '<div style="margin-bottom:16px">';
+  html += '<div style="font-family:var(--raj);font-size:11px;color:var(--t2);letter-spacing:0.1em;margin-bottom:8px">META TAG VALIDATION</div>';
+  html += checks.map(c => `<span class="seo-tag ${c.ok?'ok':'err'}">${c.name}: ${c.val}</span>`).join('');
+  html += '</div>';
+  
+  // WhatsApp Preview
+  html += '<div class="seo-platform">📱 WhatsApp Preview</div>';
+  html += `<div class="seo-card" style="max-width:400px;border-radius:12px">
+    ${ogImage ? `<img class="seo-card-img" src="${fullOgImage}" alt="OG" onerror="this.style.display='none'">` : ''}
+    <div class="seo-card-body" style="background:#DCF8C6;border-radius:0 0 12px 12px">
+      <div class="seo-card-url" style="color:#128C7E;font-size:10px">${domain}</div>
+      <div class="seo-card-title" style="color:#000">${ogTitle}</div>
+      <div class="seo-card-desc" style="color:#333">${ogDesc.slice(0,120)}${ogDesc.length>120?'...':''}</div>
+    </div>
+  </div>`;
+  
+  // Twitter/X Preview
+  html += '<div class="seo-platform">🐦 X (Twitter) Preview — Summary Large Image</div>';
+  html += `<div class="seo-card" style="max-width:500px;border-radius:16px">
+    ${twImage ? `<img class="seo-card-img" src="${twImage.startsWith('http')?twImage:window.location.origin+twImage}" alt="Twitter" onerror="this.style.display='none'" style="border-radius:16px 16px 0 0">` : ''}
+    <div class="seo-card-body" style="background:#15202b;border-radius:0 0 16px 16px">
+      <div class="seo-card-url" style="color:#8899a6;font-size:10px">${domain}</div>
+      <div class="seo-card-title" style="color:#ffffff">${twTitle}</div>
+      <div class="seo-card-desc" style="color:#8899a6">${ogDesc.slice(0,200)}</div>
+    </div>
+  </div>`;
+  
+  // Facebook Preview
+  html += '<div class="seo-platform">📘 Facebook Preview</div>';
+  html += `<div class="seo-card" style="max-width:500px;border:1px solid #ddd">
+    ${ogImage ? `<img class="seo-card-img" src="${fullOgImage}" alt="Facebook" onerror="this.style.display='none'">` : ''}
+    <div class="seo-card-body" style="background:#f0f2f5;border-top:1px solid #ddd">
+      <div class="seo-card-url" style="color:#65676b;font-size:10px;text-transform:uppercase">${domain}</div>
+      <div class="seo-card-title" style="color:#1c1e21;font-size:15px">${ogTitle}</div>
+      <div class="seo-card-desc" style="color:#606770">${ogDesc.slice(0,150)}</div>
+    </div>
+  </div>`;
+  
+  // Google Search Preview
+  html += '<div class="seo-platform">🔎 Google Search Preview</div>';
+  html += `<div style="max-width:600px;padding:12px;background:#fff;border-radius:8px;font-family:Arial,sans-serif">
+    <div style="color:#1a0dab;font-size:18px;cursor:pointer;margin-bottom:2px">${title}</div>
+    <div style="color:#006621;font-size:13px;margin-bottom:4px">${canonical || domain}</div>
+    <div style="color:#545454;font-size:13px;line-height:1.5">${desc.slice(0,160)}</div>
+  </div>`;
+  
+  content.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════
+// INDICATOR DICTIONARY
+// ═══════════════════════════════════════════════════════════
+const INDICATOR_DICT = [
+  {id:'rsi', name:'RSI (14)', nameAr:'مؤشر القوة النسبية', desc:'Relative Strength Index measures momentum on a 0-100 scale. Below 30 = oversold (potential bounce), above 70 = overbought (potential correction).', descAr:'يقيس زخم السعر من 0 إلى 100. تحت 30 = تشبع بيعي (احتمال ارتداد). فوق 70 = تشبع شرائي (احتمال تصحيح). الفترة: 14 شمعة.', getValue: (ind) => ind?.rsi?.toFixed(2) ?? '--', getColor: (ind) => ind?.rsi < 30 ? 'var(--g)' : ind?.rsi > 70 ? 'var(--r)' : 'var(--t)'},
+  {id:'stoch', name:'Stochastic RSI', nameAr:'ستوكاستيك RSI', desc:'Combines RSI with stochastic formula for extra sensitivity. K below 20 = oversold, K above 80 = overbought. K crossing above D = bullish.', descAr:'يجمع بين RSI والصيغة الاحتمالية. K تحت 20 = تشبع بيعي. K فوق 80 = تشبع شرائي. تقاطع K فوق D = إشارة صعودية.', getValue: (ind) => ind?.stochRSI ? `K: ${ind.stochRSI.k.toFixed(1)} / D: ${ind.stochRSI.d.toFixed(1)}` : '--', getColor: (ind) => ind?.stochRSI?.k < 20 ? 'var(--g)' : ind?.stochRSI?.k > 80 ? 'var(--r)' : 'var(--t)'},
+  {id:'macd', name:'MACD', nameAr:'ماكد — التقارب والتباعد', desc:'Moving Average Convergence Divergence. Bullish cross = MACD line crosses above signal. Histogram expanding = momentum increasing. Uses 12/26/9 EMAs.', descAr:'يكشف تحولات الزخم. تقاطع صعودي = خط MACD يعبر فوق خط الإشارة. الهيستوجرام المتزايد = زخم متصاعد. يستخدم EMA 12/26/9.', getValue: (ind) => ind?.macd ? `Hist: ${ind.macd.hist?.toFixed(5)}` : '--', getColor: (ind) => ind?.macd?.hist > 0 ? 'var(--g)' : ind?.macd?.hist < 0 ? 'var(--r)' : 'var(--t)'},
+  {id:'ema', name:'EMA Stack (9/21/50/200)', nameAr:'متوسطات متحركة أسية', desc:'Exponential Moving Averages at 4 periods. Bull alignment: 9>21>50>200. Bear alignment: reverse. Price above EMA200 = long-term bull structure.', descAr:'EMA9 > EMA21 > EMA50 = هيكل صعودي. العكس = هبوطي. السعر فوق EMA200 = بنية صعودية طويلة المدى.', getValue: (ind) => ind?.ema9 && ind?.ema21 ? (ind.ema9 > ind.ema21 ? '▲ Bull' : '▼ Bear') : '--', getColor: (ind) => ind?.ema9 > ind?.ema21 ? 'var(--g)' : 'var(--r)'},
+  {id:'bb', name:'Bollinger Bands (20,2)', nameAr:'بولينجر باندز', desc:'Price bands based on standard deviation. Price at lower band = oversold, upper band = overbought. Bandwidth squeeze signals breakout ahead.', descAr:'نطاقات سعرية تعتمد على الانحراف المعياري. السعر عند النطاق السفلي = تشبع بيعي. ضيق النطاق = انفجار سعري قادم.', getValue: (ind,px) => ind?.bb && px ? `${((px.price-ind.bb.lower)/(ind.bb.upper-ind.bb.lower)*100).toFixed(0)}% | BW: ${ind.bb.bw?.toFixed(2)}%` : '--', getColor: () => 'var(--t)'},
+  {id:'adx', name:'ADX (14)', nameAr:'متوسط مؤشر الاتجاه', desc:'Average Directional Index measures trend STRENGTH (not direction). Above 25 = trending, above 40 = strong trend, below 20 = ranging/choppy.', descAr:'يقيس قوة الاتجاه (ليس الاتجاه نفسه). فوق 25 = اتجاه، فوق 40 = اتجاه قوي، تحت 20 = تذبذب.', getValue: (ind) => ind?.adx ? `${ind.adx.adx.toFixed(1)} (+DI: ${ind.adx.plusDI.toFixed(1)} / -DI: ${ind.adx.minusDI.toFixed(1)})` : '--', getColor: (ind) => ind?.adx?.adx > 25 ? 'var(--g)' : 'var(--t3)'},
+  {id:'ich', name:'Ichimoku Cloud', nameAr:'سحابة إيشيموكو', desc:'Comprehensive indicator: Tenkan (9), Kijun (26), Senkou spans form the cloud. Price above cloud = bullish, below = bearish, inside = consolidation.', descAr:'مؤشر شامل. السعر فوق السحابة = صعودي. تحت = هبوطي. داخل = تذبذب. يحدد الدعم والمقاومة والاتجاه.', getValue: (ind) => ind?.ichimoku ? (ind.ichimoku.priceAboveCloud ? 'Above Cloud ↑' : ind.ichimoku.priceBelowCloud ? 'Below Cloud ↓' : 'Inside Cloud ◈') : '--', getColor: (ind) => ind?.ichimoku?.priceAboveCloud ? 'var(--g)' : ind?.ichimoku?.priceBelowCloud ? 'var(--r)' : 'var(--a)'},
+  {id:'wr', name:'Williams %R (14)', nameAr:'ويليامز %R', desc:'Momentum oscillator ranging -100 to 0. Below -80 = oversold, above -20 = overbought. Similar to inverse Stochastic.', descAr:'يتراوح من -100 إلى 0. تحت -80 = تشبع بيعي. فوق -20 = تشبع شرائي.', getValue: (ind) => ind?.williamsR?.toFixed(1) ?? '--', getColor: (ind) => ind?.williamsR < -80 ? 'var(--g)' : ind?.williamsR > -20 ? 'var(--r)' : 'var(--t)'},
+  {id:'cci', name:'CCI (20)', nameAr:'مؤشر قناة السلعة', desc:'Commodity Channel Index. Below -100 = oversold, above +100 = overbought. Measures deviation from statistical mean price.', descAr:'يقيس انحراف السعر عن المتوسط. تحت -100 = تشبع بيعي. فوق +100 = تشبع شرائي.', getValue: (ind) => ind?.cci?.toFixed(1) ?? '--', getColor: (ind) => ind?.cci < -100 ? 'var(--g)' : ind?.cci > 100 ? 'var(--r)' : 'var(--t)'},
+  {id:'mfi', name:'MFI (14)', nameAr:'مؤشر تدفق الأموال', desc:'Money Flow Index combines price AND volume. Below 20 = money outflow (oversold), above 80 = money inflow (overbought). Volume-weighted RSI.', descAr:'يجمع السعر والحجم. تحت 20 = تدفق خارجي. فوق 80 = تدفق داخلي. RSI مرجّح بالحجم.', getValue: (ind) => ind?.mfi?.toFixed(1) ?? '--', getColor: (ind) => ind?.mfi < 25 ? 'var(--g)' : ind?.mfi > 75 ? 'var(--r)' : 'var(--t)'},
+  {id:'sar', name:'Parabolic SAR', nameAr:'بارابوليك سار', desc:'Stop And Reverse. Dots below price = bullish, above = bearish. Used for trailing stops and trend direction. AF accelerates with trend.', descAr:'نقاط تحت السعر = صعودي. فوق = هبوطي. يستخدم لوقف الخسائر المتحرك وتحديد الاتجاه.', getValue: (ind) => ind?.sar ? `${ind.sar.bull ? '▲ Bull' : '▼ Bear'} @ $${fmtP(ind.sar.sar)}` : '--', getColor: (ind) => ind?.sar?.bull ? 'var(--g)' : 'var(--r)'},
+  {id:'vwap', name:'VWAP (24)', nameAr:'متوسط السعر المرجح بالحجم', desc:'Volume Weighted Average Price. Price above VWAP = bullish institutional bias, below = bearish. Key intraday reference.', descAr:'متوسط السعر المرجح بحجم التداول. السعر فوقه = ميل مؤسسي صعودي. تحته = هبوطي.', getValue: (ind) => ind?.vwap ? '$' + fmtP(ind.vwap) : '--', getColor: () => 'var(--t)'},
+  {id:'obv', name:'OBV', nameAr:'حجم التداول المتراكم', desc:'On Balance Volume. Rising OBV = volume confirms price rally. Falling OBV = volume confirms selloff. Divergence = reversal signal.', descAr:'ارتفاع OBV = الحجم يؤكد الصعود. انخفاض = يؤكد الهبوط. التباعد = إشارة انعكاس.', getValue: (ind) => ind?.obvTrend > 0 ? 'Rising ▲' : ind?.obvTrend < 0 ? 'Falling ▼' : 'Neutral', getColor: (ind) => ind?.obvTrend > 0 ? 'var(--g)' : ind?.obvTrend < 0 ? 'var(--r)' : 'var(--t2)'},
+  {id:'atr', name:'ATR (14)', nameAr:'متوسط المدى الحقيقي', desc:'Average True Range measures volatility in price units. Used for stop-loss and take-profit calculation. Higher ATR = wider stops needed.', descAr:'يقيس التقلب بوحدات السعر. يستخدم لحساب وقف الخسارة والأهداف. ATR أعلى = وقف خسارة أوسع.', getValue: (ind) => ind?.atr ? '$' + fmtP(ind.atr) : '--', getColor: () => 'var(--t)'},
+  {id:'div', name:'RSI Divergence', nameAr:'تباعد RSI', desc:'When price makes new low but RSI makes higher low = bullish divergence (reversal up). Price new high but RSI lower high = bearish divergence.', descAr:'السعر يسجل قاع جديد و RSI يسجل قاع أعلى = تباعد صعودي. العكس = تباعد هبوطي. إشارة انعكاس قوية.', getValue: (ind) => ind?.divergence ? `⚡ ${ind.divergence.toUpperCase()}` : 'None', getColor: (ind) => ind?.divergence === 'bullish' ? 'var(--g)' : ind?.divergence === 'bearish' ? 'var(--r)' : 'var(--t3)'},
+];
+
+function openDictionary() {
+  document.getElementById('dictModal').style.display = 'flex';
+  renderDictionary();
+}
+
+function renderDictionary() {
+  const sym = document.getElementById('dictAsset')?.value || 'BTCUSDT';
+  const tf = S.currentTF;
+  const ind = S.indicators[sym]?.[tf];
+  const px = S.prices[sym];
+  const content = document.getElementById('dictContent');
+  
+  content.innerHTML = INDICATOR_DICT.map(d => {
+    const val = d.getValue(ind, px);
+    const color = d.getColor(ind);
+    return `<div class="dict-entry" onclick="this.classList.toggle('open')">
+      <div class="dict-entry-head">
+        <div>
+          <span class="dict-entry-name">${d.name}</span>
+          <span style="color:var(--t3);font-size:10px;margin-left:8px">${d.nameAr}</span>
+        </div>
+        <span class="dict-entry-val" style="color:${color}">${val}</span>
+      </div>
+      <div class="dict-entry-body">
+        <p style="color:var(--t);margin-bottom:6px"><b>English:</b> ${d.desc}</p>
+        <p style="color:var(--g);direction:rtl;text-align:right"><b>العربية:</b> ${d.descAr}</p>
+        <p style="margin-top:8px;color:var(--t3);font-size:9px">📊 Live value on ${S.currentTF.toUpperCase()}: <span style="color:${color};font-weight:700">${val}</span></p>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+// NEWS FIX — Enhanced with fallback and CORS proxy
+// ═══════════════════════════════════════════════════════════
+const NEWS_PROXY = 'https://api.allorigins.win/raw?url=';
+const NEWS_FEEDS_V2 = [
+  'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fcointelegraph.com%2Frss&count=20',
+  'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.coindesk.com%2Farc%2Foutboundfeeds%2Frss%2F&count=15',
+  'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fcryptonews.com%2Fnews%2Ffeed%2F&count=15',
+];
+
+// Override fetchNews with improved version
+const _origFetchNews = fetchNews;
+fetchNews = async function() {
+  try {
+    const allItems = [];
+    const bullW = ['bull','pump','surge','soar','rally','gain','breakout','ath','rise','moon','spike','positive','adoption','approve','etf','launch','partner','upgrade','bullish','highs','growth'];
+    const bearW = ['bear','dump','crash','fall','drop','plunge','sell','fear','risk','warn','loss','ban','hack','fraud','lawsuit','sec','fine','regulation','sanctions','war','conflict','attack','bearish','lows','decline'];
+    const geoW = ['war','sanctions','tariff','election','fed','rate','inflation','gdp','recession','geopolit','opec','treasury','congress','eu','china','trump','biden','powell','military','nuclear'];
+    
+    for (const url of NEWS_FEEDS_V2) {
+      try {
+        let r = await fetch(url);
+        if (!r.ok) {
+          r = await fetch(NEWS_PROXY + encodeURIComponent(url.replace('api.rss2json.com/v1/api.json?rss_url=', '')));
+        }
+        const d = await r.json();
+        if (d?.items?.length) {
+          d.items.forEach(item => {
+            const title = item.title || '';
+            const tl = title.toLowerCase();
+            let sentiment = 'neu';
+            if (bullW.some(w => tl.includes(w))) sentiment = 'pos';
+            else if (bearW.some(w => tl.includes(w))) sentiment = 'neg';
+            const isGeo = geoW.some(w => tl.includes(w));
+            allItems.push({
+              title, link: item.link, pubDate: item.pubDate,
+              source: item.author || (url.includes('coindesk') ? 'CoinDesk' : url.includes('cryptonews') ? 'CryptoNews' : 'CoinTelegraph'),
+              thumbnail: item.thumbnail || item.enclosure?.link || '',
+              sentiment, isGeo,
+            });
+          });
+        }
+      } catch(e) { console.warn('News feed error:', e); }
+    }
+    
+    // If RSS failed, generate synthetic news from market data
+    if (allItems.length === 0) {
+      ASSETS.filter(a => !a.external).forEach(a => {
+        const px = S.prices[a.sym];
+        const sig = S.signals[a.sym]?.[S.currentTF];
+        if (!px || !sig) return;
+        const ch = px.change;
+        allItems.push({
+          title: `${a.tk} ${ch >= 0 ? 'up' : 'down'} ${Math.abs(ch).toFixed(2)}% — Signal: ${sig.signal} (${sig.conf}% confidence)`,
+          link: '#', pubDate: new Date().toISOString(),
+          source: 'WAR ROOM Analytics',
+          thumbnail: a.logo, sentiment: ch > 3 ? 'pos' : ch < -3 ? 'neg' : 'neu', isGeo: false,
+        });
+      });
+      // Add market context
+      if (S.fg) {
+        allItems.unshift({
+          title: `Crypto Fear & Greed Index at ${S.fg.val} — ${S.fg.label}. Market regime: ${REGIME.current?.replace('_',' ')||'Scanning'}`,
+          link: '#', pubDate: new Date().toISOString(),
+          source: 'Market Data', thumbnail: '', sentiment: S.fg.val > 60 ? 'pos' : S.fg.val < 40 ? 'neg' : 'neu', isGeo: false,
+        });
+      }
+    }
+    
+    const seen = new Set();
+    S.news = allItems.filter(n => {
+      const key = n.title.slice(0,50).toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key); return true;
+    });
+    S.news.sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate));
+    renderNews();
+  } catch(e) { console.warn('News fetch failed:', e); }
 };
 </script>
 </body>
