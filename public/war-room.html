@@ -2417,26 +2417,45 @@ function renderHeatmap(){
   const html=ASSETS.map(a=>{
     const px=S.prices[a.sym];if(!px)return'';
     const ch=px.change,abs=Math.abs(ch),int=Math.min(abs/12,1);
-    const bg=ch>=0?`rgba(0,229,160,${int*0.45})`:`rgba(255,62,62,${int*0.45})`;
+    const bg=ch>=0?`rgba(0,229,160,${int*0.35})`:`rgba(255,62,62,${int*0.35})`;
     const chColor=ch>=0?'var(--g)':'var(--r)';
     const sig=S.signals[a.sym]?.[S.currentTF];
     const sc=sigClass(sig?.signal);
     const ind=S.indicators[a.sym]?.[S.currentTF];
-    const rsiVal=ind?.rsi?.toFixed(0)??'--';
-    const adxVal=ind?.adx?.adx?.toFixed(0)??'--';
-    const logoHTML=a.logo?`<img src="${a.logo}" alt="${a.tk}" style="width:24px;height:24px;border-radius:50%;margin-bottom:4px" onerror="this.style.display='none'">`:'';
-    return`<div class="hm-cell" onclick="selectCard('${a.sym}');switchTab('matrix',document.querySelector('.tab-btn'))">
+    const rsiVal=ind?.rsi?.toFixed(1)??'--';
+    const adxVal=ind?.adx?.adx?.toFixed(1)??'--';
+    const volR=ind?.volRatio?.toFixed(2)??'--';
+    const logoHTML=a.logo?`<img src="${a.logo}" alt="${a.tk}" style="width:28px;height:28px;border-radius:50%;margin-bottom:6px;box-shadow:0 0 8px rgba(0,0,0,0.4)" onerror="this.style.display='none'">`:'';
+    // Raw data section
+    const rawData = `<div class="hm-raw">
+      <div style="font-family:var(--raj);font-size:10px;color:var(--g);margin-bottom:4px;letter-spacing:0.1em">📊 RAW DATA — ${a.tk}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 12px">
+        <span style="color:var(--t3)">RSI (14)</span><span style="color:${ind?.rsi<30?'var(--g)':ind?.rsi>70?'var(--r)':'var(--t)'}">${rsiVal}</span>
+        <span style="color:var(--t3)">ADX (14)</span><span style="color:${ind?.adx?.adx>25?'var(--g)':'var(--t)'}">${adxVal}</span>
+        <span style="color:var(--t3)">Vol Ratio</span><span style="color:${ind?.volRatio>2?'var(--r)':'var(--t)'}">${volR}x</span>
+        <span style="color:var(--t3)">MACD Hist</span><span style="color:${ind?.macd?.hist>0?'var(--g)':'var(--r)'}">${ind?.macd?.hist?.toFixed(5)??'--'}</span>
+        <span style="color:var(--t3)">BB Position</span><span style="color:var(--t)">${ind?.bb?((px.price-ind.bb.lower)/(ind.bb.upper-ind.bb.lower)*100).toFixed(0)+'%':'--'}</span>
+        <span style="color:var(--t3)">ATR</span><span style="color:var(--t)">$${ind?.atr?fmtP(ind.atr):'--'}</span>
+        <span style="color:var(--t3)">MFI</span><span style="color:${ind?.mfi<25?'var(--g)':ind?.mfi>75?'var(--r)':'var(--t)'}">${ind?.mfi?.toFixed(1)??'--'}</span>
+        <span style="color:var(--t3)">Stoch K</span><span style="color:${ind?.stochRSI?.k<20?'var(--g)':ind?.stochRSI?.k>80?'var(--r)':'var(--t)'}">${ind?.stochRSI?.k?.toFixed(1)??'--'}</span>
+        <span style="color:var(--t3)">Score</span><span style="color:${sig?.score>0?'var(--g)':'var(--r)'}">${sig?.score>0?'+':''}${sig?.score??0}</span>
+        <span style="color:var(--t3)">Confidence</span><span style="color:${sig?.conf>70?'var(--g)':'var(--a)'}">${sig?.conf??0}%</span>
+      </div>
+    </div>`;
+    return`<div class="hm-cell" onclick="this.classList.toggle('show-raw')">
       <div class="hm-overlay" style="background:${bg}"></div>
       ${logoHTML}
       <div class="hm-ticker" style="color:${a.color}">${a.tk}</div>
       <div class="hm-price">$${fmtP(px.price)}</div>
       <div class="hm-change" style="color:${chColor}">${ch>=0?'+':''}${ch.toFixed(2)}%</div>
-      <div style="display:flex;gap:8px;justify-content:center;margin-top:6px;font-size:9px">
-        <span style="color:var(--t3)">RSI</span><span style="color:${ind?.rsi<35?'var(--g)':ind?.rsi>65?'var(--r)':'var(--t2)'}">${rsiVal}</span>
-        <span style="color:var(--t3)">ADX</span><span style="color:${ind?.adx?.adx>25?'var(--g)':'var(--t2)'}">${adxVal}</span>
-        <span style="color:var(--t3)">Vol</span><span style="color:${ind?.volRatio>2?'var(--r)':'var(--t2)'}">${ind?.volRatio?.toFixed(1)??'--'}x</span>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:8px;font-size:9px">
+        <span style="color:var(--t3)">RSI</span><span style="color:${ind?.rsi<35?'var(--g)':ind?.rsi>65?'var(--r)':'var(--t2)'};font-weight:600">${rsiVal}</span>
+        <span style="color:var(--t3)">ADX</span><span style="color:${ind?.adx?.adx>25?'var(--g)':'var(--t2)'};font-weight:600">${adxVal}</span>
+        <span style="color:var(--t3)">Vol</span><span style="color:${ind?.volRatio>2?'var(--r)':'var(--t2)'};font-weight:600">${ind?.volRatio?.toFixed(1)??'--'}x</span>
       </div>
       <div class="hm-sig"><span class="sig-badge sig-${sc}">${sig?.signal??'WAIT'}</span></div>
+      ${rawData}
+      <div style="font-size:7px;color:var(--t3);margin-top:6px;text-align:center;opacity:0.6">اضغط لعرض البيانات الخام</div>
     </div>`;
   }).join('');
   grid.innerHTML=html||'<div class="empty-state">Waiting for price data...</div>';
