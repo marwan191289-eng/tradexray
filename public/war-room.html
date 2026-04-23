@@ -1325,8 +1325,10 @@ function generateSignal(sym,tf){
   let conf=score===0?48:Math.min(96,Math.round(38+(absScore/maxPossible)*58));
 
   // MTF alignment boost to confidence
-  if(tfsAligned>=3)conf=Math.min(96,conf+10);
-  else if(tfsAligned>=2)conf=Math.min(96,conf+5);
+  if(tfsAligned>=5)conf=Math.min(96,conf+12);
+  else if(tfsAligned>=4)conf=Math.min(96,conf+10);
+  else if(tfsAligned>=3)conf=Math.min(96,conf+7);
+  else if(tfsAligned>=2)conf=Math.min(96,conf+4);
 
   let signal;
   if     (score>=14)signal='STRONG BUY';
