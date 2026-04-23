@@ -2037,7 +2037,7 @@ function buildCard(a){
     <div class="vd-track"><div class="vd-buy" style="width:${vdBuyPct}%"></div><div class="vd-sell" style="width:${vdSellPct}%"></div><div class="vd-mid"></div></div>
     <span class="vd-pct" style="color:${vdColor}">${vdBuyPct}%B</span>
   </div>
-  <div class="chips">
+  <div class="chips" onclick="event.stopPropagation();toggleIndicatorTooltip('${a.sym}')">
     <div class="chip"><div class="chip-lbl">EMA</div><div class="chip-val ${emaDir[1]}">${emaDir[0]}</div></div>
     <div class="chip"><div class="chip-lbl">MACD</div><div class="chip-val ${macdDir[1]}">${macdDir[0]}</div></div>
     <div class="chip"><div class="chip-lbl">ICH</div><div class="chip-val ${ichDir[1]}">${ichDir[0]}</div></div>
@@ -2046,6 +2046,18 @@ function buildCard(a){
     <div class="chip"><div class="chip-lbl">CCI</div><div class="chip-val ${cciCls}">${cciVal}</div></div>
     <div class="chip"><div class="chip-lbl">MFI</div><div class="chip-val">${mfiVal}</div></div>
     <div class="chip"><div class="chip-lbl">ADX</div><div class="chip-val">${ind?.adx?.adx?.toFixed(0)??'--'}</div></div>
+  </div>
+  <div class="ind-tooltip" id="tooltip-${a.sym}">
+    <div class="ind-tooltip-title">📊 شرح المؤشرات — Indicator Guide</div>
+    <p><b style="color:var(--g)">EMA (9/21):</b> المتوسط المتحرك الأسي — ${ind?.ema9>ind?.ema21?'<span style="color:var(--g)">9 فوق 21 = اتجاه صعودي قصير</span>':'<span style="color:var(--r)">9 تحت 21 = ضغط هبوطي</span>'}. يقيس اتجاه السعر القصير والمتوسط.</p>
+    <p><b style="color:var(--a)">MACD:</b> مؤشر التقارب والتباعد — ${ind?.macd?.hist>0?'<span style="color:var(--g)">إيجابي = زخم صعودي</span>':'<span style="color:var(--r)">سلبي = زخم هبوطي</span>'}. ${ind?.macd?.bullCross?'<b style="color:var(--g)">⚡ تقاطع صعودي!</b>':ind?.macd?.bearCross?'<b style="color:var(--r)">⚡ تقاطع هبوطي!</b>':'يكشف تحولات الزخم.'}</p>
+    <p><b style="color:var(--b0)">ICH (Ichimoku):</b> سحابة إيشيموكو — ${ind?.ichimoku?.priceAboveCloud?'<span style="color:var(--g)">السعر فوق السحابة = صعودي</span>':ind?.ichimoku?.priceBelowCloud?'<span style="color:var(--r)">السعر تحت السحابة = هبوطي</span>':'<span style="color:var(--a)">داخل السحابة = تذبذب</span>'}. مؤشر شامل للاتجاه والدعم/المقاومة.</p>
+    <p><b style="color:var(--p)">SAR:</b> Parabolic SAR — ${ind?.sar?.bull?'<span style="color:var(--g)">صعودي ↑</span>':'<span style="color:var(--r)">هبوطي ↓</span>'}. يحدد نقاط الانعكاس المحتملة ومستويات وقف الخسارة.</p>
+    <p><b style="color:var(--t)">%R:</b> Williams %R (${willVal}) — ${ind?.williamsR<=-80?'<span style="color:var(--g)">تشبع بيعي شديد → احتمال ارتداد</span>':ind?.williamsR>=-20?'<span style="color:var(--r)">تشبع شرائي → احتمال تصحيح</span>':'نطاق محايد'}. يقيس قوة الزخم ومناطق التشبع.</p>
+    <p><b style="color:var(--a)">CCI:</b> مؤشر قناة السلعة (${cciVal}) — ${ind?.cci<-100?'<span style="color:var(--g)">تشبع بيعي</span>':ind?.cci>100?'<span style="color:var(--r)">تشبع شرائي</span>':'محايد'}. يكشف الانحرافات السعرية عن المتوسط.</p>
+    <p><b style="color:var(--g)">MFI:</b> مؤشر تدفق الأموال (${mfiVal}) — ${ind?.mfi<25?'<span style="color:var(--g)">تدفق خارج = فرصة شراء</span>':ind?.mfi>75?'<span style="color:var(--r)">تدفق داخل = تشبع</span>':'متوازن'}. يجمع بين السعر والحجم.</p>
+    <p><b style="color:var(--b0)">ADX:</b> مؤشر متوسط الاتجاه (${ind?.adx?.adx?.toFixed(0)??'--'}) — ${ind?.adx?.adx>40?'<b style="color:var(--g)">اتجاه قوي جداً</b>':ind?.adx?.adx>25?'اتجاه معتدل':'<span style="color:var(--t3)">ضعيف / بدون اتجاه</span>'}. لا يحدد الاتجاه بل قوته فقط.</p>
+    <p style="margin-top:6px;color:var(--t3);font-size:9px">💡 اضغط مرة أخرى لإخفاء الشرح · Click indicators again to collapse</p>
   </div>
   ${tags.length?`<div class="card-tags">${tags.join('')}</div>`:''}
   <div class="mtf-grid">${mtfCells}</div>
