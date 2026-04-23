@@ -3235,7 +3235,10 @@ function renderCorrelation() {
       <span style="color:var(--t2);font-size:10px">Inverse / independent move</span>
     </div>
     <div class="corr-info"><div class="corr-info-title">Methodology</div>
-      <span style="color:var(--t2);font-size:10px">Rolling 20-bar Pearson correlation on log returns (1H candles). Range: -1 (perfect inverse) to +1 (perfect positive). Values above ±0.6 shown in colour.</span>
+      <span style="color:var(--t2);font-size:10px;line-height:1.7">Rolling 20-bar Pearson correlation on log returns (1H candles).<br>
+      <b style="color:var(--g)">+1.0</b> = تطابق تام (يتحركان معاً) · <b style="color:var(--r)">-1.0</b> = عكسي تام (يتحركان بعكس بعض)<br>
+      <b style="color:var(--a)">0</b> = لا علاقة · <b>أعلى من ±0.6</b> = ارتباط قوي ملوّن<br>
+      <span style="color:var(--t3)">💡 استخدم الارتباط لتنويع المحفظة: اختر أصولاً ذات ارتباط منخفض لتقليل المخاطر. تجنّب فتح صفقات متشابهة على أصول مرتبطة بقوة.</span></span>
     </div>
   </div>`;
 
