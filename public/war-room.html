@@ -2708,33 +2708,7 @@ async function pollExternalAssets(){
   }
 }
 
-async function init(){
-  tickClock();setInterval(tickClock,1000);
-  await initKlines();
-  await pollExternalAssets();
-  DQ.restLastOk = Date.now();
-  // Run a first regime + recompute signals through the wrapper so initial
-  // render reflects calibrated confidence.
-  classifyRegime();
-  ASSETS.forEach(a => {
-    if (a.external) return;
-    ['5m','15m','1h','4h','1d'].forEach(tf => {
-      if (S.indicators[a.sym]?.[tf]) S.signals[a.sym][tf] = generateSignal(a.sym, tf);
-    });
-  });
-  renderCards();renderDetail(S.selected);updateCmdStats();
-  renderHeatmap();renderRadar();
-  connectWS();
-  fetchFG();fetchMarket();fetchNews();
-  setInterval(async ()=>{ await refreshKlines(); DQ.restLastOk = Date.now(); }, 5*60*1000);
-  setInterval(pollExternalAssets, 90*1000); // CoinGecko free tier: ~30 calls/min
-  setInterval(fetchFG,60*60*1000);
-  setInterval(fetchMarket,5*60*1000);
-  setInterval(fetchNews,15*60*1000);
-  setInterval(()=>{renderHeatmap();renderRadar();},30*1000);
-  // Data quality + regime tick every 3s
-  setInterval(()=>{ dqEvaluate(); renderRegimeCell(); }, 3000);
-}
+// (init function defined at bottom of file)
 
 // ═══════════════════════════════════════════════════════════
 // ── VOLUME DELTA ────────────────────────────────────────────
