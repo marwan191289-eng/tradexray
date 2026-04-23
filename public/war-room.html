@@ -1465,54 +1465,127 @@ function generateSignal(sym,tf){
 }
 
 // ═══════════════════════════════════════════════════════════
-// API LAYER
+// API LAYER — PARALLEL FETCHING WITH RETRY
 // ═══════════════════════════════════════════════════════════
 
-async function fetchKlines(sym,interval='1h',limit=100){
-  try{
-    const r=await fetch(`${BREST}/klines?symbol=${sym}&interval=${interval}&limit=${limit}`);
-    if(!r.ok)return null;
-    const d=await r.json();
-    return d.map(k=>({t:k[0],o:+k[1],h:+k[2],l:+k[3],c:+k[4],v:+k[5]}));
-  }catch{return null;}
+const BINANCE_MIRRORS = [
+  'https://api.binance.com/api/v3',
+  'https://api1.binance.com/api/v3',
+  'https://api2.binance.com/api/v3',
+  'https://api3.binance.com/api/v3',
+  'https://api4.binance.com/api/v3',
+];
+let _activeMirror = 0;
+
+async function fetchKlines(sym,interval='1h',limit=100, retries=2){
+  for(let attempt=0; attempt<=retries; attempt++){
+    const base = BINANCE_MIRRORS[(_activeMirror + attempt) % BINANCE_MIRRORS.length];
+    try{
+      const controller = new AbortController();
+      const timeout = setTimeout(()=>controller.abort(), 8000);
+      const r=await fetch(`${base}/klines?symbol=${sym}&interval=${interval}&limit=${limit}`, {signal:controller.signal});
+      clearTimeout(timeout);
+      if(!r.ok){ if(r.status===429){await new Promise(r=>setTimeout(r,1000*(attempt+1)));continue;} continue; }
+      const d=await r.json();
+      if(!Array.isArray(d)||!d.length) continue;
+      _activeMirror = (_activeMirror + attempt) % BINANCE_MIRRORS.length;
+      return d.map(k=>({t:k[0],o:+k[1],h:+k[2],l:+k[3],c:+k[4],v:+k[5]}));
+    }catch(e){
+      if(attempt<retries) await new Promise(r=>setTimeout(r,500*(attempt+1)));
+    }
+  }
+  console.warn(`fetchKlines failed: ${sym} ${interval}`);
+  return null;
+}
+
+// Fetch a batch of promises with concurrency limit
+async function fetchBatch(tasks, concurrency=4){
+  const results=[];
+  let i=0;
+  async function worker(){
+    while(i<tasks.length){
+      const idx=i++;
+      results[idx]=await tasks[idx]();
+    }
+  }
+  await Promise.all(Array.from({length:Math.min(concurrency,tasks.length)},()=>worker()));
+  return results;
 }
 
 async function initKlines(){
   const tfs=['5m','15m','1h','4h','1d','1w','1M'];
-  for(const a of ASSETS){
-    S.klines[a.sym]={};S.indicators[a.sym]={};S.signals[a.sym]={};
-    if(a.external) continue; // External assets (CoinGecko) handled separately
-    for(const tf of tfs){
+  const nonExtAssets=ASSETS.filter(a=>!a.external);
+  
+  // Init state
+  ASSETS.forEach(a=>{S.klines[a.sym]={};S.indicators[a.sym]={};S.signals[a.sym]={};});
+  
+  // Build task list: fetch all assets × all timeframes
+  const tasks=[];
+  nonExtAssets.forEach(a=>{
+    tfs.forEach(tf=>{
       const limit=tf==='5m'?60:tf==='15m'?100:tf==='4h'?100:tf==='1d'?200:tf==='1w'?100:tf==='1M'?60:120;
-      const k=await fetchKlines(a.sym,tf,limit);
-      if(k){
-        S.klines[a.sym][tf]=k;
-        S.indicators[a.sym][tf]=calcAll(a.sym,tf);
-        S.signals[a.sym][tf]=generateSignal(a.sym,tf);
-      }
-    }
+      tasks.push(async ()=>{
+        const k=await fetchKlines(a.sym,tf,limit);
+        return {sym:a.sym,tf,k};
+      });
+    });
+  });
+  
+  // Update loading status
+  const ldTxt=document.querySelector('.ld-txt');
+  let done=0;
+  const origTasks=tasks.map((fn,idx)=>async ()=>{
+    const r=await fn();
+    done++;
+    if(ldTxt)ldTxt.textContent=`Loading data... ${done}/${tasks.length} (${((done/tasks.length)*100).toFixed(0)}%)`;
+    return r;
+  });
+  
+  // Run with concurrency of 6 (Binance allows burst)
+  const results=await fetchBatch(origTasks, 6);
+  
+  // Process results
+  results.forEach(r=>{
+    if(!r||!r.k) return;
+    S.klines[r.sym][r.tf]=r.k;
+    S.indicators[r.sym][r.tf]=calcAll(r.sym,r.tf);
+    S.signals[r.sym][r.tf]=generateSignal(r.sym,r.tf);
+  });
+  
+  // Build history from 1h klines
+  nonExtAssets.forEach(a=>{
     if(S.klines[a.sym]['1h'])
       S.history[a.sym]=S.klines[a.sym]['1h'].slice(-80).map(k=>k.c);
-  }
+  });
+  
+  // Log results
+  const loaded=nonExtAssets.filter(a=>Object.keys(S.klines[a.sym]).length>0).length;
+  console.log(`initKlines: ${loaded}/${nonExtAssets.length} assets loaded`);
 }
 
 async function refreshKlines(){
   const tfs=['5m','15m','1h','4h','1d','1w','1M'];
-  for(const a of ASSETS){
-    if(a.external) continue;
-    for(const tf of tfs){
-      const fresh=await fetchKlines(a.sym,tf,8);
-      if(!fresh||!S.klines[a.sym]?.[tf])continue;
-      fresh.forEach(nc=>{
-        const idx=S.klines[a.sym][tf].findIndex(k=>k.t===nc.t);
-        if(idx>=0)S.klines[a.sym][tf][idx]=nc;
-        else S.klines[a.sym][tf].push(nc);
+  const tasks=[];
+  ASSETS.filter(a=>!a.external).forEach(a=>{
+    tfs.forEach(tf=>{
+      tasks.push(async ()=>{
+        const fresh=await fetchKlines(a.sym,tf,8,1);
+        return {sym:a.sym,tf,fresh};
       });
-      if(S.klines[a.sym][tf].length>250)S.klines[a.sym][tf].splice(0,S.klines[a.sym][tf].length-250);
-      S.indicators[a.sym][tf]=calcAll(a.sym,tf);
-      S.signals[a.sym][tf]=generateSignal(a.sym,tf);
-    }
-  }
+    });
+  });
+  const results=await fetchBatch(tasks,6);
+  results.forEach(r=>{
+    if(!r||!r.fresh||!S.klines[r.sym]?.[r.tf]) return;
+    r.fresh.forEach(nc=>{
+      const idx=S.klines[r.sym][r.tf].findIndex(k=>k.t===nc.t);
+      if(idx>=0)S.klines[r.sym][r.tf][idx]=nc;
+      else S.klines[r.sym][r.tf].push(nc);
+    });
+    if(S.klines[r.sym][r.tf].length>250)S.klines[r.sym][r.tf].splice(0,S.klines[r.sym][r.tf].length-250);
+    S.indicators[r.sym][r.tf]=calcAll(r.sym,r.tf);
+    S.signals[r.sym][r.tf]=generateSignal(r.sym,r.tf);
+  });
 }
 
 async function fetchFG(){
