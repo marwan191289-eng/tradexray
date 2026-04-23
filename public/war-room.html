@@ -1601,14 +1601,150 @@ function pushAlert(sym,sig,price,tf){
 
 function playAlertSound(sig){
   try{
-    const ac=new AudioContext();
-    const o=ac.createOscillator(),g=ac.createGain();
-    o.connect(g);g.connect(ac.destination);
-    o.frequency.value=sig.includes('BUY')?800:400;
-    g.gain.setValueAtTime(0.08,ac.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.4);
-    o.start();o.stop(ac.currentTime+0.4);
-  }catch{}
+    const isBuy = sig.includes('BUY');
+    const isStrong = sig.includes('STRONG');
+    
+    // Only do full 5s alarm for STRONG signals
+    if (!isStrong) {
+      // Quick beep for normal BUY/SELL
+      const ac=new AudioContext();
+      const o=ac.createOscillator(),g=ac.createGain();
+      o.connect(g);g.connect(ac.destination);
+      o.frequency.value=isBuy?800:400;
+      g.gain.setValueAtTime(0.08,ac.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.4);
+      o.start();o.stop(ac.currentTime+0.4);
+      return;
+    }
+
+    // ── VISUAL FLASH OVERLAY ──
+    let flash = document.getElementById('alertFlashOverlay');
+    if (!flash) {
+      flash = document.createElement('div');
+      flash.id = 'alertFlashOverlay';
+      flash.style.cssText = 'position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:0;transition:opacity 0.1s';
+      document.body.appendChild(flash);
+    }
+    const flashColor = isBuy 
+      ? 'radial-gradient(ellipse at center, rgba(0,229,160,0.25) 0%, rgba(0,229,160,0.08) 50%, transparent 80%)'
+      : 'radial-gradient(ellipse at center, rgba(255,62,62,0.30) 0%, rgba(255,62,62,0.10) 50%, transparent 80%)';
+    flash.style.background = flashColor;
+    
+    let flashCount = 0;
+    const maxFlashes = 10; // 10 flashes over 5 seconds
+    const flashInterval = setInterval(() => {
+      flash.style.opacity = flash.style.opacity === '0' ? '1' : '0';
+      flashCount++;
+      if (flashCount >= maxFlashes * 2) {
+        clearInterval(flashInterval);
+        flash.style.opacity = '0';
+      }
+    }, 250);
+
+    // ── AUDIO: 5 seconds ──
+    const ac = new AudioContext();
+    const duration = 5;
+
+    if (isBuy) {
+      // ── STRONG BUY: Ascending triumphant chimes ──
+      const masterGain = ac.createGain();
+      masterGain.gain.value = 0.12;
+      masterGain.connect(ac.destination);
+
+      const chimeNotes = [523, 659, 784, 1047, 784, 1047, 1319, 1568]; // C5-G5-C6 arpeggios
+      chimeNotes.forEach((freq, i) => {
+        const startTime = i * 0.6;
+        if (startTime >= duration) return;
+        
+        const osc = ac.createOscillator();
+        const env = ac.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        osc.connect(env);
+        env.connect(masterGain);
+        
+        env.gain.setValueAtTime(0, ac.currentTime + startTime);
+        env.gain.linearRampToValueAtTime(0.8, ac.currentTime + startTime + 0.05);
+        env.gain.exponentialRampToValueAtTime(0.01, ac.currentTime + startTime + 0.55);
+        
+        osc.start(ac.currentTime + startTime);
+        osc.stop(ac.currentTime + startTime + 0.6);
+        
+        // Harmonic shimmer
+        const h = ac.createOscillator();
+        const hg = ac.createGain();
+        h.type = 'sine';
+        h.frequency.value = freq * 2;
+        h.connect(hg);
+        hg.connect(masterGain);
+        hg.gain.setValueAtTime(0, ac.currentTime + startTime);
+        hg.gain.linearRampToValueAtTime(0.2, ac.currentTime + startTime + 0.05);
+        hg.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + startTime + 0.5);
+        h.start(ac.currentTime + startTime);
+        h.stop(ac.currentTime + startTime + 0.55);
+      });
+      
+      setTimeout(() => ac.close(), (duration + 1) * 1000);
+      
+    } else {
+      // ── STRONG SELL: Nuclear war siren ──
+      const masterGain = ac.createGain();
+      masterGain.gain.value = 0.15;
+      masterGain.connect(ac.destination);
+
+      // Main siren: sweeping frequency
+      const siren = ac.createOscillator();
+      const sirenGain = ac.createGain();
+      siren.type = 'sawtooth';
+      siren.connect(sirenGain);
+      sirenGain.connect(masterGain);
+      sirenGain.gain.value = 0.6;
+
+      // Siren sweep: 200Hz → 800Hz → 200Hz cycling over 1.2s periods
+      const now = ac.currentTime;
+      for (let t = 0; t < duration; t += 1.2) {
+        siren.frequency.setValueAtTime(200, now + t);
+        siren.frequency.linearRampToValueAtTime(800, now + t + 0.6);
+        siren.frequency.linearRampToValueAtTime(200, now + t + 1.2);
+      }
+      siren.start(now);
+      siren.stop(now + duration);
+
+      // Sub-bass rumble
+      const bass = ac.createOscillator();
+      const bassGain = ac.createGain();
+      bass.type = 'sine';
+      bass.frequency.value = 55;
+      bass.connect(bassGain);
+      bassGain.connect(masterGain);
+      bassGain.gain.value = 0.4;
+      bass.start(now);
+      bass.stop(now + duration);
+
+      // Distortion/noise layer for "war" feel
+      const noise = ac.createOscillator();
+      const noiseGain = ac.createGain();
+      noise.type = 'square';
+      noise.frequency.value = 80;
+      noise.connect(noiseGain);
+      noiseGain.connect(masterGain);
+      noiseGain.gain.value = 0.15;
+      // Pulse the noise
+      for (let t = 0; t < duration; t += 0.5) {
+        noiseGain.gain.setValueAtTime(0.15, now + t);
+        noiseGain.gain.linearRampToValueAtTime(0.02, now + t + 0.25);
+        noiseGain.gain.linearRampToValueAtTime(0.15, now + t + 0.5);
+      }
+      noise.start(now);
+      noise.stop(now + duration);
+
+      // Fade out at the end
+      masterGain.gain.setValueAtTime(0.15, now + duration - 0.5);
+      masterGain.gain.linearRampToValueAtTime(0, now + duration);
+
+      setTimeout(() => ac.close(), (duration + 1) * 1000);
+    }
+  }catch(e){console.warn('Alert sound error:',e)}
 }
 
 function renderAlerts(){
