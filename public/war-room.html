@@ -2678,11 +2678,12 @@ async function pollExternalAssets(){
       const sparkline = coin.sparkline_in_7d?.price || [];
       // Inject into S.prices in same shape Binance ticker uses
       S.prices[a.sym] = {
-        last: price,
+        price: price,
         change,
         high: coin.high_24h ?? price,
         low: coin.low_24h ?? price,
-        volume: coin.total_volume ?? 0,
+        vol: coin.total_volume ?? 0,
+        open: price / (1 + change/100),
         marketCap: coin.market_cap ?? 0,
         rank: coin.market_cap_rank ?? null,
         external: true,
