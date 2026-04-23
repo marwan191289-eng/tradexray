@@ -1786,11 +1786,13 @@ function buildCard(a){
   if(sig?.counterTrend)tags.push(`<span class="ctag ctag-bear">⚠CT</span>`);
   if(sig?.regime && sig.regime !== 'UNKNOWN')tags.push(`<span class="ctag ctag-${sig.regime.includes('BULL')?'bull':sig.regime.includes('BEAR')?'bear':'neu'}" style="font-size:6px">${sig.regime.replace('_',' ').slice(0,8)}</span>`);
 
+  const logoHTML = a.logo ? `<img class="card-logo" src="${a.logo}" alt="${a.tk}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="card-icon" style="border-color:${a.color}55;color:${a.color};display:none">${a.tk.slice(0,4)}</div>` : `<div class="card-icon" style="border-color:${a.color}55;color:${a.color}">${a.tk.slice(0,4)}</div>`;
+
   return`<div class="asset-card${selCls}" id="card-${a.sym}" onclick="selectCard('${a.sym}')">
   <div class="card-accent" style="background:${accentColor}"></div>
   <div class="card-top">
     <div class="card-assetinfo">
-      <div class="card-icon" style="border-color:${a.color}55;color:${a.color}">${a.tk.slice(0,4)}</div>
+      ${logoHTML}
       <div><div class="card-ticker">${a.tk}</div><div class="card-name">${a.name}</div></div>
     </div>
     <span class="sig-badge sig-${sc}">${sig?.signal??'WAIT'}</span>
