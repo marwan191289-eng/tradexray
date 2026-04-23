@@ -529,6 +529,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
   <button class="tab-btn" onclick="switchTab('perf',this)">📈 Performance</button>
   <button class="tab-btn" onclick="switchTab('news',this)">📰 News</button>
   <button class="tab-btn" onclick="switchTab('briefing',this)">🤖 AI Brief</button>
+  <button class="tab-btn" onclick="switchTab('chart',this)">📊 SuperChart</button>
 </div>
 
 <!-- TIMEFRAME SELECTOR -->
@@ -700,6 +701,43 @@ The briefing includes:
 
 Available in Arabic and English.</div>
       </div>
+    </div>
+
+    <!-- TRADINGVIEW SUPERCHART TAB -->
+    <div class="tab-content" id="tab-chart">
+      <div class="section-bar">
+        <span class="section-title">TradingView SuperChart</span>
+        <span class="live-tag" style="background:rgba(74,171,255,0.1);border-color:rgba(74,171,255,0.25);color:var(--b0)">LIVE CHART</span>
+      </div>
+      <div class="chart-controls" style="display:flex;gap:8px;padding:8px 12px;background:var(--bg2);border-bottom:1px solid var(--br);flex-wrap:wrap;align-items:center">
+        <select id="tvSymbol" onchange="loadTVChart()" style="background:var(--bg3);color:var(--t);border:1px solid var(--br2);padding:5px 10px;border-radius:4px;font-family:var(--mono);font-size:11px;cursor:pointer">
+          <option value="BINANCE:BTCUSDT">BTC/USDT</option>
+          <option value="BINANCE:ETHUSDT">ETH/USDT</option>
+          <option value="BINANCE:SOLUSDT">SOL/USDT</option>
+          <option value="BINANCE:BNBUSDT">BNB/USDT</option>
+          <option value="BINANCE:XRPUSDT">XRP/USDT</option>
+          <option value="BINANCE:ADAUSDT">ADA/USDT</option>
+          <option value="BINANCE:DOGEUSDT">DOGE/USDT</option>
+          <option value="BINANCE:AVAXUSDT">AVAX/USDT</option>
+          <option value="BINANCE:AAVEUSDT">AAVE/USDT</option>
+          <option value="BINANCE:DOTUSDT">DOT/USDT</option>
+        </select>
+        <div style="display:flex;gap:4px">
+          <button class="tv-tf-btn active" onclick="setTVInterval('1',this)">1m</button>
+          <button class="tv-tf-btn" onclick="setTVInterval('5',this)">5m</button>
+          <button class="tv-tf-btn" onclick="setTVInterval('15',this)">15m</button>
+          <button class="tv-tf-btn" onclick="setTVInterval('60',this)">1H</button>
+          <button class="tv-tf-btn" onclick="setTVInterval('240',this)">4H</button>
+          <button class="tv-tf-btn" onclick="setTVInterval('D',this)">1D</button>
+          <button class="tv-tf-btn" onclick="setTVInterval('W',this)">1W</button>
+          <button class="tv-tf-btn" onclick="setTVInterval('M',this)">1M</button>
+        </div>
+        <div style="display:flex;gap:4px">
+          <button class="tv-tf-btn" onclick="setTVTheme('dark',this)" style="color:var(--b0)">🌙 Dark</button>
+          <button class="tv-tf-btn" onclick="setTVTheme('light',this)" style="color:var(--a)">☀️ Light</button>
+        </div>
+      </div>
+      <div id="tvChartContainer" style="width:100%;height:calc(100vh - 200px);min-height:500px;background:var(--bg)"></div>
     </div>
 
   </div>
@@ -3545,8 +3583,95 @@ init();
   <div style="margin-top:6px;font-size:9px;color:var(--t3);letter-spacing:0.1em;font-family:var(--raj)">WAR ROOM · Decision Intelligence Platform · v2.0</div>
 </div>
 <style>
-@keyframes devShine{0%{transform:translateX(-100%)}50%{transform:translateX(100%)}100%{transform:translateX(100%)}}
-@keyframes devGlow{0%{text-shadow:0 0 10px rgba(0,229,160,0.4),0 0 20px rgba(0,229,160,0.2)}100%{text-shadow:0 0 20px rgba(0,229,160,0.8),0 0 40px rgba(0,229,160,0.4),0 0 60px rgba(0,229,160,0.2)}}
+.tv-tf-btn{background:var(--bg3);color:var(--t2);border:1px solid var(--br);padding:4px 10px;border-radius:4px;font-family:var(--mono);font-size:10px;cursor:pointer;transition:all 0.2s;font-weight:600}
+.tv-tf-btn:hover{color:var(--t);border-color:var(--br2)}
+.tv-tf-btn.active{color:var(--g);border-color:var(--g);background:rgba(0,229,160,0.08)}
 </style>
+<script>
+// ═══════════════════════════════════════════════════════════
+// TRADINGVIEW SUPERCHART
+// ═══════════════════════════════════════════════════════════
+let tvWidget = null;
+let tvInterval = '1';
+let tvTheme = 'dark';
+
+function loadTVChart() {
+  const container = document.getElementById('tvChartContainer');
+  if (!container) return;
+  const symbol = document.getElementById('tvSymbol')?.value || 'BINANCE:BTCUSDT';
+  
+  container.innerHTML = '';
+  
+  const widgetConfig = {
+    "autosize": true,
+    "symbol": symbol,
+    "interval": tvInterval,
+    "timezone": "Etc/UTC",
+    "theme": tvTheme,
+    "style": "1",
+    "locale": "ar_AE",
+    "enable_publishing": false,
+    "allow_symbol_change": true,
+    "hide_top_toolbar": false,
+    "hide_legend": false,
+    "save_image": true,
+    "calendar": true,
+    "hide_volume": false,
+    "support_host": "https://www.tradingview.com",
+    "container_id": "tvChartContainer",
+    "studies": [
+      "MASimple@tv-basicstudies",
+      "RSI@tv-basicstudies",
+      "MACD@tv-basicstudies",
+      "BB@tv-basicstudies"
+    ],
+    "show_popup_button": true,
+    "popup_width": "1000",
+    "popup_height": "650",
+    "withdateranges": true,
+    "details": true,
+    "hotlist": true
+  };
+
+  const script = document.createElement('script');
+  script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
+  script.type = 'text/javascript';
+  script.async = true;
+  script.textContent = JSON.stringify(widgetConfig);
+
+  const widgetDiv = document.createElement('div');
+  widgetDiv.className = 'tradingview-widget-container';
+  widgetDiv.style.cssText = 'height:100%;width:100%';
+  
+  const innerDiv = document.createElement('div');
+  innerDiv.className = 'tradingview-widget-container__widget';
+  innerDiv.style.cssText = 'height:100%;width:100%';
+  
+  widgetDiv.appendChild(innerDiv);
+  widgetDiv.appendChild(script);
+  container.appendChild(widgetDiv);
+}
+
+function setTVInterval(interval, btn) {
+  tvInterval = interval;
+  document.querySelectorAll('.chart-controls .tv-tf-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  loadTVChart();
+}
+
+function setTVTheme(theme) {
+  tvTheme = theme;
+  loadTVChart();
+}
+
+// Auto-load chart when tab is switched to chart
+const _origSwitchTab2 = switchTab;
+switchTab = function(tab, btn) {
+  _origSwitchTab2(tab, btn);
+  if (tab === 'chart' && !document.getElementById('tvChartContainer')?.children.length) {
+    setTimeout(loadTVChart, 100);
+  }
+};
+</script>
 </body>
 </html>
