@@ -3,9 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WAR ROOM ∷ Decision Intelligence for Crypto Traders</title>
-<meta name="description" content="Probability-driven crypto market intelligence: real-time data, multi-layer signal scoring, regime-filtered analysis, transparent confidence, and explicit risk management. Educational tool — not financial advice.">
+<title>WAR ROOM — Crypto Trading Intelligence Platform</title>
+<meta name="description" content="Real-time probability-driven crypto market intelligence: multi-layer signal scoring, regime-filtered analysis, 20+ technical indicators, and ATR-based risk management. By Marwan Negm.">
 <meta name="robots" content="index,follow">
+<link rel="icon" href="/logo.png" type="image/png">
+<link rel="apple-touch-icon" href="/logo.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="WAR ROOM — Crypto Trading Intelligence Platform">
+<meta property="og:description" content="Real-time crypto signals with 20+ indicators, multi-timeframe analysis, and AI-powered tactical briefings.">
+<meta property="og:image" content="/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="WAR ROOM — Crypto Trading Intelligence">
+<meta name="twitter:image" content="/og-image.jpg">
+<meta name="theme-color" content="#010308">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
@@ -34,10 +46,11 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 ::-webkit-scrollbar-thumb{background:var(--gd);border-radius:2px}
 
 /* NAV */
-.nav{position:sticky;top:0;z-index:500;background:rgba(1,3,8,0.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--br2);height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem;gap:1rem}
+.nav{position:sticky;top:0;z-index:500;background:linear-gradient(180deg,rgba(1,3,8,0.98),rgba(5,10,20,0.96));backdrop-filter:blur(24px);border-bottom:1px solid var(--br2);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;gap:1rem;box-shadow:0 2px 20px rgba(0,0,0,0.5)}
 .nav-brand{display:flex;align-items:center;gap:12px;flex-shrink:0}
-.nav-logo{font-family:var(--orb);font-size:16px;font-weight:900;letter-spacing:0.18em;color:var(--g);text-transform:uppercase;white-space:nowrap;text-shadow:0 0 20px rgba(0,229,160,0.4)}
-.nav-sep{width:1px;height:20px;background:var(--br2)}
+.nav-logo-img{width:32px;height:32px;border-radius:6px;object-fit:contain;filter:drop-shadow(0 0 8px rgba(0,229,160,0.3))}
+.nav-logo{font-family:var(--orb);font-size:17px;font-weight:900;letter-spacing:0.2em;color:var(--g);text-transform:uppercase;white-space:nowrap;text-shadow:0 0 24px rgba(0,229,160,0.5),0 0 60px rgba(0,229,160,0.15)}
+.nav-sep{width:1px;height:22px;background:linear-gradient(180deg,transparent,var(--br2),transparent)}
 .nav-sub{font-size:9px;color:var(--t2);letter-spacing:0.14em;text-transform:uppercase;font-family:var(--raj)}
 .nav-ticker{flex:1;overflow:hidden;mask-image:linear-gradient(90deg,transparent,black 10%,black 90%,transparent)}
 .ticker-wrap{display:flex;gap:2rem;animation:tickerScroll 40s linear infinite;white-space:nowrap;width:max-content}
@@ -61,6 +74,13 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .alert-bell:hover{opacity:1}
 .alert-bell .badge{position:absolute;top:-2px;right:-2px;background:var(--r);color:white;font-size:7px;font-family:var(--raj);font-weight:700;padding:1px 3px;border-radius:2px;min-width:14px;text-align:center;display:none}
 .alert-bell .badge.show{display:block}
+
+/* INDICATOR TOOLTIP */
+.ind-tooltip{display:none;background:var(--bg3);border:1px solid var(--br2);padding:10px 12px;margin-top:8px;font-size:10px;color:var(--t2);line-height:1.7;border-left:3px solid var(--g);animation:tooltipIn 0.2s ease}
+.ind-tooltip.show{display:block}
+@keyframes tooltipIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.ind-tooltip-title{font-family:var(--raj);font-size:11px;font-weight:700;color:var(--g);margin-bottom:4px;letter-spacing:0.08em}
+.ind-tooltip p{margin:3px 0;color:var(--t2)}
 
 /* COMMAND BAR */
 .cmd{display:grid;grid-template-columns:repeat(8,1fr);border-bottom:1px solid var(--br2);background:var(--bg2);position:relative;z-index:10}
@@ -438,6 +458,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 <!-- NAV -->
 <nav class="nav">
   <div class="nav-brand">
+    <img class="nav-logo-img" src="/logo.png" alt="WAR ROOM" onerror="this.style.display='none'">
     <div class="nav-logo">WAR ROOM</div>
     <div class="nav-sep"></div>
     <div class="nav-sub">Decision Intelligence · Educational Use Only</div>
@@ -2016,7 +2037,7 @@ function buildCard(a){
     <div class="vd-track"><div class="vd-buy" style="width:${vdBuyPct}%"></div><div class="vd-sell" style="width:${vdSellPct}%"></div><div class="vd-mid"></div></div>
     <span class="vd-pct" style="color:${vdColor}">${vdBuyPct}%B</span>
   </div>
-  <div class="chips">
+  <div class="chips" onclick="event.stopPropagation();toggleIndicatorTooltip('${a.sym}')">
     <div class="chip"><div class="chip-lbl">EMA</div><div class="chip-val ${emaDir[1]}">${emaDir[0]}</div></div>
     <div class="chip"><div class="chip-lbl">MACD</div><div class="chip-val ${macdDir[1]}">${macdDir[0]}</div></div>
     <div class="chip"><div class="chip-lbl">ICH</div><div class="chip-val ${ichDir[1]}">${ichDir[0]}</div></div>
@@ -2025,6 +2046,18 @@ function buildCard(a){
     <div class="chip"><div class="chip-lbl">CCI</div><div class="chip-val ${cciCls}">${cciVal}</div></div>
     <div class="chip"><div class="chip-lbl">MFI</div><div class="chip-val">${mfiVal}</div></div>
     <div class="chip"><div class="chip-lbl">ADX</div><div class="chip-val">${ind?.adx?.adx?.toFixed(0)??'--'}</div></div>
+  </div>
+  <div class="ind-tooltip" id="tooltip-${a.sym}">
+    <div class="ind-tooltip-title">📊 شرح المؤشرات — Indicator Guide</div>
+    <p><b style="color:var(--g)">EMA (9/21):</b> المتوسط المتحرك الأسي — ${ind?.ema9>ind?.ema21?'<span style="color:var(--g)">9 فوق 21 = اتجاه صعودي قصير</span>':'<span style="color:var(--r)">9 تحت 21 = ضغط هبوطي</span>'}. يقيس اتجاه السعر القصير والمتوسط.</p>
+    <p><b style="color:var(--a)">MACD:</b> مؤشر التقارب والتباعد — ${ind?.macd?.hist>0?'<span style="color:var(--g)">إيجابي = زخم صعودي</span>':'<span style="color:var(--r)">سلبي = زخم هبوطي</span>'}. ${ind?.macd?.bullCross?'<b style="color:var(--g)">⚡ تقاطع صعودي!</b>':ind?.macd?.bearCross?'<b style="color:var(--r)">⚡ تقاطع هبوطي!</b>':'يكشف تحولات الزخم.'}</p>
+    <p><b style="color:var(--b0)">ICH (Ichimoku):</b> سحابة إيشيموكو — ${ind?.ichimoku?.priceAboveCloud?'<span style="color:var(--g)">السعر فوق السحابة = صعودي</span>':ind?.ichimoku?.priceBelowCloud?'<span style="color:var(--r)">السعر تحت السحابة = هبوطي</span>':'<span style="color:var(--a)">داخل السحابة = تذبذب</span>'}. مؤشر شامل للاتجاه والدعم/المقاومة.</p>
+    <p><b style="color:var(--p)">SAR:</b> Parabolic SAR — ${ind?.sar?.bull?'<span style="color:var(--g)">صعودي ↑</span>':'<span style="color:var(--r)">هبوطي ↓</span>'}. يحدد نقاط الانعكاس المحتملة ومستويات وقف الخسارة.</p>
+    <p><b style="color:var(--t)">%R:</b> Williams %R (${willVal}) — ${ind?.williamsR<=-80?'<span style="color:var(--g)">تشبع بيعي شديد → احتمال ارتداد</span>':ind?.williamsR>=-20?'<span style="color:var(--r)">تشبع شرائي → احتمال تصحيح</span>':'نطاق محايد'}. يقيس قوة الزخم ومناطق التشبع.</p>
+    <p><b style="color:var(--a)">CCI:</b> مؤشر قناة السلعة (${cciVal}) — ${ind?.cci<-100?'<span style="color:var(--g)">تشبع بيعي</span>':ind?.cci>100?'<span style="color:var(--r)">تشبع شرائي</span>':'محايد'}. يكشف الانحرافات السعرية عن المتوسط.</p>
+    <p><b style="color:var(--g)">MFI:</b> مؤشر تدفق الأموال (${mfiVal}) — ${ind?.mfi<25?'<span style="color:var(--g)">تدفق خارج = فرصة شراء</span>':ind?.mfi>75?'<span style="color:var(--r)">تدفق داخل = تشبع</span>':'متوازن'}. يجمع بين السعر والحجم.</p>
+    <p><b style="color:var(--b0)">ADX:</b> مؤشر متوسط الاتجاه (${ind?.adx?.adx?.toFixed(0)??'--'}) — ${ind?.adx?.adx>40?'<b style="color:var(--g)">اتجاه قوي جداً</b>':ind?.adx?.adx>25?'اتجاه معتدل':'<span style="color:var(--t3)">ضعيف / بدون اتجاه</span>'}. لا يحدد الاتجاه بل قوته فقط.</p>
+    <p style="margin-top:6px;color:var(--t3);font-size:9px">💡 اضغط مرة أخرى لإخفاء الشرح · Click indicators again to collapse</p>
   </div>
   ${tags.length?`<div class="card-tags">${tags.join('')}</div>`:''}
   <div class="mtf-grid">${mtfCells}</div>
@@ -2080,6 +2113,11 @@ function patchCard(sym,prevP){
   const sp=document.getElementById('sp-'+sym);
   if(sp&&S.history[sym])drawSpark(sp,S.history[sym]);
   if(sym===S.selected)renderDetail(sym);
+}
+
+function toggleIndicatorTooltip(sym){
+  const el=document.getElementById('tooltip-'+sym);
+  if(el)el.classList.toggle('show');
 }
 
 function selectCard(sym){
@@ -2189,13 +2227,18 @@ function renderDetail(sym){
     const rr=Math.abs((tp1-price)/(price-sl));
     targetsHTML=`<div class="ind-section">
       <div class="ind-section-title">Risk Management (ATR-Based)</div>
+      <div style="font-size:10px;color:var(--t2);margin-bottom:8px;line-height:1.6;padding:6px 8px;background:var(--bg4);border-left:2px solid var(--a)">
+        <b style="color:var(--a)">TP = Take Profit</b> (أهداف الربح) — السعر المتوقع للخروج بربح.<br>
+        <b style="color:var(--r)">SL = Stop Loss</b> (وقف الخسارة) — نقطة الخروج لتقليل الخسائر.<br>
+        <b style="color:var(--t)">ATR</b> = متوسط المدى الحقيقي — وحدة قياس التقلب. كلما زاد ATR زادت المسافة بين النقاط.
+      </div>
       <div class="targets-grid">
-        <div class="tg-cell"><div class="tg-label">TP1 (1.5 ATR)</div><div class="tg-val ${sUp?'bull':'bear'}">$${fmtP(tp1)}</div></div>
-        <div class="tg-cell"><div class="tg-label">TP2 (2.5 ATR)</div><div class="tg-val ${sUp?'bull':'bear'}">$${fmtP(tp2)}</div></div>
-        <div class="tg-cell"><div class="tg-label">TP3 (4.0 ATR)</div><div class="tg-val ${sUp?'bull':'bear'}">$${fmtP(tp3)}</div></div>
-        <div class="tg-cell"><div class="tg-label">Stop Loss</div><div class="tg-val ${sUp?'bear':'bull'}">$${fmtP(sl)}</div></div>
-        <div class="tg-cell"><div class="tg-label">Risk:Reward</div><div class="tg-val neu">1:${rr.toFixed(2)}</div></div>
-        <div class="tg-cell"><div class="tg-label">ATR Value</div><div class="tg-val neu">$${fmtP(atrV)}</div></div>
+        <div class="tg-cell"><div class="tg-label" style="color:var(--t);font-size:8px;font-weight:700">🎯 TP1 (1.5× ATR)</div><div class="tg-val ${sUp?'bull':'bear'}" style="font-size:13px">$${fmtP(tp1)}</div><div style="font-size:8px;color:var(--t3);margin-top:2px">هدف أول — محافظ</div></div>
+        <div class="tg-cell"><div class="tg-label" style="color:var(--t);font-size:8px;font-weight:700">🎯 TP2 (2.5× ATR)</div><div class="tg-val ${sUp?'bull':'bear'}" style="font-size:13px">$${fmtP(tp2)}</div><div style="font-size:8px;color:var(--t3);margin-top:2px">هدف ثاني — متوسط</div></div>
+        <div class="tg-cell"><div class="tg-label" style="color:var(--t);font-size:8px;font-weight:700">🎯 TP3 (4.0× ATR)</div><div class="tg-val ${sUp?'bull':'bear'}" style="font-size:13px">$${fmtP(tp3)}</div><div style="font-size:8px;color:var(--t3);margin-top:2px">هدف طموح</div></div>
+        <div class="tg-cell"><div class="tg-label" style="color:var(--r);font-size:8px;font-weight:700">🛑 Stop Loss (1× ATR)</div><div class="tg-val ${sUp?'bear':'bull'}" style="font-size:13px">$${fmtP(sl)}</div><div style="font-size:8px;color:var(--t3);margin-top:2px">نقطة وقف الخسارة</div></div>
+        <div class="tg-cell"><div class="tg-label" style="color:var(--t);font-size:8px;font-weight:700">⚖️ Risk:Reward</div><div class="tg-val neu" style="font-size:13px">1:${rr.toFixed(2)}</div><div style="font-size:8px;color:var(--t3);margin-top:2px">نسبة المخاطرة/العائد</div></div>
+        <div class="tg-cell"><div class="tg-label" style="color:var(--t);font-size:8px;font-weight:700">📏 ATR Value</div><div class="tg-val neu" style="font-size:13px">$${fmtP(atrV)}</div><div style="font-size:8px;color:var(--t3);margin-top:2px">وحدة التقلب</div></div>
       </div>
       <div class="pos-calc">
         <div class="pos-calc-title">Position Size Calculator</div>
@@ -2307,12 +2350,21 @@ function renderHeatmap(){
     const chColor=ch>=0?'var(--g)':'var(--r)';
     const sig=S.signals[a.sym]?.[S.currentTF];
     const sc=sigClass(sig?.signal);
-    return`<div class="hm-cell" onclick="selectCard('${a.sym}')">
+    const ind=S.indicators[a.sym]?.[S.currentTF];
+    const rsiVal=ind?.rsi?.toFixed(0)??'--';
+    const adxVal=ind?.adx?.adx?.toFixed(0)??'--';
+    const logoHTML=a.logo?`<img src="${a.logo}" alt="${a.tk}" style="width:24px;height:24px;border-radius:50%;margin-bottom:4px" onerror="this.style.display='none'">`:'';
+    return`<div class="hm-cell" onclick="selectCard('${a.sym}');switchTab('matrix',document.querySelector('.tab-btn'))">
       <div class="hm-overlay" style="background:${bg}"></div>
+      ${logoHTML}
       <div class="hm-ticker" style="color:${a.color}">${a.tk}</div>
       <div class="hm-price">$${fmtP(px.price)}</div>
       <div class="hm-change" style="color:${chColor}">${ch>=0?'+':''}${ch.toFixed(2)}%</div>
-      <div class="hm-vol" style="color:var(--t3)">Vol ${S.indicators[a.sym]?.[S.currentTF]?.volRatio?.toFixed(1)??'--'}x</div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:6px;font-size:9px">
+        <span style="color:var(--t3)">RSI</span><span style="color:${ind?.rsi<35?'var(--g)':ind?.rsi>65?'var(--r)':'var(--t2)'}">${rsiVal}</span>
+        <span style="color:var(--t3)">ADX</span><span style="color:${ind?.adx?.adx>25?'var(--g)':'var(--t2)'}">${adxVal}</span>
+        <span style="color:var(--t3)">Vol</span><span style="color:${ind?.volRatio>2?'var(--r)':'var(--t2)'}">${ind?.volRatio?.toFixed(1)??'--'}x</span>
+      </div>
       <div class="hm-sig"><span class="sig-badge sig-${sc}">${sig?.signal??'WAIT'}</span></div>
     </div>`;
   }).join('');
@@ -2328,10 +2380,19 @@ function renderRadar(){
   grid.innerHTML=ASSETS.map(a=>{
     const sig=S.signals[a.sym]?.[S.currentTF];
     const sc=sigClass(sig?.signal);
+    const ind=S.indicators[a.sym]?.[S.currentTF];
+    const logoHTML=a.logo?`<img src="${a.logo}" alt="${a.tk}" style="width:20px;height:20px;border-radius:50%" onerror="this.style.display='none'">`:'';
     return`<div class="radar-cell">
-      <div class="radar-title" style="color:${a.color}">${a.tk}</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        ${logoHTML}
+        <div class="radar-title" style="color:${a.color}">${a.tk}</div>
+      </div>
       <div class="radar-chart"><svg id="radar-${a.sym}" width="170" height="170" viewBox="0 0 170 170"></svg></div>
-      <div class="radar-score"><span class="sig-badge sig-${sc}">${sig?.signal??'WAIT'}</span></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="sig-badge sig-${sc}">${sig?.signal??'WAIT'}</span>
+        <span style="font-size:10px;color:var(--t2)">${sig?.conf??0}%</span>
+        <span style="font-size:9px;color:${sig?.score>0?'var(--g)':'var(--r)'}">${sig?.score>0?'+':''}${sig?.score??0}</span>
+      </div>
     </div>`;
   }).join('');
   ASSETS.forEach(a=>drawRadarChart(a.sym));
@@ -3174,7 +3235,10 @@ function renderCorrelation() {
       <span style="color:var(--t2);font-size:10px">Inverse / independent move</span>
     </div>
     <div class="corr-info"><div class="corr-info-title">Methodology</div>
-      <span style="color:var(--t2);font-size:10px">Rolling 20-bar Pearson correlation on log returns (1H candles). Range: -1 (perfect inverse) to +1 (perfect positive). Values above ±0.6 shown in colour.</span>
+      <span style="color:var(--t2);font-size:10px;line-height:1.7">Rolling 20-bar Pearson correlation on log returns (1H candles).<br>
+      <b style="color:var(--g)">+1.0</b> = تطابق تام (يتحركان معاً) · <b style="color:var(--r)">-1.0</b> = عكسي تام (يتحركان بعكس بعض)<br>
+      <b style="color:var(--a)">0</b> = لا علاقة · <b>أعلى من ±0.6</b> = ارتباط قوي ملوّن<br>
+      <span style="color:var(--t3)">💡 استخدم الارتباط لتنويع المحفظة: اختر أصولاً ذات ارتباط منخفض لتقليل المخاطر. تجنّب فتح صفقات متشابهة على أصول مرتبطة بقوة.</span></span>
     </div>
   </div>`;
 
@@ -3711,12 +3775,15 @@ init();
 </script>
 
 <!-- DEVELOPER BADGE -->
-<div style="text-align:center;padding:18px 0 22px;background:linear-gradient(180deg,var(--bg),var(--bg2));border-top:1px solid var(--br2)">
-  <div style="display:inline-block;padding:10px 28px;border:1px solid rgba(0,229,160,0.3);background:rgba(0,229,160,0.04);position:relative;overflow:hidden">
-    <div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(0,229,160,0.08),transparent);animation:devShine 3s ease-in-out infinite"></div>
-    <span style="font-family:var(--orb);font-size:10px;letter-spacing:0.2em;color:var(--g);text-shadow:0 0 15px rgba(0,229,160,0.6),0 0 30px rgba(0,229,160,0.3);animation:devGlow 2s ease-in-out infinite alternate">DEVELOPER: MARWAN NEGM</span>
+<div style="text-align:center;padding:24px 0 30px;background:linear-gradient(180deg,var(--bg),rgba(0,229,160,0.02),var(--bg2));border-top:1px solid var(--br2)">
+  <div style="display:inline-block;padding:14px 36px;border:1px solid rgba(0,229,160,0.25);background:linear-gradient(135deg,rgba(0,229,160,0.04),rgba(74,171,255,0.03));position:relative;overflow:hidden;border-radius:4px;box-shadow:0 0 30px rgba(0,229,160,0.08)">
+    <div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(0,229,160,0.12) 50%,transparent 100%);animation:devShine 4s ease-in-out infinite"></div>
+    <div style="position:absolute;inset:-1px;border-radius:4px;background:linear-gradient(45deg,rgba(0,229,160,0.3),transparent,rgba(74,171,255,0.3),transparent);animation:devBorder 6s linear infinite;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:xor;-webkit-mask-composite:xor;padding:1px"></div>
+    <div style="font-family:var(--orb);font-size:8px;letter-spacing:0.3em;color:var(--t3);margin-bottom:6px">ENGINEERED BY</div>
+    <span style="font-family:var(--orb);font-size:14px;letter-spacing:0.25em;color:var(--g);text-shadow:0 0 20px rgba(0,229,160,0.7),0 0 40px rgba(0,229,160,0.3),0 0 80px rgba(0,229,160,0.1);animation:devGlow 2.5s ease-in-out infinite alternate;font-weight:900">✦ MARWAN NEGM ✦</span>
+    <div style="margin-top:6px;font-family:var(--raj);font-size:9px;letter-spacing:0.15em;color:var(--b0);text-shadow:0 0 10px rgba(74,171,255,0.3)">FULL-STACK DEVELOPER & QUANT ANALYST</div>
   </div>
-  <div style="margin-top:6px;font-size:9px;color:var(--t3);letter-spacing:0.1em;font-family:var(--raj)">WAR ROOM · Decision Intelligence Platform · v2.0</div>
+  <div style="margin-top:8px;font-size:9px;color:var(--t3);letter-spacing:0.1em;font-family:var(--raj)">WAR ROOM · Decision Intelligence Platform · v3.0</div>
 </div>
 <style>
 .tv-tf-btn{background:var(--bg3);color:var(--t2);border:1px solid var(--br);padding:4px 10px;border-radius:4px;font-family:var(--mono);font-size:10px;cursor:pointer;transition:all 0.2s;font-weight:600}
