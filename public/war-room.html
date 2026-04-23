@@ -4370,9 +4370,143 @@ const NEWS_FEEDS_V2 = [
   'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fcryptonews.com%2Fnews%2Ffeed%2F&count=15',
 ];
 
-// Override fetchNews with improved version
-const _origFetchNews = fetchNews;
-fetchNews = async function() {
+
+// ═══════════════════════════════════════════════════════════
+// LIGHT/DARK THEME TOGGLE
+// ═══════════════════════════════════════════════════════════
+let _theme = localStorage.getItem('wr_theme') || 'dark';
+function applyTheme(t){
+  _theme=t;
+  document.body.classList.toggle('light', t==='light');
+  const btn=document.getElementById('themeToggle');
+  if(btn) btn.textContent=t==='light'?'☀️':'🌙';
+  localStorage.setItem('wr_theme',t);
+}
+function toggleTheme(){
+  applyTheme(_theme==='dark'?'light':'dark');
+}
+applyTheme(_theme);
+
+// ═══════════════════════════════════════════════════════════
+// CORR TIMEFRAME & WINDOW CONTROLS
+// ═══════════════════════════════════════════════════════════
+let _corrTF='1h', _corrWindow=20;
+const _corrCache={};
+
+function setCorrTF(tf,btn){
+  _corrTF=tf;
+  btn.parentElement.querySelectorAll('.tf-btn').forEach(b=>b.classList.remove('active'));
+  // Only deactivate TF buttons (first group)
+  const btns=btn.parentElement.querySelectorAll('.tf-btn');
+  [btns[0],btns[1],btns[2]].forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  delete _corrCache[_corrTF+'_'+_corrWindow];
+  renderCorrelation();
+}
+
+function setCorrWindow(w,btn){
+  _corrWindow=w;
+  // Only deactivate Window buttons (second group)
+  const allBtns=btn.parentElement.querySelectorAll('.tf-btn');
+  [allBtns[3],allBtns[4],allBtns[5]].forEach(b=>b&&b.classList.remove('active'));
+  btn.classList.add('active');
+  delete _corrCache[_corrTF+'_'+_corrWindow];
+  renderCorrelation();
+}
+
+// Override computeCorrelations to use selected TF and window
+const _origComputeCorrelations = computeCorrelations;
+computeCorrelations = function(period){
+  const useP = _corrWindow || period || 20;
+  const useTF = _corrTF || '1h';
+  const cacheKey = useTF+'_'+useP;
+  if(_corrCache[cacheKey] && Date.now()-_corrCache[cacheKey].ts < 10000) return _corrCache[cacheKey].data;
+  
+  const syms = ASSETS.filter(a=>!a.external).map(a=>a.sym);
+  const returns = {};
+  syms.forEach(sym => {
+    const k = S.klines[sym]?.[useTF];
+    if (!k || k.length < useP+1) { returns[sym]=null; return; }
+    const closes = k.slice(-(useP+1)).map(x=>x.c);
+    returns[sym] = closes.slice(1).map((c,i)=>Math.log(c/closes[i]));
+  });
+  const matrix = {};
+  syms.forEach(a => {
+    matrix[a] = {};
+    syms.forEach(b => {
+      if (a===b){ matrix[a][b]=1; return; }
+      if (!returns[a]||!returns[b]){ matrix[a][b]=null; return; }
+      matrix[a][b] = pearson(returns[a], returns[b]);
+    });
+  });
+  const result = { syms, matrix };
+  _corrCache[cacheKey] = {data:result, ts:Date.now()};
+  return result;
+};
+
+// ═══════════════════════════════════════════════════════════
+// UNIFIED RAW DATA MODAL for Heatmap & Radar
+// ═══════════════════════════════════════════════════════════
+function showRawDataModal(sym, source){
+  let modal=document.getElementById('rawDataModal');
+  if(!modal){
+    modal=document.createElement('div');
+    modal.id='rawDataModal';
+    modal.className='raw-modal-backdrop';
+    modal.onclick=function(e){if(e.target===this)this.classList.remove('show');};
+    modal.innerHTML='<div class="raw-modal"><div class="raw-modal-head"><h3 id="rawModalTitle"></h3><button class="raw-modal-close" onclick="document.getElementById(\'rawDataModal\').classList.remove(\'show\')">✕ إغلاق</button></div><div class="raw-modal-body" id="rawModalBody"></div></div>';
+    document.body.appendChild(modal);
+  }
+  const a=ASSETS.find(x=>x.sym===sym);
+  const tf=S.currentTF;
+  const ind=S.indicators[sym]?.[tf];
+  const sig=S.signals[sym]?.[tf];
+  const px=S.prices[sym];
+  
+  document.getElementById('rawModalTitle').innerHTML=`📊 ${source==='heatmap'?'Heatmap':'Radar'} — ${a?.tk||sym} <span style="color:var(--t3);font-size:11px">[${tf.toUpperCase()}]</span>`;
+  
+  const rows=[
+    {name:'RSI (14)',val:ind?.rsi?.toFixed(2)??'--',color:ind?.rsi<30?'var(--g)':ind?.rsi>70?'var(--r)':'var(--t)',desc:'مؤشر القوة النسبية — تحت 30 تشبع بيعي، فوق 70 تشبع شرائي'},
+    {name:'Stoch RSI K',val:ind?.stochRSI?.k?.toFixed(1)??'--',color:ind?.stochRSI?.k<20?'var(--g)':ind?.stochRSI?.k>80?'var(--r)':'var(--t)',desc:'ستوكاستيك RSI — تحت 20 تشبع بيعي، فوق 80 تشبع شرائي'},
+    {name:'MACD Hist',val:ind?.macd?.hist?.toFixed(5)??'--',color:ind?.macd?.hist>0?'var(--g)':'var(--r)',desc:'مؤشر التقارب والتباعد — إيجابي = زخم صعودي'},
+    {name:'ADX (14)',val:ind?.adx?.adx?.toFixed(1)??'--',color:ind?.adx?.adx>25?'var(--g)':'var(--t3)',desc:'متوسط مؤشر الاتجاه — فوق 25 اتجاه، فوق 40 قوي'},
+    {name:'Williams %R',val:ind?.williamsR?.toFixed(1)??'--',color:ind?.williamsR<-80?'var(--g)':ind?.williamsR>-20?'var(--r)':'var(--t)',desc:'ويليامز — تحت -80 تشبع بيعي'},
+    {name:'CCI (20)',val:ind?.cci?.toFixed(1)??'--',color:ind?.cci<-100?'var(--g)':ind?.cci>100?'var(--r)':'var(--t)',desc:'مؤشر قناة السلعة — تحت -100 تشبع بيعي'},
+    {name:'MFI (14)',val:ind?.mfi?.toFixed(1)??'--',color:ind?.mfi<25?'var(--g)':ind?.mfi>75?'var(--r)':'var(--t)',desc:'مؤشر تدفق الأموال — تحت 25 تدفق خارجي'},
+    {name:'Vol Ratio',val:ind?.volRatio?.toFixed(2)+'x'??'--',color:ind?.volRatio>2?'var(--r)':'var(--t)',desc:'نسبة الحجم مقارنة بالمتوسط'},
+    {name:'ATR (14)',val:ind?.atr?'$'+fmtP(ind.atr):'--',color:'var(--t)',desc:'متوسط المدى الحقيقي — يقيس التقلب'},
+    {name:'BB Position',val:ind?.bb&&px?((px.price-ind.bb.lower)/(ind.bb.upper-ind.bb.lower)*100).toFixed(0)+'%':'--',color:'var(--t)',desc:'موقع السعر داخل بولينجر باندز'},
+    {name:'EMA Stack',val:ind?.ema9>ind?.ema21?'Bull ▲':'Bear ▼',color:ind?.ema9>ind?.ema21?'var(--g)':'var(--r)',desc:'ترتيب المتوسطات المتحركة'},
+    {name:'Ichimoku',val:ind?.ichimoku?(ind.ichimoku.priceAboveCloud?'فوق السحابة ↑':ind.ichimoku.priceBelowCloud?'تحت السحابة ↓':'داخل السحابة'):'--',color:ind?.ichimoku?.priceAboveCloud?'var(--g)':ind?.ichimoku?.priceBelowCloud?'var(--r)':'var(--a)',desc:'سحابة إيشيموكو — فوق = صعودي'},
+    {name:'PAR SAR',val:ind?.sar?(ind.sar.bull?'صعودي ↑':'هبوطي ↓'):'--',color:ind?.sar?.bull?'var(--g)':'var(--r)',desc:'بارابوليك سار — اتجاه السعر'},
+    {name:'Signal',val:sig?.signal??'WAIT',color:sig?.score>0?'var(--g)':sig?.score<0?'var(--r)':'var(--a)',desc:'الإشارة الحالية مع الثقة: '+(sig?.conf??0)+'%'},
+    {name:'Score',val:(sig?.score>0?'+':'')+(sig?.score??0),color:sig?.score>0?'var(--g)':sig?.score<0?'var(--r)':'var(--a)',desc:'النتيجة الإجمالية من أصل ±38'},
+  ];
+  
+  document.getElementById('rawModalBody').innerHTML=rows.map(r=>`<div class="raw-row">
+    <div><div class="raw-row-name">${r.name}</div><div class="raw-row-desc">${r.desc}</div></div>
+    <div class="raw-row-val" style="color:${r.color}">${r.val}</div>
+  </div>`).join('');
+  
+  modal.classList.add('show');
+}
+
+// ═══════════════════════════════════════════════════════════
+// DEBOUNCE HELPER
+// ═══════════════════════════════════════════════════════════
+function debounce(fn, ms){
+  let timer;
+  return function(...args){clearTimeout(timer);timer=setTimeout(()=>fn.apply(this,args),ms);};
+}
+
+// Debounced versions of heavy renders
+const debouncedRenderCorrelation = debounce(renderCorrelation, 300);
+const debouncedRenderHeatmap = debounce(renderHeatmap, 200);
+const debouncedRenderRadar = debounce(renderRadar, 200);
+
+</script>
+</body>
+</html>
   try {
     const allItems = [];
     const bullW = ['bull','pump','surge','soar','rally','gain','breakout','ath','rise','moon','spike','positive','adoption','approve','etf','launch','partner','upgrade','bullish','highs','growth'];
