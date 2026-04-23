@@ -1742,35 +1742,48 @@ function buildCard(a){
   const emaDir=ind?.ema9&&ind?.ema21?(ind.ema9>ind.ema21?['▲','up']:['▼','dn']):['—',''];
   const macdDir=ind?.macd?(ind.macd.hist>0?['▲','up']:['▼','dn']):['—',''];
   const ichDir=ind?.ichimoku?(ind.ichimoku.priceAboveCloud?['↑','up']:ind.ichimoku.priceBelowCloud?['↓','dn']:['◈','neu']):['—',''];
-  const willVal=ind?.williamsR!==null?ind.williamsR.toFixed(0):'--';
+  const willVal=ind?.williamsR!==null&&ind?.williamsR!==undefined?ind.williamsR.toFixed(0):'--';
   const willCls=ind?.williamsR!=null?(ind.williamsR<=-80?'up':ind.williamsR>=-20?'dn':''):'' ;
-  const cciVal=ind?.cci!==null?ind.cci.toFixed(0):'--';
+  const cciVal=ind?.cci!==null&&ind?.cci!==undefined?ind.cci.toFixed(0):'--';
   const cciCls=ind?.cci!=null?(ind.cci<-100?'up':ind.cci>100?'dn':''):'';
-  const mfiVal=ind?.mfi!==null?ind.mfi.toFixed(0):'--';
+  const mfiVal=ind?.mfi!==null&&ind?.mfi!==undefined?ind.mfi.toFixed(0):'--';
   const sarDir=ind?.sar?(ind.sar.bull?['↑','up']:['↓','dn']):['—',''];
   const conf=sig?.conf??0;
   const confCol=sc==='buy'?'var(--g)':sc==='sell'?'var(--r)':'var(--a)';
   const selCls=S.selected===a.sym?' sel':'';
 
-  // MTF grid
+  // Quality badge
+  const qualBadge = sig?.quality ? `<span class="ctag ctag-${sig.quality==='A'?'bull':sig.quality==='B'?'info':sig.quality==='C'?'neu':'bear'}" style="font-size:7px">Q:${sig.quality}</span>` : '';
+
+  // Volume Delta
+  const k = S.klines[a.sym]?.[tf];
+  const vd = k ? volumeDelta(k, 20) : null;
+  const vdBuyPct = vd ? vd.buyPct.toFixed(0) : 50;
+  const vdSellPct = vd ? (100-vd.buyPct).toFixed(0) : 50;
+  const vdColor = vd ? (vd.buyPct > 55 ? 'var(--g)' : vd.buyPct < 45 ? 'var(--r)' : 'var(--a)') : 'var(--t3)';
+
+  // MTF grid — 7 timeframes
   const tfs=['5m','15m','1h','4h','1d','1w','1M'];
   const mtfCells=tfs.map(t=>{
     const s=S.signals[a.sym]?.[t];
     const sClass=s?sigClass(s.signal):'wait';
-    const sText=s?(s.signal==='STRONG BUY'?'S.B':s.signal==='STRONG SELL'?'S.S':s.signal==='WEAK BUY'?'W.B':s.signal==='WEAK SELL'?'W.S':s.signal==='HOLD'?'HOL':'—'):'—';
+    const sText=s?(s.signal==='STRONG BUY'?'S.B':s.signal==='STRONG SELL'?'S.S':s.signal==='WEAK BUY'?'W.B':s.signal==='WEAK SELL'?'W.S':s.signal==='HOLD'?'HOL':s.signal==='NO TRADE'||s.signal==='NO-TRADE'?'N/T':'—'):'—';
     return`<div class="mtf-cell"><div class="mtf-label">${t}</div><div class="mtf-sig ${sClass}">${sText}</div></div>`;
   }).join('');
 
   // Tags
   const tags=[];
+  if(qualBadge) tags.push(qualBadge);
   if(ind?.divergence==='bullish')tags.push(`<span class="ctag ctag-bull">⚡DIV BULL</span>`);
   if(ind?.divergence==='bearish')tags.push(`<span class="ctag ctag-bear">⚡DIV BEAR</span>`);
   if(ind?.ichimoku?.priceAboveCloud)tags.push(`<span class="ctag ctag-bull">CLOUD ↑</span>`);
   if(ind?.ichimoku?.priceBelowCloud)tags.push(`<span class="ctag ctag-bear">CLOUD ↓</span>`);
   if(ind?.macd?.bullCross)tags.push(`<span class="ctag ctag-bull">MACD✕</span>`);
   if(ind?.macd?.bearCross)tags.push(`<span class="ctag ctag-bear">MACD✕</span>`);
-  if((sig?.tfsAligned||0)>=3)tags.push(`<span class="ctag ctag-info">MTF ${sig.tfsAligned}/4</span>`);
+  if((sig?.tfsAligned||0)>=4)tags.push(`<span class="ctag ctag-info">MTF ${sig.tfsAligned}/6</span>`);
   if(ind?.volRatio>2.5)tags.push(`<span class="ctag ctag-neu">VOL${ind.volRatio.toFixed(1)}x</span>`);
+  if(sig?.counterTrend)tags.push(`<span class="ctag ctag-bear">⚠CT</span>`);
+  if(sig?.regime && sig.regime !== 'UNKNOWN')tags.push(`<span class="ctag ctag-${sig.regime.includes('BULL')?'bull':sig.regime.includes('BEAR')?'bear':'neu'}" style="font-size:6px">${sig.regime.replace('_',' ').slice(0,8)}</span>`);
 
   return`<div class="asset-card${selCls}" id="card-${a.sym}" onclick="selectCard('${a.sym}')">
   <div class="card-accent" style="background:${accentColor}"></div>
@@ -1790,6 +1803,11 @@ function buildCard(a){
   <div class="score-meter">
     <div class="score-label"><span>Signal Score</span><span style="color:${scoreColor}">${scoreVal>0?'+':''}${scoreVal}</span></div>
     <div class="score-track"><div class="score-marker"></div><div class="score-fill" id="sf-${a.sym}" style="left:0;width:${scorePct}%;background:${scoreColor}"></div></div>
+  </div>
+  <div class="vd-row">
+    <span class="vd-lbl">B</span>
+    <div class="vd-track"><div class="vd-buy" style="width:${vdBuyPct}%"></div><div class="vd-sell" style="width:${vdSellPct}%"></div><div class="vd-mid"></div></div>
+    <span class="vd-pct" style="color:${vdColor}">${vdBuyPct}%B</span>
   </div>
   <div class="chips">
     <div class="chip"><div class="chip-lbl">EMA</div><div class="chip-val ${emaDir[1]}">${emaDir[0]}</div></div>
