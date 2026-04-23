@@ -3257,7 +3257,6 @@ function computeCorrelations(period = 20) {
 function renderCorrelation() {
   const grid = document.getElementById('corrMatrix');
   const { syms, matrix } = computeCorrelations(20);
-  const binanceSyms = ASSETS.filter(a=>!a.external);
 
   let html = '<table class="corr-table"><thead><tr><th></th>';
   syms.forEach(sym => {
@@ -3272,13 +3271,12 @@ function renderCorrelation() {
     html += `<tr><td class="corr-lbl" style="color:${aColor}">${aTk}</td>`;
     syms.forEach(b => {
       const v = matrix[a]?.[b];
-      if (a===b) { html += `<td style="background:var(--bg4);color:var(--t)">1.00</td>`; return; }
+      if (a===b) { html += `<td style="background:var(--bg4);color:var(--t);border-radius:4px">1.00</td>`; return; }
       if (v===null) { html += `<td style="color:var(--t3)">--</td>`; return; }
       const abs = Math.abs(v);
-      const r = Math.round((v+1)/2 * 255), g2 = Math.round((1-abs) * 80), bl = Math.round((1-v)/2 * 180);
-      const bg = v > 0.6 ? `rgba(0,229,160,${abs*0.35})` : v < -0.6 ? `rgba(255,62,62,${abs*0.35})` : 'transparent';
+      const bg = v > 0.6 ? `rgba(0,229,160,${abs*0.3})` : v < -0.6 ? `rgba(255,62,62,${abs*0.3})` : v > 0.3 ? `rgba(0,229,160,${abs*0.15})` : v < -0.3 ? `rgba(255,62,62,${abs*0.15})` : 'rgba(255,255,255,0.02)';
       const col = v > 0.5 ? 'var(--g)' : v < -0.5 ? 'var(--r)' : v > 0.2 ? 'var(--t)' : v < -0.2 ? 'var(--t)' : 'var(--t3)';
-      html += `<td class="corr-cell" style="background:${bg};color:${col}">${v.toFixed(2)}</td>`;
+      html += `<td class="corr-cell" style="background:${bg};color:${col}" onclick="showCorrDetail('${a}','${b}',${v},event)">${v.toFixed(2)}</td>`;
     });
     html += '</tr>';
   });
@@ -3295,25 +3293,102 @@ function renderCorrelation() {
   }
 
   html += `<div class="corr-stats">
-    <div class="corr-info"><div class="corr-info-title">Highest Correlation</div>
-      <span style="color:var(--g)">${maxPair}</span><br>
-      <span style="color:var(--t)">${maxCorr.toFixed(3)}</span><br>
-      <span style="color:var(--t2);font-size:10px">Move together — limited diversification</span>
+    <div class="corr-info"><div class="corr-info-title">📈 Highest Correlation</div>
+      <span style="color:var(--g);font-family:var(--orb);font-size:14px">${maxPair}</span><br>
+      <span style="color:var(--t);font-family:var(--orb);font-size:18px;font-weight:700">${maxCorr.toFixed(3)}</span><br>
+      <span style="color:var(--t2);font-size:10px">يتحركان معاً — تنويع محدود<br>Move together — limited diversification</span>
     </div>
-    <div class="corr-info"><div class="corr-info-title">Most Divergent</div>
-      <span style="color:var(--r)">${minPair}</span><br>
-      <span style="color:var(--t)">${minCorr.toFixed(3)}</span><br>
-      <span style="color:var(--t2);font-size:10px">Inverse / independent move</span>
+    <div class="corr-info"><div class="corr-info-title">📉 Most Divergent</div>
+      <span style="color:var(--r);font-family:var(--orb);font-size:14px">${minPair}</span><br>
+      <span style="color:var(--t);font-family:var(--orb);font-size:18px;font-weight:700">${minCorr.toFixed(3)}</span><br>
+      <span style="color:var(--t2);font-size:10px">حركة عكسية — تحوّط فعّال<br>Inverse movement — effective hedge</span>
     </div>
-    <div class="corr-info"><div class="corr-info-title">Methodology</div>
-      <span style="color:var(--t2);font-size:10px;line-height:1.7">Rolling 20-bar Pearson correlation on log returns (1H candles).<br>
-      <b style="color:var(--g)">+1.0</b> = تطابق تام (يتحركان معاً) · <b style="color:var(--r)">-1.0</b> = عكسي تام (يتحركان بعكس بعض)<br>
-      <b style="color:var(--a)">0</b> = لا علاقة · <b>أعلى من ±0.6</b> = ارتباط قوي ملوّن<br>
-      <span style="color:var(--t3)">💡 استخدم الارتباط لتنويع المحفظة: اختر أصولاً ذات ارتباط منخفض لتقليل المخاطر. تجنّب فتح صفقات متشابهة على أصول مرتبطة بقوة.</span></span>
+    <div class="corr-info"><div class="corr-info-title">📖 Methodology</div>
+      <span style="color:var(--t2);font-size:10px;line-height:1.7">Rolling 20-bar Pearson correlation · Log returns · 1H candles<br>
+      <b style="color:var(--g)">+1.0</b> = تطابق تام · <b style="color:var(--r)">-1.0</b> = عكسي تام<br>
+      <b style="color:var(--a)">0</b> = لا علاقة · <b>±0.6+</b> = ارتباط قوي<br>
+      <span style="color:var(--t3)">💡 اضغط على أي خلية لعرض scatter chart وتفاصيل الارتباط<br>Click any cell for scatter chart & correlation details</span></span>
     </div>
   </div>`;
 
+  // Detail popup container
+  html += '<div id="corrDetailPopup"></div>';
+
   grid.innerHTML = html;
+}
+
+// Show correlation detail with mini scatter
+function showCorrDetail(symA, symB, corrVal, event) {
+  const popup = document.getElementById('corrDetailPopup');
+  const tkA = ASSETS.find(a=>a.sym===symA)?.tk ?? symA;
+  const tkB = ASSETS.find(a=>a.sym===symB)?.tk ?? symB;
+  const colA = ASSETS.find(a=>a.sym===symA)?.color ?? 'var(--g)';
+  const colB = ASSETS.find(a=>a.sym===symB)?.color ?? 'var(--b0)';
+  
+  // Get return data for scatter
+  const kA = S.klines[symA]?.['1h'], kB = S.klines[symB]?.['1h'];
+  let scatterHTML = '';
+  if (kA && kB) {
+    const period = 20;
+    const closesA = kA.slice(-(period+1)).map(x=>x.c);
+    const closesB = kB.slice(-(period+1)).map(x=>x.c);
+    const retA = closesA.slice(1).map((c,i)=>((c/closesA[i])-1)*100);
+    const retB = closesB.slice(1).map((c,i)=>((c/closesB[i])-1)*100);
+    
+    // Build scatter SVG
+    const w=260, h=140, pad=25;
+    const maxA = Math.max(...retA.map(Math.abs), 0.1);
+    const maxB = Math.max(...retB.map(Math.abs), 0.1);
+    let svgPts = '';
+    for (let i=0; i<Math.min(retA.length,retB.length); i++) {
+      const x = pad + (retA[i]/maxA + 1)/2 * (w-2*pad);
+      const y = h - pad - (retB[i]/maxB + 1)/2 * (h-2*pad);
+      const dotCol = corrVal > 0 ? 'rgba(0,229,160,0.7)' : 'rgba(255,62,62,0.7)';
+      svgPts += `<circle cx="${x}" cy="${y}" r="3.5" fill="${dotCol}" stroke="${dotCol}" stroke-width="0.5" opacity="0.8"/>`;
+    }
+    // Regression line
+    const meanA = retA.reduce((s,v)=>s+v,0)/retA.length;
+    const meanB = retB.reduce((s,v)=>s+v,0)/retB.length;
+    let num=0,den=0;
+    for(let i=0;i<retA.length;i++){num+=(retA[i]-meanA)*(retB[i]-meanB);den+=(retA[i]-meanA)**2;}
+    const slope = den?num/den:0;
+    const intercept = meanB - slope*meanA;
+    const lx1 = pad, lx2 = w-pad;
+    const retAtX1 = -maxA, retAtX2 = maxA;
+    const ly1 = h-pad-(((slope*retAtX1+intercept)/maxB+1)/2*(h-2*pad));
+    const ly2 = h-pad-(((slope*retAtX2+intercept)/maxB+1)/2*(h-2*pad));
+    const lineCol = corrVal > 0 ? 'rgba(0,229,160,0.4)' : 'rgba(255,62,62,0.4)';
+    
+    scatterHTML = `<div style="margin-top:8px;background:rgba(0,0,0,0.3);border-radius:6px;padding:8px">
+      <div style="font-size:8px;color:var(--t3);margin-bottom:4px;text-align:center;font-family:var(--raj);letter-spacing:0.1em">SCATTER · 20-BAR LOG RETURNS</div>
+      <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="display:block;margin:0 auto">
+        <line x1="${pad}" y1="${h/2}" x2="${w-pad}" y2="${h/2}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+        <line x1="${w/2}" y1="${pad}" x2="${w/2}" y2="${h-pad}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+        <line x1="${lx1}" y1="${ly1}" x2="${lx2}" y2="${ly2}" stroke="${lineCol}" stroke-width="1.5" stroke-dasharray="4,3"/>
+        ${svgPts}
+        <text x="${w/2}" y="${h-4}" text-anchor="middle" fill="#334B60" font-size="8" font-family="JetBrains Mono">${tkA} returns %</text>
+        <text x="4" y="${h/2}" transform="rotate(-90,8,${h/2})" text-anchor="middle" fill="#334B60" font-size="8" font-family="JetBrains Mono">${tkB}</text>
+      </svg>
+    </div>`;
+  }
+  
+  const strength = Math.abs(corrVal) > 0.7 ? 'قوي جداً / Very Strong' : Math.abs(corrVal) > 0.5 ? 'قوي / Strong' : Math.abs(corrVal) > 0.3 ? 'معتدل / Moderate' : 'ضعيف / Weak';
+  const direction = corrVal > 0 ? 'إيجابي (يتحركان معاً) / Positive' : 'سلبي (يتحركان عكسياً) / Negative';
+  const advice = corrVal > 0.6 ? '⚠ تجنّب فتح نفس الصفقة على كليهما — التنويع محدود' : corrVal < -0.5 ? '✅ مناسب للتحوّط — حركة عكسية' : '🔄 ارتباط معتدل — تنويع مقبول';
+  
+  popup.innerHTML = `<div class="corr-detail-popup">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-family:var(--orb);font-size:13px"><span style="color:${colA}">${tkA}</span> ↔ <span style="color:${colB}">${tkB}</span></span>
+      <span style="font-family:var(--orb);font-size:18px;font-weight:900;color:${corrVal>0?'var(--g)':'var(--r)'}">${corrVal.toFixed(3)}</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px">
+      <div><span style="color:var(--t3);font-size:8px;text-transform:uppercase;letter-spacing:0.1em">القوة / Strength</span><br><span style="color:var(--t)">${strength}</span></div>
+      <div><span style="color:var(--t3);font-size:8px;text-transform:uppercase;letter-spacing:0.1em">الاتجاه / Direction</span><br><span style="color:var(--t)">${direction}</span></div>
+    </div>
+    <div style="padding:6px 8px;background:rgba(255,176,32,0.06);border:1px solid rgba(255,176,32,0.15);border-radius:4px;font-size:9px;color:var(--a)">${advice}</div>
+    ${scatterHTML}
+    <div style="margin-top:6px;font-size:8px;color:var(--t3);text-align:center">النافذة الزمنية: آخر 20 شمعة 1H · Window: Last 20 bars (1H)</div>
+  </div>`;
 }
 
 // ═══════════════════════════════════════════════════════════
