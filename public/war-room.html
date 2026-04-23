@@ -662,7 +662,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 
     <!-- AI BRIEFING TAB -->
     <div class="tab-content" id="tab-briefing">
-      <div class="section-bar"><span class="section-title">AI Tactical Briefing</span><span class="live-tag" style="background:rgba(74,171,255,0.1);border-color:rgba(74,171,255,0.25);color:var(--b0)">CLAUDE AI</span></div>
+      <div class="section-bar"><span class="section-title">AI Tactical Briefing</span><span class="live-tag" style="background:rgba(74,171,255,0.1);border-color:rgba(74,171,255,0.25);color:var(--b0)">QUANT ENGINE · 7-TF</span></div>
       <div class="briefing-container">
         <div class="briefing-select-bar">
           <select id="briefingAsset">
@@ -2905,7 +2905,7 @@ function renderScreener() {
       <td style="color:${ind?.rsi<30?'var(--g)':ind?.rsi>70?'var(--r)':'var(--t)'}">${ind?.rsi?.toFixed(1)??'--'}</td>
       <td style="color:${ind?.adx?.adx>30?'var(--g)':'var(--t)'}">${ind?.adx?.adx?.toFixed(0)??'--'}</td>
       <td style="color:${ind?.volRatio>2?'var(--r)':ind?.volRatio>1.5?'var(--a)':'var(--t2)'}">${ind?.volRatio?.toFixed(2)??'--'}x</td>
-      <td><span class="mtf-align-badge ${mtf>=4?'strong':mtf>=2?'moderate':'weak'}">${mtf}/5</span></td>
+      <td><span class="mtf-align-badge ${mtf>=5?'strong':mtf>=3?'moderate':'weak'}">${mtf}/7</span></td>
       <td><div class="sc-bar"><div class="sc-fill" style="left:0;width:${scorePct}%;background:${scoreColor}"></div></div></td>
     </tr>`;
   }).join('');
