@@ -2471,9 +2471,24 @@ function renderRadar(){
     const sig=S.signals[a.sym]?.[S.currentTF];
     const sc=sigClass(sig?.signal);
     const ind=S.indicators[a.sym]?.[S.currentTF];
-    const logoHTML=a.logo?`<img src="${a.logo}" alt="${a.tk}" style="width:20px;height:20px;border-radius:50%" onerror="this.style.display='none'">`:'';
-    return`<div class="radar-cell">
-      <div style="display:flex;align-items:center;gap:6px">
+    const px=S.prices[a.sym];
+    const logoHTML=a.logo?`<img src="${a.logo}" alt="${a.tk}" style="width:22px;height:22px;border-radius:50%;box-shadow:0 0 6px rgba(0,0,0,0.4)" onerror="this.style.display='none'">`:'';
+    // Raw data for radar
+    const rawData = `<div class="radar-raw">
+      <div style="font-family:var(--raj);font-size:10px;color:var(--g);margin-bottom:4px;letter-spacing:0.1em">📊 RAW RADAR VALUES — ${a.tk}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 10px">
+        <span style="color:var(--t3)">RSI</span><span style="color:${ind?.rsi<30?'var(--g)':ind?.rsi>70?'var(--r)':'var(--t)'}">${ind?.rsi?.toFixed(1)??'--'} → ${(ind?.rsi!==null?(ind.rsi/100*100).toFixed(0):'50')}%</span>
+        <span style="color:var(--t3)">MACD</span><span style="color:${ind?.macd?.hist>0?'var(--g)':'var(--r)'}">${ind?.macd?.hist?.toFixed(5)??'--'} → ${ind?.macd?(ind.macd.hist>0?'75':'25'):'50'}%</span>
+        <span style="color:var(--t3)">EMA Stack</span><span style="color:${ind?.ema9>ind?.ema21?'var(--g)':'var(--r)'}">${ind?.ema9>ind?.ema21?'Bull ▲':'Bear ▼'} → ${ind?.ema9>ind?.ema21?'75':'25'}%</span>
+        <span style="color:var(--t3)">BB%</span><span style="color:var(--t)">${ind?.bb&&px?((px.price-ind.bb.lower)/(ind.bb.upper-ind.bb.lower)*100).toFixed(0)+'%':'--'}</span>
+        <span style="color:var(--t3)">Volume</span><span style="color:${ind?.volRatio>2?'var(--r)':'var(--t)'}">${ind?.volRatio?.toFixed(2)??'--'}x → ${ind?.volRatio?(Math.min(ind.volRatio/3,1)*100).toFixed(0):'50'}%</span>
+        <span style="color:var(--t3)">ADX</span><span style="color:${ind?.adx?.adx>25?'var(--g)':'var(--t3)'}">${ind?.adx?.adx?.toFixed(1)??'--'} → ${ind?.adx?(Math.min(ind.adx.adx/100,1)*100).toFixed(0):'0'}%</span>
+        <span style="color:var(--t3)">Ichimoku</span><span style="color:${ind?.ichimoku?.priceAboveCloud?'var(--g)':ind?.ichimoku?.priceBelowCloud?'var(--r)':'var(--a)'}">${ind?.ichimoku?(ind.ichimoku.priceAboveCloud?'Above ↑':ind.ichimoku.priceBelowCloud?'Below ↓':'Inside'):'--'}</span>
+        <span style="color:var(--t3)">MFI</span><span style="color:${ind?.mfi<25?'var(--g)':ind?.mfi>75?'var(--r)':'var(--t)'}">${ind?.mfi?.toFixed(1)??'--'} → ${ind?.mfi!==null?(ind.mfi).toFixed(0):'50'}%</span>
+      </div>
+    </div>`;
+    return`<div class="radar-cell" onclick="this.classList.toggle('show-raw')">
+      <div style="display:flex;align-items:center;gap:8px">
         ${logoHTML}
         <div class="radar-title" style="color:${a.color}">${a.tk}</div>
       </div>
@@ -2483,6 +2498,8 @@ function renderRadar(){
         <span style="font-size:10px;color:var(--t2)">${sig?.conf??0}%</span>
         <span style="font-size:9px;color:${sig?.score>0?'var(--g)':'var(--r)'}">${sig?.score>0?'+':''}${sig?.score??0}</span>
       </div>
+      ${rawData}
+      <div style="font-size:7px;color:var(--t3);opacity:0.6;margin-top:2px">اضغط لعرض القيم الخام</div>
     </div>`;
   }).join('');
   ASSETS.forEach(a=>drawRadarChart(a.sym));
