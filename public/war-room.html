@@ -2901,7 +2901,7 @@ function renderScreener() {
     return `<tr onclick="selectCard('${a.sym}');switchTab('matrix',document.querySelector('.tab-btn'))">
       <td style="color:${a.color}">${a.tk}<span style="color:var(--t2);font-size:9px;margin-left:4px">${a.name.slice(0,8)}</span></td>
       <td style="font-family:var(--orb)">$${fmtP(px?.price)}</td>
-      <td style="color:${chg>=0?'var(--g)':'var(--r)';font-weight:600}">${chg>=0?'+':''}${chg.toFixed(2)}%</td>
+      <td style="color:${chg>=0?'var(--g)':'var(--r)'};font-weight:600">${chg>=0?'+':''}${chg.toFixed(2)}%</td>
       <td><span class="sig-badge sig-${sc}">${sig?.signal??'WAIT'}</span></td>
       <td style="color:${scoreColor};font-weight:700">${score>0?'+':''}${score}</td>
       <td style="color:${sig?.conf>=75?'var(--g)':sig?.conf>=55?'var(--a)':'var(--r)'}">${sig?.conf??0}%</td>
