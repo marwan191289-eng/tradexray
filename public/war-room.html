@@ -2345,12 +2345,21 @@ function renderHeatmap(){
     const chColor=ch>=0?'var(--g)':'var(--r)';
     const sig=S.signals[a.sym]?.[S.currentTF];
     const sc=sigClass(sig?.signal);
-    return`<div class="hm-cell" onclick="selectCard('${a.sym}')">
+    const ind=S.indicators[a.sym]?.[S.currentTF];
+    const rsiVal=ind?.rsi?.toFixed(0)??'--';
+    const adxVal=ind?.adx?.adx?.toFixed(0)??'--';
+    const logoHTML=a.logo?`<img src="${a.logo}" alt="${a.tk}" style="width:24px;height:24px;border-radius:50%;margin-bottom:4px" onerror="this.style.display='none'">`:'';
+    return`<div class="hm-cell" onclick="selectCard('${a.sym}');switchTab('matrix',document.querySelector('.tab-btn'))">
       <div class="hm-overlay" style="background:${bg}"></div>
+      ${logoHTML}
       <div class="hm-ticker" style="color:${a.color}">${a.tk}</div>
       <div class="hm-price">$${fmtP(px.price)}</div>
       <div class="hm-change" style="color:${chColor}">${ch>=0?'+':''}${ch.toFixed(2)}%</div>
-      <div class="hm-vol" style="color:var(--t3)">Vol ${S.indicators[a.sym]?.[S.currentTF]?.volRatio?.toFixed(1)??'--'}x</div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:6px;font-size:9px">
+        <span style="color:var(--t3)">RSI</span><span style="color:${ind?.rsi<35?'var(--g)':ind?.rsi>65?'var(--r)':'var(--t2)'}">${rsiVal}</span>
+        <span style="color:var(--t3)">ADX</span><span style="color:${ind?.adx?.adx>25?'var(--g)':'var(--t2)'}">${adxVal}</span>
+        <span style="color:var(--t3)">Vol</span><span style="color:${ind?.volRatio>2?'var(--r)':'var(--t2)'}">${ind?.volRatio?.toFixed(1)??'--'}x</span>
+      </div>
       <div class="hm-sig"><span class="sig-badge sig-${sc}">${sig?.signal??'WAIT'}</span></div>
     </div>`;
   }).join('');
@@ -2366,10 +2375,19 @@ function renderRadar(){
   grid.innerHTML=ASSETS.map(a=>{
     const sig=S.signals[a.sym]?.[S.currentTF];
     const sc=sigClass(sig?.signal);
+    const ind=S.indicators[a.sym]?.[S.currentTF];
+    const logoHTML=a.logo?`<img src="${a.logo}" alt="${a.tk}" style="width:20px;height:20px;border-radius:50%" onerror="this.style.display='none'">`:'';
     return`<div class="radar-cell">
-      <div class="radar-title" style="color:${a.color}">${a.tk}</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        ${logoHTML}
+        <div class="radar-title" style="color:${a.color}">${a.tk}</div>
+      </div>
       <div class="radar-chart"><svg id="radar-${a.sym}" width="170" height="170" viewBox="0 0 170 170"></svg></div>
-      <div class="radar-score"><span class="sig-badge sig-${sc}">${sig?.signal??'WAIT'}</span></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="sig-badge sig-${sc}">${sig?.signal??'WAIT'}</span>
+        <span style="font-size:10px;color:var(--t2)">${sig?.conf??0}%</span>
+        <span style="font-size:9px;color:${sig?.score>0?'var(--g)':'var(--r)'}">${sig?.score>0?'+':''}${sig?.score??0}</span>
+      </div>
     </div>`;
   }).join('');
   ASSETS.forEach(a=>drawRadarChart(a.sym));
