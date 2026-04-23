@@ -1530,27 +1530,131 @@ const BINANCE_MIRRORS = [
   'https://api3.binance.com/api/v3',
   'https://api4.binance.com/api/v3',
 ];
+const ANALYSIS_TFS = ['5m','15m','1h','4h','1d','1w','1M'];
 let _activeMirror = 0;
 
-async function fetchKlines(sym,interval='1h',limit=100, retries=2){
+function derivePriceFromKlines(sym){
+  const k1h=S.klines[sym]?.['1h'];
+  const k1d=S.klines[sym]?.['1d'];
+  const basis=k1h?.length?k1h:k1d;
+  if(!basis?.length)return null;
+  const last=basis[basis.length-1];
+  const dayBase=k1d?.length
+    ? (k1d[k1d.length-1]?.o ?? k1d[Math.max(0,k1d.length-2)]?.c ?? last.o ?? last.c)
+    : (k1h?.length>24 ? (k1h[k1h.length-24]?.o ?? k1h[k1h.length-24]?.c ?? last.o ?? last.c) : (last.o ?? last.c));
+  const open=Number.isFinite(+dayBase)?+dayBase:(last.o??last.c);
+  return {
+    price:+last.c,
+    open:+open,
+    high:+last.h,
+    low:+last.l,
+    vol:+last.v,
+    change:open?((+last.c-open)/open)*100:0,
+    source:'kline-fallback',
+    derived:true,
+  };
+}
+
+function applyPriceSnapshot(sym,snap){
+  if(!sym||!snap||!Number.isFinite(+snap.price))return false;
+  const prev=S.prices[sym]||{};
+  S.prices[sym]={
+    ...prev,
+    price:+snap.price,
+    open:Number.isFinite(+snap.open)?+snap.open:(prev.open??+snap.price),
+    high:Number.isFinite(+snap.high)?+snap.high:(prev.high??+snap.price),
+    low:Number.isFinite(+snap.low)?+snap.low:(prev.low??+snap.price),
+    vol:Number.isFinite(+snap.vol)?+snap.vol:(prev.vol??0),
+    change:Number.isFinite(+snap.change)?+snap.change:(prev.change??0),
+    source:snap.source||prev.source||'unknown',
+    derived:!!snap.derived,
+    ts:Date.now(),
+  };
+  return true;
+}
+
+function ensurePriceSnapshot(sym,force=false){
+  if(!force&&Number.isFinite(S.prices[sym]?.price))return true;
+  const snap=derivePriceFromKlines(sym);
+  return snap?applyPriceSnapshot(sym,snap):false;
+}
+
+async function fetchKlines(sym,interval='1h',limit=100,retries=2){
   for(let attempt=0; attempt<=retries; attempt++){
-    const base = BINANCE_MIRRORS[(_activeMirror + attempt) % BINANCE_MIRRORS.length];
+    const base=BINANCE_MIRRORS[(_activeMirror+attempt)%BINANCE_MIRRORS.length];
+    let timeout;
     try{
-      const controller = new AbortController();
-      const timeout = setTimeout(()=>controller.abort(), 8000);
-      const r=await fetch(`${base}/klines?symbol=${sym}&interval=${interval}&limit=${limit}`, {signal:controller.signal});
-      clearTimeout(timeout);
+      const controller=new AbortController();
+      timeout=setTimeout(()=>controller.abort(),8000);
+      const r=await fetch(`${base}/klines?symbol=${sym}&interval=${interval}&limit=${limit}`,{signal:controller.signal});
       if(!r.ok){ if(r.status===429){await new Promise(r=>setTimeout(r,1000*(attempt+1)));continue;} continue; }
       const d=await r.json();
       if(!Array.isArray(d)||!d.length) continue;
-      _activeMirror = (_activeMirror + attempt) % BINANCE_MIRRORS.length;
+      _activeMirror=(_activeMirror+attempt)%BINANCE_MIRRORS.length;
       return d.map(k=>({t:k[0],o:+k[1],h:+k[2],l:+k[3],c:+k[4],v:+k[5]}));
     }catch(e){
       if(attempt<retries) await new Promise(r=>setTimeout(r,500*(attempt+1)));
+    }finally{
+      clearTimeout(timeout);
     }
   }
   console.warn(`fetchKlines failed: ${sym} ${interval}`);
   return null;
+}
+
+async function fetchTickerSnapshot(sym,retries=2){
+  for(let attempt=0; attempt<=retries; attempt++){
+    const base=BINANCE_MIRRORS[(_activeMirror+attempt)%BINANCE_MIRRORS.length];
+    let timeout;
+    try{
+      const controller=new AbortController();
+      timeout=setTimeout(()=>controller.abort(),7000);
+      const r=await fetch(`${base}/ticker/24hr?symbol=${sym}`,{signal:controller.signal});
+      if(!r.ok){ if(r.status===429||r.status>=500){await new Promise(r=>setTimeout(r,700*(attempt+1)));continue;} continue; }
+      const d=await r.json();
+      if(!d?.symbol||!Number.isFinite(+d.lastPrice)) continue;
+      _activeMirror=(_activeMirror+attempt)%BINANCE_MIRRORS.length;
+      return {sym,data:d};
+    }catch(e){
+      if(attempt<retries) await new Promise(r=>setTimeout(r,400*(attempt+1)));
+    }finally{
+      clearTimeout(timeout);
+    }
+  }
+  return {sym,data:null};
+}
+
+async function fetchTickerSnapshots(symbols=ASSETS.filter(a=>!a.external).map(a=>a.sym)){
+  const tasks=symbols.map(sym=>async()=>fetchTickerSnapshot(sym,2));
+  const results=await fetchBatch(tasks,5);
+  let loaded=0;
+  results.forEach((result,idx)=>{
+    const sym=symbols[idx];
+    const data=result?.data;
+    if(data&&applyPriceSnapshot(sym,{
+      price:+data.lastPrice,
+      open:+data.openPrice,
+      high:+data.highPrice,
+      low:+data.lowPrice,
+      vol:+data.volume,
+      change:+data.priceChangePercent,
+      source:'binance-24hr',
+    })){
+      loaded++;
+      return;
+    }
+    if(ensurePriceSnapshot(sym,true)) loaded++;
+  });
+  return loaded;
+}
+
+function regenerateSignals(symbols=ASSETS.filter(a=>!a.external).map(a=>a.sym),tfs=ANALYSIS_TFS){
+  symbols.forEach(sym=>{
+    S.signals[sym]=S.signals[sym]||{};
+    tfs.forEach(tf=>{
+      if(S.indicators[sym]?.[tf])S.signals[sym][tf]=generateSignal(sym,tf);
+    });
+  });
 }
 
 // Fetch a batch of promises with concurrency limit
@@ -1568,7 +1672,7 @@ async function fetchBatch(tasks, concurrency=4){
 }
 
 async function initKlines(){
-  const tfs=['5m','15m','1h','4h','1d','1w','1M'];
+  const tfs=ANALYSIS_TFS;
   const nonExtAssets=ASSETS.filter(a=>!a.external);
   
   // Init state
@@ -1604,22 +1708,26 @@ async function initKlines(){
     if(!r||!r.k) return;
     S.klines[r.sym][r.tf]=r.k;
     S.indicators[r.sym][r.tf]=calcAll(r.sym,r.tf);
-    S.signals[r.sym][r.tf]=generateSignal(r.sym,r.tf);
   });
   
   // Build history from 1h klines
   nonExtAssets.forEach(a=>{
     if(S.klines[a.sym]['1h'])
       S.history[a.sym]=S.klines[a.sym]['1h'].slice(-80).map(k=>k.c);
+    ensurePriceSnapshot(a.sym,true);
   });
+
+  await fetchTickerSnapshots(nonExtAssets.map(a=>a.sym));
+  regenerateSignals(nonExtAssets.map(a=>a.sym),tfs);
   
   // Log results
   const loaded=nonExtAssets.filter(a=>Object.keys(S.klines[a.sym]).length>0).length;
-  console.log(`initKlines: ${loaded}/${nonExtAssets.length} assets loaded`);
+  const priced=nonExtAssets.filter(a=>Number.isFinite(S.prices[a.sym]?.price)).length;
+  console.log(`initKlines: ${loaded}/${nonExtAssets.length} assets loaded · ${priced}/${nonExtAssets.length} priced`);
 }
 
 async function refreshKlines(){
-  const tfs=['5m','15m','1h','4h','1d','1w','1M'];
+  const tfs=ANALYSIS_TFS;
   const tasks=[];
   ASSETS.filter(a=>!a.external).forEach(a=>{
     tfs.forEach(tf=>{
@@ -1639,8 +1747,11 @@ async function refreshKlines(){
     });
     if(S.klines[r.sym][r.tf].length>250)S.klines[r.sym][r.tf].splice(0,S.klines[r.sym][r.tf].length-250);
     S.indicators[r.sym][r.tf]=calcAll(r.sym,r.tf);
-    S.signals[r.sym][r.tf]=generateSignal(r.sym,r.tf);
   });
+  const syms=ASSETS.filter(a=>!a.external).map(a=>a.sym);
+  syms.forEach(sym=>ensurePriceSnapshot(sym,true));
+  await fetchTickerSnapshots(syms);
+  regenerateSignals(syms,tfs);
 }
 
 async function fetchFG(){
@@ -1719,7 +1830,15 @@ function connectWS(){
   try { ws=new WebSocket(BWS+streams); }
   catch(e){ setWS('err'); scheduleReconnect(); return; }
   S.ws=ws;
-  ws.onopen=()=>{ _wsRetry=0; setWS('live'); if(typeof DQ!=='undefined'){ DQ.wsConnectedAt=Date.now(); DQ.wsLastMsg=Date.now(); } };
+  ws.onopen=async ()=>{
+    _wsRetry=0; setWS('live');
+    if(typeof DQ!=='undefined'){ DQ.wsConnectedAt=Date.now(); DQ.wsLastMsg=Date.now(); }
+    try{
+      await fetchTickerSnapshots();
+      regenerateSignals();
+      renderCards();renderDetail(S.selected);updateCmdStats();renderHeatmap();renderRadar();renderScreener();
+    }catch(e){console.warn('WS bootstrap snapshot failed:', e);}
+  };
   ws.onerror=()=>setWS('err');
   ws.onclose=()=>{ setWS('err'); scheduleReconnect(); };
   ws.onmessage=({data})=>{
@@ -1732,7 +1851,7 @@ function connectWS(){
       if(!S.history[sym])S.history[sym]=[];
       S.history[sym].push(price);
       if(S.history[sym].length>120)S.history[sym].shift();
-      const tfs=['5m','15m','1h','4h','1d','1w','1M'];
+      const tfs=ANALYSIS_TFS;
       tfs.forEach(tf=>{
         const k=S.klines[sym]?.[tf];
         if(k?.length){const last=k[k.length-1];last.c=price;if(price>last.h)last.h=price;if(price<last.l)last.l=price;last.v=+d.v;}
@@ -4058,7 +4177,7 @@ async function init(){
   classifyRegime();
   ASSETS.forEach(a => {
     if (a.external) return;
-    ['5m','15m','1h','4h','1d','1w','1M'].forEach(tf => {
+    ANALYSIS_TFS.forEach(tf => {
       if (S.indicators[a.sym]?.[tf]) S.signals[a.sym][tf] = generateSignal(a.sym, tf);
     });
   });
