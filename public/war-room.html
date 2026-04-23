@@ -3200,14 +3200,14 @@ async function generateAIBriefing() {
   const a    = ASSETS.find(x => x.sym === sym);
   const btn  = document.getElementById('genBriefBtn');
 
-  // Update metrics bar regardless
+  // Update metrics bar
   if (sig && ind && px) {
     const sc = sigClass(sig.signal);
     document.getElementById('briefingMetrics').innerHTML = [
-      { label:'Signal',     val: sig.signal, cls: sc==='buy'?'var(--g)':sc==='sell'?'var(--r)':'var(--a)', sub:'Current' },
+      { label:'Signal',     val: sig.signal, cls: sc==='buy'?'var(--g)':sc==='sell'?'var(--r)':'var(--a)', sub:`Quality ${sig.quality||'--'}` },
       { label:'Score',      val: (sig.score>0?'+':'')+sig.score, cls: sig.score>0?'var(--g)':sig.score<0?'var(--r)':'var(--a)', sub:'out of ±38' },
       { label:'Confidence', val: sig.conf+'%', cls: sig.conf>75?'var(--g)':sig.conf>55?'var(--a)':'var(--r)', sub:'calibrated' },
-      { label:'MTF Align',  val: sig.tfsAligned+'/4', cls: sig.tfsAligned>=3?'var(--g)':sig.tfsAligned>=2?'var(--a)':'var(--r)', sub:'TFs' },
+      { label:'MTF Align',  val: sig.tfsAligned+'/6', cls: sig.tfsAligned>=4?'var(--g)':sig.tfsAligned>=2?'var(--a)':'var(--r)', sub:'TFs aligned' },
       { label:'RSI(14)',    val: ind.rsi?.toFixed(1)??'--', cls: ind.rsi<35?'var(--g)':ind.rsi>65?'var(--r)':'var(--t)', sub:'momentum' },
       { label:'Regime',     val: REGIME.current.replace('_',' '), cls: regimeColor(REGIME.current), sub: REGIME.sub.slice(0,20) },
     ].map(m => `<div class="briefing-metric"><div class="bm-label">${m.label}</div><div class="bm-value" style="color:${m.cls}">${m.val}</div><div class="bm-sub">${m.sub}</div></div>`).join('');
@@ -3216,78 +3216,64 @@ async function generateAIBriefing() {
   const out = document.getElementById('briefingOutput');
   btn.classList.add('loading');
 
-  // Build comprehensive context JSON for Claude
-  const ctx = buildBriefingContext(sym, tf);
-
-  const langInstr = lang === 'ar'
-    ? 'Write the entire briefing in Arabic (العربية). Use professional financial Arabic terminology.'
-    : 'Write in English.';
-
-  const prompt = `You are an expert quantitative crypto market analyst providing a professional institutional-grade briefing.
-
-${langInstr}
-
-Asset: ${a?.name} (${a?.tk}/USDT)
-Timeframe: ${tf.toUpperCase()}
-Generated: ${new Date().toLocaleString()}
-
-LIVE MARKET DATA:
-${JSON.stringify(ctx, null, 2)}
-
-Provide a comprehensive tactical briefing covering:
-1. **Signal Assessment** — Current signal strength, conviction level, and quality tier
-2. **Momentum Analysis** — RSI, Stochastic RSI, Williams %R, CCI, MFI interpretation
-3. **Trend Structure** — EMA alignment, MACD crossovers, ADX trend strength, Parabolic SAR
-4. **Ichimoku Analysis** — Cloud position, TK cross, Kumo structure
-5. **Volatility & Price Structure** — Bollinger Bands, VWAP, ATR context
-6. **Volume Analysis** — OBV trend, volume ratio, money flow conviction
-7. **Key Levels** — Pivot points, Fibonacci retracements, critical support/resistance
-8. **Divergence Alerts** — RSI divergence detection results
-9. **Multi-Timeframe Confluence** — Alignment across 5m/15m/1h/4h/1d
-10. **Risk Management** — ATR-based entry zone, stop loss, TP1/TP2/TP3, risk:reward ratio
-11. **Market Regime Context** — Current regime, Fear&Greed, cross-asset breadth
-12. **Tactical Recommendation** — Clear directional view with invalidation level
-
-Be precise, honest, and include specific prices. Flag any warnings (counter-trend, data quality, regime conflict). Use ⚡ for strong signals and ⚠ for warnings.`;
-
-  try {
-    out.innerHTML = '<span class="brief-ai-badge">CLAUDE AI · STREAMING</span><br><span class="brief-cursor"></span>';
+  // Use the comprehensive template briefing (AI edge function can be connected later)
+  setTimeout(() => {
+    const brief = buildBriefing(sym, tf);
     
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1500,
-        stream: false,
-        messages: [{ role: 'user', content: prompt }],
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API ${response.status}: ${await response.text()}`);
+    // Add Volume Delta section
+    const k = S.klines[sym]?.[tf];
+    const vd = k ? volumeDelta(k, 20) : null;
+    let vdSection = '';
+    if (vd) {
+      vdSection = `\n\n<span style="color:var(--a);font-weight:600">[ VOLUME DELTA — ${tf.toUpperCase()} ]</span>\n`;
+      vdSection += `Buy Pressure:  <span style="color:var(--g)">${vd.buyPct.toFixed(1)}%</span>  |  Sell Pressure: <span style="color:var(--r)">${(100-vd.buyPct).toFixed(1)}%</span>\n`;
+      vdSection += vd.buyPct > 60 ? '<span style="color:var(--g)">Strong buying dominance — confirms upward momentum.</span>\n' :
+                   vd.buyPct < 40 ? '<span style="color:var(--r)">Strong selling dominance — confirms downward pressure.</span>\n' :
+                   '<span style="color:var(--a)">Balanced volume — no clear conviction from order flow.</span>\n';
     }
 
-    const data = await response.json();
-    const text = data.content?.map(b => b.text || '').join('') || '';
+    // Add Risk Plan
+    const rp = riskPlan(sym, tf, 10000, 2);
+    let rpSection = '';
+    if (rp) {
+      rpSection = `\n<span style="color:var(--a);font-weight:600">[ POSITION SIZING — $10K account, 2% risk ]</span>\n`;
+      rpSection += `Direction: <span style="color:${rp.direction==='LONG'?'var(--g)':'var(--r)'}"><b>${rp.direction}</b></span>\n`;
+      rpSection += `Entry:  <span style="color:var(--t)">$${fmtP(rp.entry)}</span>\n`;
+      rpSection += `Stop:   <span style="color:var(--r)">$${fmtP(rp.stop)}</span> (${rp.invalidationPct.toFixed(2)}% risk)\n`;
+      rpSection += `TP1:    <span style="color:var(--g)">$${fmtP(rp.tp1)}</span> (R:R ${rp.rr.toFixed(1)})\n`;
+      rpSection += `TP2:    <span style="color:var(--g)">$${fmtP(rp.tp2)}</span>\n`;
+      rpSection += `TP3:    <span style="color:var(--g)">$${fmtP(rp.tp3)}</span>\n`;
+      rpSection += `Units:  <span style="color:var(--t)">${rp.units.toFixed(4)}</span> | Notional: <span style="color:var(--a)">$${rp.notional.toFixed(0)}</span>\n`;
+    }
 
-    // Render with markdown-like formatting
-    const formatted = text
-      .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--t)">$1</strong>')
-      .replace(/^#{1,3}\s+(.+)$/gm, '<span style="color:var(--g);font-family:var(--orb);font-size:10px;letter-spacing:0.1em;display:block;margin-top:10px">$1</span>')
-      .replace(/⚡/g, '<span style="color:var(--g)">⚡</span>')
-      .replace(/⚠/g, '<span style="color:var(--a)">⚠</span>')
-      .replace(/\n/g, '<br>');
+    // Add Correlation insight
+    const corrInsight = buildCorrInsight(sym);
 
-    out.innerHTML = `<div class="brief-ai-badge">CLAUDE AI · ${new Date().toLocaleTimeString()}</div><br>${formatted}`;
+    out.innerHTML = `<div class="brief-ai-badge">QUANTITATIVE ENGINE · 7-TF · ${new Date().toLocaleTimeString()}</div><br>${brief}${vdSection}${rpSection}${corrInsight}`;
+    btn.classList.remove('loading');
+  }, 300);
+}
 
-  } catch (err) {
-    // Fallback to template briefing
-    console.warn('AI Briefing API error:', err.message);
-    out.innerHTML = `<span style="color:var(--a);font-size:10px">⚠ AI API unavailable — showing template analysis. Error: ${err.message}</span>\n\n${buildBriefing(sym, tf)}`;
-  }
-
-  btn.classList.remove('loading');
+// Build correlation insight for a specific symbol
+function buildCorrInsight(sym) {
+  const { syms, matrix } = computeCorrelations(20);
+  if (!matrix[sym]) return '';
+  let highest = { sym: '', val: -Infinity };
+  let lowest = { sym: '', val: Infinity };
+  syms.forEach(s => {
+    if (s === sym) return;
+    const v = matrix[sym]?.[s];
+    if (v === null || v === undefined) return;
+    if (v > highest.val) highest = { sym: s, val: v };
+    if (v < lowest.val) lowest = { sym: s, val: v };
+  });
+  if (highest.val === -Infinity) return '';
+  const hTk = ASSETS.find(a=>a.sym===highest.sym)?.tk ?? highest.sym;
+  const lTk = ASSETS.find(a=>a.sym===lowest.sym)?.tk ?? lowest.sym;
+  let section = `\n<span style="color:var(--a);font-weight:600">[ CORRELATION CONTEXT ]</span>\n`;
+  section += `Highest correlation: <span style="color:var(--g)">${hTk}</span> (${highest.val.toFixed(3)}) — moves together\n`;
+  section += `Lowest correlation:  <span style="color:var(--r)">${lTk}</span> (${lowest.val.toFixed(3)}) — divergent/hedge\n`;
+  return section;
 }
 
 // Builds a structured context object for the AI prompt
