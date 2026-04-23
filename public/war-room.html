@@ -1830,7 +1830,15 @@ function connectWS(){
   try { ws=new WebSocket(BWS+streams); }
   catch(e){ setWS('err'); scheduleReconnect(); return; }
   S.ws=ws;
-  ws.onopen=()=>{ _wsRetry=0; setWS('live'); if(typeof DQ!=='undefined'){ DQ.wsConnectedAt=Date.now(); DQ.wsLastMsg=Date.now(); } };
+  ws.onopen=async ()=>{
+    _wsRetry=0; setWS('live');
+    if(typeof DQ!=='undefined'){ DQ.wsConnectedAt=Date.now(); DQ.wsLastMsg=Date.now(); }
+    try{
+      await fetchTickerSnapshots();
+      regenerateSignals();
+      renderCards();renderDetail(S.selected);updateCmdStats();renderHeatmap();renderRadar();renderScreener();
+    }catch(e){console.warn('WS bootstrap snapshot failed:', e);}
+  };
   ws.onerror=()=>setWS('err');
   ws.onclose=()=>{ setWS('err'); scheduleReconnect(); };
   ws.onmessage=({data})=>{
@@ -1843,7 +1851,7 @@ function connectWS(){
       if(!S.history[sym])S.history[sym]=[];
       S.history[sym].push(price);
       if(S.history[sym].length>120)S.history[sym].shift();
-      const tfs=['5m','15m','1h','4h','1d','1w','1M'];
+      const tfs=ANALYSIS_TFS;
       tfs.forEach(tf=>{
         const k=S.klines[sym]?.[tf];
         if(k?.length){const last=k[k.length-1];last.c=price;if(price>last.h)last.h=price;if(price<last.l)last.l=price;last.v=+d.v;}
@@ -4169,7 +4177,7 @@ async function init(){
   classifyRegime();
   ASSETS.forEach(a => {
     if (a.external) return;
-    ['5m','15m','1h','4h','1d','1w','1M'].forEach(tf => {
+    ANALYSIS_TFS.forEach(tf => {
       if (S.indicators[a.sym]?.[tf]) S.signals[a.sym][tf] = generateSignal(a.sym, tf);
     });
   });
