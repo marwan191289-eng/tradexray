@@ -836,7 +836,11 @@ const BREST = 'https://api.binance.com/api/v3';
 const BWS   = 'wss://stream.binance.com:9443/stream?streams=';
 const GECKO = 'https://api.coingecko.com/api/v3';
 const FNG   = 'https://api.alternative.me/fng/?limit=1';
-const NEWS_URL = 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fcointelegraph.com%2Frss&api_key=free&count=30';
+const NEWS_FEEDS = [
+  'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fcointelegraph.com%2Frss&count=20',
+  'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.coindesk.com%2Farc%2Foutboundfeeds%2Frss%2F&count=20',
+  'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fcryptonews.com%2Fnews%2Ffeed%2F&count=15',
+];
 
 // ═══════════════════════════════════════════════════════════
 // STATE
@@ -1414,21 +1418,47 @@ async function fetchMarket(){
 
 async function fetchNews(){
   try{
-    const r=await fetch(NEWS_URL);const d=await r.json();
-    if(d?.items?.length){
-      S.news=d.items.map(item=>{
-        const title=item.title||'';
-        const tl=title.toLowerCase();
-        let sentiment='neu';
-        const bullW=['bull','pump','surge','soar','rally','gain','breakout','ath','rise','moon','spike','positive'];
-        const bearW=['bear','dump','crash','fall','drop','plunge','sell','fear','risk','warn','loss','ban','hack'];
-        if(bullW.some(w=>tl.includes(w)))sentiment='pos';
-        else if(bearW.some(w=>tl.includes(w)))sentiment='neg';
-        return{title,link:item.link,pubDate:item.pubDate,source:item.author||'CoinTelegraph',thumbnail:item.thumbnail,sentiment};
-      });
-      renderNews();
+    const allItems = [];
+    for (const url of NEWS_FEEDS) {
+      try {
+        const r = await fetch(url);
+        const d = await r.json();
+        if (d?.items?.length) {
+          d.items.forEach(item => {
+            const title = item.title || '';
+            const tl = title.toLowerCase();
+            let sentiment = 'neu';
+            const bullW = ['bull','pump','surge','soar','rally','gain','breakout','ath','rise','moon','spike','positive','adoption','approve','etf','launch','partner','upgrade'];
+            const bearW = ['bear','dump','crash','fall','drop','plunge','sell','fear','risk','warn','loss','ban','hack','fraud','lawsuit','sec','fine','regulation','sanctions','war','conflict','attack'];
+            const geoW = ['war','sanctions','tariff','election','fed','rate','inflation','gdp','recession','geopolit','opec','treasury','congress','eu','china','trump','biden','powell'];
+            if (bullW.some(w => tl.includes(w))) sentiment = 'pos';
+            else if (bearW.some(w => tl.includes(w))) sentiment = 'neg';
+            const isGeo = geoW.some(w => tl.includes(w));
+            allItems.push({
+              title,
+              link: item.link,
+              pubDate: item.pubDate,
+              source: item.author || (url.includes('coindesk') ? 'CoinDesk' : url.includes('cryptonews') ? 'CryptoNews' : 'CoinTelegraph'),
+              thumbnail: item.thumbnail || item.enclosure?.link || '',
+              sentiment,
+              isGeo,
+            });
+          });
+        }
+      } catch(e) { console.warn('News feed error:', e); }
     }
-  }catch{}
+    // Remove duplicates by title
+    const seen = new Set();
+    S.news = allItems.filter(n => {
+      const key = n.title.slice(0,50).toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    // Sort by date, newest first
+    S.news.sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate));
+    renderNews();
+  } catch(e) { console.warn('News fetch failed:', e); }
 }
 
 // ═══════════════════════════════════════════════════════════
