@@ -507,6 +507,49 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 /* RAW DATA OVERLAY */
 .raw-data-overlay{position:absolute;inset:0;background:rgba(2,5,16,0.95);display:none;padding:10px;font-size:10px;color:var(--t2);overflow-y:auto;z-index:5;border-radius:var(--card-radius)}
 .raw-data-overlay.show{display:block}
+
+/* UNIFIED RAW DATA MODAL */
+.raw-modal-backdrop{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center}
+.raw-modal-backdrop.show{display:flex}
+.raw-modal{background:var(--bg2);border:1px solid var(--br2);border-radius:12px;max-width:520px;width:95%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.6);animation:tooltipIn 0.2s ease}
+.raw-modal-head{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--br2);position:sticky;top:0;background:var(--bg2);z-index:1;border-radius:12px 12px 0 0}
+.raw-modal-head h3{font-family:var(--raj);font-size:14px;font-weight:700;color:var(--g);letter-spacing:0.1em}
+.raw-modal-close{background:transparent;border:1px solid var(--br2);color:var(--t2);padding:4px 10px;cursor:pointer;font-family:var(--mono);font-size:10px;border-radius:4px;transition:all 0.15s}
+.raw-modal-close:hover{border-color:var(--g);color:var(--g)}
+.raw-modal-body{padding:18px}
+.raw-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--br);gap:12px}
+.raw-row:last-child{border-bottom:none}
+.raw-row-name{font-size:11px;color:var(--t2);font-weight:600;letter-spacing:0.04em}
+.raw-row-val{font-family:var(--orb);font-size:13px;font-weight:700;text-align:right}
+.raw-row-desc{font-size:9px;color:var(--t3);direction:rtl;text-align:right;line-height:1.5;margin-top:2px}
+
+/* LIGHT THEME */
+body.light{--bg:#F5F7FA;--bg2:#FFFFFF;--bg3:#F0F2F5;--bg4:#E8ECF0;--bg5:#DCE0E6;--t:#1A2030;--t2:#4A5568;--t3:#8A99A8;--t4:#B0BCC4;--br:rgba(0,0,0,0.06);--br2:rgba(0,0,0,0.12);--br3:rgba(0,0,0,0.2);--glass:rgba(255,255,255,0.90);--glass-border:rgba(0,0,0,0.06);--shadow:0 4px 20px rgba(0,0,0,0.08)}
+body.light{background:var(--bg);color:var(--t)}
+body.light::before{background:none}
+body.light::after{opacity:0}
+body.light .nav{background:linear-gradient(180deg,rgba(255,255,255,0.98),rgba(245,247,250,0.95));border-bottom-color:rgba(0,0,0,0.08);box-shadow:0 2px 20px rgba(0,0,0,0.06)}
+body.light .cmd-cell{background:linear-gradient(180deg,rgba(255,255,255,0.95),rgba(245,247,250,0.98))}
+body.light .cmd-val{color:#1A2030;text-shadow:none}
+body.light .asset-card{background:linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,249,252,0.95));border-color:rgba(0,0,0,0.06)}
+body.light .asset-card:hover{border-color:rgba(0,229,160,0.25);box-shadow:0 8px 30px rgba(0,0,0,0.08)}
+body.light .card-price{color:#1A2030}
+body.light .hm-cell{background:linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,249,252,0.95));border-color:rgba(0,0,0,0.06)}
+body.light .radar-cell{background:linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,249,252,0.95));border-color:rgba(0,0,0,0.06)}
+body.light .tabs{background:linear-gradient(180deg,rgba(255,255,255,0.95),rgba(248,249,252,0.98))}
+body.light .tab-btn{color:var(--t2)}
+body.light .tab-btn.active{color:var(--g);background:linear-gradient(180deg,rgba(0,229,160,0.06),transparent)}
+body.light .briefing-output{background:#fff;border-color:rgba(0,0,0,0.08);color:#4A5568}
+body.light .raw-modal{background:#fff;border-color:rgba(0,0,0,0.1)}
+body.light .raw-modal-head{background:#fff}
+body.light .corr-table td{background:rgba(255,255,255,0.8)}
+body.light ::-webkit-scrollbar-track{background:#F5F7FA}
+body.light ::-webkit-scrollbar-thumb{background:#C4CDD5}
+
+/* CORR LOADING BAR */
+.corr-loading{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg2);border-bottom:1px solid var(--br);font-size:10px;color:var(--t2)}
+.corr-loading-bar{flex:1;height:3px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.corr-loading-fill{height:100%;background:var(--g);width:0%;transition:width 0.3s;border-radius:2px}
 </style>
 </head>
 <body>
@@ -536,6 +579,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
     </div>
   </div>
   <div class="nav-right">
+    <button class="tf-btn" onclick="toggleTheme()" id="themeToggle" title="Light/Dark Mode" style="font-size:12px;padding:3px 8px;border-radius:3px">🌙</button>
     <button class="tf-btn" onclick="openDictionary()" title="قاموس المؤشرات" style="font-size:10px;padding:3px 8px;border-radius:3px">📖 Dictionary</button>
     <button class="tf-btn" onclick="openSEOPreview()" title="SEO & OG Preview" style="font-size:10px;padding:3px 8px;border-radius:3px">🔍 SEO</button>
     <div class="ws-status"><div class="ws-dot" id="wsDot"></div><span class="ws-label" id="wsLabel">Init...</span></div>
@@ -700,7 +744,18 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 
     <!-- CORRELATION TAB -->
     <div class="tab-content" id="tab-corr">
-      <div class="section-bar"><span class="section-title">Rolling Correlation Matrix (20-bar)</span></div>
+      <div class="section-bar"><span class="section-title">Rolling Correlation Matrix</span></div>
+      <div class="corr-controls" style="display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid var(--br);background:var(--bg2);align-items:center;flex-wrap:wrap">
+        <span style="font-size:9px;color:var(--t3);letter-spacing:0.12em;text-transform:uppercase;font-family:var(--raj)">TF</span>
+        <button class="tf-btn active" onclick="setCorrTF('1h',this)">1H</button>
+        <button class="tf-btn" onclick="setCorrTF('4h',this)">4H</button>
+        <button class="tf-btn" onclick="setCorrTF('1d',this)">1D</button>
+        <span style="flex:1"></span>
+        <span style="font-size:9px;color:var(--t3);letter-spacing:0.12em;text-transform:uppercase;font-family:var(--raj)">Window</span>
+        <button class="tf-btn active" onclick="setCorrWindow(20,this)">20</button>
+        <button class="tf-btn" onclick="setCorrWindow(40,this)">40</button>
+        <button class="tf-btn" onclick="setCorrWindow(60,this)">60</button>
+      </div>
       <div class="corr-matrix" id="corrMatrix"><div class="loading"><div class="ld-bar"><div class="ld-prog"></div></div><div class="ld-txt">Computing correlations...</div></div></div>
     </div>
 
@@ -1465,54 +1520,127 @@ function generateSignal(sym,tf){
 }
 
 // ═══════════════════════════════════════════════════════════
-// API LAYER
+// API LAYER — PARALLEL FETCHING WITH RETRY
 // ═══════════════════════════════════════════════════════════
 
-async function fetchKlines(sym,interval='1h',limit=100){
-  try{
-    const r=await fetch(`${BREST}/klines?symbol=${sym}&interval=${interval}&limit=${limit}`);
-    if(!r.ok)return null;
-    const d=await r.json();
-    return d.map(k=>({t:k[0],o:+k[1],h:+k[2],l:+k[3],c:+k[4],v:+k[5]}));
-  }catch{return null;}
+const BINANCE_MIRRORS = [
+  'https://api.binance.com/api/v3',
+  'https://api1.binance.com/api/v3',
+  'https://api2.binance.com/api/v3',
+  'https://api3.binance.com/api/v3',
+  'https://api4.binance.com/api/v3',
+];
+let _activeMirror = 0;
+
+async function fetchKlines(sym,interval='1h',limit=100, retries=2){
+  for(let attempt=0; attempt<=retries; attempt++){
+    const base = BINANCE_MIRRORS[(_activeMirror + attempt) % BINANCE_MIRRORS.length];
+    try{
+      const controller = new AbortController();
+      const timeout = setTimeout(()=>controller.abort(), 8000);
+      const r=await fetch(`${base}/klines?symbol=${sym}&interval=${interval}&limit=${limit}`, {signal:controller.signal});
+      clearTimeout(timeout);
+      if(!r.ok){ if(r.status===429){await new Promise(r=>setTimeout(r,1000*(attempt+1)));continue;} continue; }
+      const d=await r.json();
+      if(!Array.isArray(d)||!d.length) continue;
+      _activeMirror = (_activeMirror + attempt) % BINANCE_MIRRORS.length;
+      return d.map(k=>({t:k[0],o:+k[1],h:+k[2],l:+k[3],c:+k[4],v:+k[5]}));
+    }catch(e){
+      if(attempt<retries) await new Promise(r=>setTimeout(r,500*(attempt+1)));
+    }
+  }
+  console.warn(`fetchKlines failed: ${sym} ${interval}`);
+  return null;
+}
+
+// Fetch a batch of promises with concurrency limit
+async function fetchBatch(tasks, concurrency=4){
+  const results=[];
+  let i=0;
+  async function worker(){
+    while(i<tasks.length){
+      const idx=i++;
+      results[idx]=await tasks[idx]();
+    }
+  }
+  await Promise.all(Array.from({length:Math.min(concurrency,tasks.length)},()=>worker()));
+  return results;
 }
 
 async function initKlines(){
   const tfs=['5m','15m','1h','4h','1d','1w','1M'];
-  for(const a of ASSETS){
-    S.klines[a.sym]={};S.indicators[a.sym]={};S.signals[a.sym]={};
-    if(a.external) continue; // External assets (CoinGecko) handled separately
-    for(const tf of tfs){
+  const nonExtAssets=ASSETS.filter(a=>!a.external);
+  
+  // Init state
+  ASSETS.forEach(a=>{S.klines[a.sym]={};S.indicators[a.sym]={};S.signals[a.sym]={};});
+  
+  // Build task list: fetch all assets × all timeframes
+  const tasks=[];
+  nonExtAssets.forEach(a=>{
+    tfs.forEach(tf=>{
       const limit=tf==='5m'?60:tf==='15m'?100:tf==='4h'?100:tf==='1d'?200:tf==='1w'?100:tf==='1M'?60:120;
-      const k=await fetchKlines(a.sym,tf,limit);
-      if(k){
-        S.klines[a.sym][tf]=k;
-        S.indicators[a.sym][tf]=calcAll(a.sym,tf);
-        S.signals[a.sym][tf]=generateSignal(a.sym,tf);
-      }
-    }
+      tasks.push(async ()=>{
+        const k=await fetchKlines(a.sym,tf,limit);
+        return {sym:a.sym,tf,k};
+      });
+    });
+  });
+  
+  // Update loading status
+  const ldTxt=document.querySelector('.ld-txt');
+  let done=0;
+  const origTasks=tasks.map((fn,idx)=>async ()=>{
+    const r=await fn();
+    done++;
+    if(ldTxt)ldTxt.textContent=`Loading data... ${done}/${tasks.length} (${((done/tasks.length)*100).toFixed(0)}%)`;
+    return r;
+  });
+  
+  // Run with concurrency of 6 (Binance allows burst)
+  const results=await fetchBatch(origTasks, 6);
+  
+  // Process results
+  results.forEach(r=>{
+    if(!r||!r.k) return;
+    S.klines[r.sym][r.tf]=r.k;
+    S.indicators[r.sym][r.tf]=calcAll(r.sym,r.tf);
+    S.signals[r.sym][r.tf]=generateSignal(r.sym,r.tf);
+  });
+  
+  // Build history from 1h klines
+  nonExtAssets.forEach(a=>{
     if(S.klines[a.sym]['1h'])
       S.history[a.sym]=S.klines[a.sym]['1h'].slice(-80).map(k=>k.c);
-  }
+  });
+  
+  // Log results
+  const loaded=nonExtAssets.filter(a=>Object.keys(S.klines[a.sym]).length>0).length;
+  console.log(`initKlines: ${loaded}/${nonExtAssets.length} assets loaded`);
 }
 
 async function refreshKlines(){
   const tfs=['5m','15m','1h','4h','1d','1w','1M'];
-  for(const a of ASSETS){
-    if(a.external) continue;
-    for(const tf of tfs){
-      const fresh=await fetchKlines(a.sym,tf,8);
-      if(!fresh||!S.klines[a.sym]?.[tf])continue;
-      fresh.forEach(nc=>{
-        const idx=S.klines[a.sym][tf].findIndex(k=>k.t===nc.t);
-        if(idx>=0)S.klines[a.sym][tf][idx]=nc;
-        else S.klines[a.sym][tf].push(nc);
+  const tasks=[];
+  ASSETS.filter(a=>!a.external).forEach(a=>{
+    tfs.forEach(tf=>{
+      tasks.push(async ()=>{
+        const fresh=await fetchKlines(a.sym,tf,8,1);
+        return {sym:a.sym,tf,fresh};
       });
-      if(S.klines[a.sym][tf].length>250)S.klines[a.sym][tf].splice(0,S.klines[a.sym][tf].length-250);
-      S.indicators[a.sym][tf]=calcAll(a.sym,tf);
-      S.signals[a.sym][tf]=generateSignal(a.sym,tf);
-    }
-  }
+    });
+  });
+  const results=await fetchBatch(tasks,6);
+  results.forEach(r=>{
+    if(!r||!r.fresh||!S.klines[r.sym]?.[r.tf]) return;
+    r.fresh.forEach(nc=>{
+      const idx=S.klines[r.sym][r.tf].findIndex(k=>k.t===nc.t);
+      if(idx>=0)S.klines[r.sym][r.tf][idx]=nc;
+      else S.klines[r.sym][r.tf].push(nc);
+    });
+    if(S.klines[r.sym][r.tf].length>250)S.klines[r.sym][r.tf].splice(0,S.klines[r.sym][r.tf].length-250);
+    S.indicators[r.sym][r.tf]=calcAll(r.sym,r.tf);
+    S.signals[r.sym][r.tf]=generateSignal(r.sym,r.tf);
+  });
 }
 
 async function fetchFG(){
@@ -4242,7 +4370,143 @@ const NEWS_FEEDS_V2 = [
   'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fcryptonews.com%2Fnews%2Ffeed%2F&count=15',
 ];
 
-// Override fetchNews with improved version
+
+// ═══════════════════════════════════════════════════════════
+// LIGHT/DARK THEME TOGGLE
+// ═══════════════════════════════════════════════════════════
+let _theme = localStorage.getItem('wr_theme') || 'dark';
+function applyTheme(t){
+  _theme=t;
+  document.body.classList.toggle('light', t==='light');
+  const btn=document.getElementById('themeToggle');
+  if(btn) btn.textContent=t==='light'?'☀️':'🌙';
+  localStorage.setItem('wr_theme',t);
+}
+function toggleTheme(){
+  applyTheme(_theme==='dark'?'light':'dark');
+}
+applyTheme(_theme);
+
+// ═══════════════════════════════════════════════════════════
+// CORR TIMEFRAME & WINDOW CONTROLS
+// ═══════════════════════════════════════════════════════════
+let _corrTF='1h', _corrWindow=20;
+const _corrCache={};
+
+function setCorrTF(tf,btn){
+  _corrTF=tf;
+  btn.parentElement.querySelectorAll('.tf-btn').forEach(b=>b.classList.remove('active'));
+  // Only deactivate TF buttons (first group)
+  const btns=btn.parentElement.querySelectorAll('.tf-btn');
+  [btns[0],btns[1],btns[2]].forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  delete _corrCache[_corrTF+'_'+_corrWindow];
+  renderCorrelation();
+}
+
+function setCorrWindow(w,btn){
+  _corrWindow=w;
+  // Only deactivate Window buttons (second group)
+  const allBtns=btn.parentElement.querySelectorAll('.tf-btn');
+  [allBtns[3],allBtns[4],allBtns[5]].forEach(b=>b&&b.classList.remove('active'));
+  btn.classList.add('active');
+  delete _corrCache[_corrTF+'_'+_corrWindow];
+  renderCorrelation();
+}
+
+// Override computeCorrelations to use selected TF and window
+const _origComputeCorrelations = computeCorrelations;
+computeCorrelations = function(period){
+  const useP = _corrWindow || period || 20;
+  const useTF = _corrTF || '1h';
+  const cacheKey = useTF+'_'+useP;
+  if(_corrCache[cacheKey] && Date.now()-_corrCache[cacheKey].ts < 10000) return _corrCache[cacheKey].data;
+  
+  const syms = ASSETS.filter(a=>!a.external).map(a=>a.sym);
+  const returns = {};
+  syms.forEach(sym => {
+    const k = S.klines[sym]?.[useTF];
+    if (!k || k.length < useP+1) { returns[sym]=null; return; }
+    const closes = k.slice(-(useP+1)).map(x=>x.c);
+    returns[sym] = closes.slice(1).map((c,i)=>Math.log(c/closes[i]));
+  });
+  const matrix = {};
+  syms.forEach(a => {
+    matrix[a] = {};
+    syms.forEach(b => {
+      if (a===b){ matrix[a][b]=1; return; }
+      if (!returns[a]||!returns[b]){ matrix[a][b]=null; return; }
+      matrix[a][b] = pearson(returns[a], returns[b]);
+    });
+  });
+  const result = { syms, matrix };
+  _corrCache[cacheKey] = {data:result, ts:Date.now()};
+  return result;
+};
+
+// ═══════════════════════════════════════════════════════════
+// UNIFIED RAW DATA MODAL for Heatmap & Radar
+// ═══════════════════════════════════════════════════════════
+function showRawDataModal(sym, source){
+  let modal=document.getElementById('rawDataModal');
+  if(!modal){
+    modal=document.createElement('div');
+    modal.id='rawDataModal';
+    modal.className='raw-modal-backdrop';
+    modal.onclick=function(e){if(e.target===this)this.classList.remove('show');};
+    modal.innerHTML='<div class="raw-modal"><div class="raw-modal-head"><h3 id="rawModalTitle"></h3><button class="raw-modal-close" onclick="document.getElementById(\'rawDataModal\').classList.remove(\'show\')">✕ إغلاق</button></div><div class="raw-modal-body" id="rawModalBody"></div></div>';
+    document.body.appendChild(modal);
+  }
+  const a=ASSETS.find(x=>x.sym===sym);
+  const tf=S.currentTF;
+  const ind=S.indicators[sym]?.[tf];
+  const sig=S.signals[sym]?.[tf];
+  const px=S.prices[sym];
+  
+  document.getElementById('rawModalTitle').innerHTML=`📊 ${source==='heatmap'?'Heatmap':'Radar'} — ${a?.tk||sym} <span style="color:var(--t3);font-size:11px">[${tf.toUpperCase()}]</span>`;
+  
+  const rows=[
+    {name:'RSI (14)',val:ind?.rsi?.toFixed(2)??'--',color:ind?.rsi<30?'var(--g)':ind?.rsi>70?'var(--r)':'var(--t)',desc:'مؤشر القوة النسبية — تحت 30 تشبع بيعي، فوق 70 تشبع شرائي'},
+    {name:'Stoch RSI K',val:ind?.stochRSI?.k?.toFixed(1)??'--',color:ind?.stochRSI?.k<20?'var(--g)':ind?.stochRSI?.k>80?'var(--r)':'var(--t)',desc:'ستوكاستيك RSI — تحت 20 تشبع بيعي، فوق 80 تشبع شرائي'},
+    {name:'MACD Hist',val:ind?.macd?.hist?.toFixed(5)??'--',color:ind?.macd?.hist>0?'var(--g)':'var(--r)',desc:'مؤشر التقارب والتباعد — إيجابي = زخم صعودي'},
+    {name:'ADX (14)',val:ind?.adx?.adx?.toFixed(1)??'--',color:ind?.adx?.adx>25?'var(--g)':'var(--t3)',desc:'متوسط مؤشر الاتجاه — فوق 25 اتجاه، فوق 40 قوي'},
+    {name:'Williams %R',val:ind?.williamsR?.toFixed(1)??'--',color:ind?.williamsR<-80?'var(--g)':ind?.williamsR>-20?'var(--r)':'var(--t)',desc:'ويليامز — تحت -80 تشبع بيعي'},
+    {name:'CCI (20)',val:ind?.cci?.toFixed(1)??'--',color:ind?.cci<-100?'var(--g)':ind?.cci>100?'var(--r)':'var(--t)',desc:'مؤشر قناة السلعة — تحت -100 تشبع بيعي'},
+    {name:'MFI (14)',val:ind?.mfi?.toFixed(1)??'--',color:ind?.mfi<25?'var(--g)':ind?.mfi>75?'var(--r)':'var(--t)',desc:'مؤشر تدفق الأموال — تحت 25 تدفق خارجي'},
+    {name:'Vol Ratio',val:ind?.volRatio?.toFixed(2)+'x'??'--',color:ind?.volRatio>2?'var(--r)':'var(--t)',desc:'نسبة الحجم مقارنة بالمتوسط'},
+    {name:'ATR (14)',val:ind?.atr?'$'+fmtP(ind.atr):'--',color:'var(--t)',desc:'متوسط المدى الحقيقي — يقيس التقلب'},
+    {name:'BB Position',val:ind?.bb&&px?((px.price-ind.bb.lower)/(ind.bb.upper-ind.bb.lower)*100).toFixed(0)+'%':'--',color:'var(--t)',desc:'موقع السعر داخل بولينجر باندز'},
+    {name:'EMA Stack',val:ind?.ema9>ind?.ema21?'Bull ▲':'Bear ▼',color:ind?.ema9>ind?.ema21?'var(--g)':'var(--r)',desc:'ترتيب المتوسطات المتحركة'},
+    {name:'Ichimoku',val:ind?.ichimoku?(ind.ichimoku.priceAboveCloud?'فوق السحابة ↑':ind.ichimoku.priceBelowCloud?'تحت السحابة ↓':'داخل السحابة'):'--',color:ind?.ichimoku?.priceAboveCloud?'var(--g)':ind?.ichimoku?.priceBelowCloud?'var(--r)':'var(--a)',desc:'سحابة إيشيموكو — فوق = صعودي'},
+    {name:'PAR SAR',val:ind?.sar?(ind.sar.bull?'صعودي ↑':'هبوطي ↓'):'--',color:ind?.sar?.bull?'var(--g)':'var(--r)',desc:'بارابوليك سار — اتجاه السعر'},
+    {name:'Signal',val:sig?.signal??'WAIT',color:sig?.score>0?'var(--g)':sig?.score<0?'var(--r)':'var(--a)',desc:'الإشارة الحالية مع الثقة: '+(sig?.conf??0)+'%'},
+    {name:'Score',val:(sig?.score>0?'+':'')+(sig?.score??0),color:sig?.score>0?'var(--g)':sig?.score<0?'var(--r)':'var(--a)',desc:'النتيجة الإجمالية من أصل ±38'},
+  ];
+  
+  document.getElementById('rawModalBody').innerHTML=rows.map(r=>`<div class="raw-row">
+    <div><div class="raw-row-name">${r.name}</div><div class="raw-row-desc">${r.desc}</div></div>
+    <div class="raw-row-val" style="color:${r.color}">${r.val}</div>
+  </div>`).join('');
+  
+  modal.classList.add('show');
+}
+
+// ═══════════════════════════════════════════════════════════
+// DEBOUNCE HELPER
+// ═══════════════════════════════════════════════════════════
+function debounce(fn, ms){
+  let timer;
+  return function(...args){clearTimeout(timer);timer=setTimeout(()=>fn.apply(this,args),ms);};
+}
+
+// Debounced versions of heavy renders
+const debouncedRenderCorrelation = debounce(renderCorrelation, 300);
+const debouncedRenderHeatmap = debounce(renderHeatmap, 200);
+const debouncedRenderRadar = debounce(renderRadar, 200);
+
+// ═══════════════════════════════════════════════════════════
+// NEWS FIX — Enhanced fetchNews override with fallback
+// ═══════════════════════════════════════════════════════════
 const _origFetchNews = fetchNews;
 fetchNews = async function() {
   try {
@@ -4250,67 +4514,42 @@ fetchNews = async function() {
     const bullW = ['bull','pump','surge','soar','rally','gain','breakout','ath','rise','moon','spike','positive','adoption','approve','etf','launch','partner','upgrade','bullish','highs','growth'];
     const bearW = ['bear','dump','crash','fall','drop','plunge','sell','fear','risk','warn','loss','ban','hack','fraud','lawsuit','sec','fine','regulation','sanctions','war','conflict','attack','bearish','lows','decline'];
     const geoW = ['war','sanctions','tariff','election','fed','rate','inflation','gdp','recession','geopolit','opec','treasury','congress','eu','china','trump','biden','powell','military','nuclear'];
-    
     for (const url of NEWS_FEEDS_V2) {
       try {
         let r = await fetch(url);
-        if (!r.ok) {
-          r = await fetch(NEWS_PROXY + encodeURIComponent(url.replace('api.rss2json.com/v1/api.json?rss_url=', '')));
-        }
+        if (!r.ok) r = await fetch(NEWS_PROXY + encodeURIComponent(url.replace('api.rss2json.com/v1/api.json?rss_url=', '')));
         const d = await r.json();
         if (d?.items?.length) {
           d.items.forEach(item => {
-            const title = item.title || '';
-            const tl = title.toLowerCase();
+            const title = item.title || '', tl = title.toLowerCase();
             let sentiment = 'neu';
             if (bullW.some(w => tl.includes(w))) sentiment = 'pos';
             else if (bearW.some(w => tl.includes(w))) sentiment = 'neg';
-            const isGeo = geoW.some(w => tl.includes(w));
-            allItems.push({
-              title, link: item.link, pubDate: item.pubDate,
+            allItems.push({ title, link: item.link, pubDate: item.pubDate,
               source: item.author || (url.includes('coindesk') ? 'CoinDesk' : url.includes('cryptonews') ? 'CryptoNews' : 'CoinTelegraph'),
-              thumbnail: item.thumbnail || item.enclosure?.link || '',
-              sentiment, isGeo,
-            });
+              thumbnail: item.thumbnail || item.enclosure?.link || '', sentiment, isGeo: geoW.some(w => tl.includes(w)) });
           });
         }
       } catch(e) { console.warn('News feed error:', e); }
     }
-    
-    // If RSS failed, generate synthetic news from market data
     if (allItems.length === 0) {
       ASSETS.filter(a => !a.external).forEach(a => {
-        const px = S.prices[a.sym];
-        const sig = S.signals[a.sym]?.[S.currentTF];
+        const px = S.prices[a.sym], sig = S.signals[a.sym]?.[S.currentTF];
         if (!px || !sig) return;
-        const ch = px.change;
-        allItems.push({
-          title: `${a.tk} ${ch >= 0 ? 'up' : 'down'} ${Math.abs(ch).toFixed(2)}% — Signal: ${sig.signal} (${sig.conf}% confidence)`,
-          link: '#', pubDate: new Date().toISOString(),
-          source: 'WAR ROOM Analytics',
-          thumbnail: a.logo, sentiment: ch > 3 ? 'pos' : ch < -3 ? 'neg' : 'neu', isGeo: false,
-        });
+        allItems.push({ title: `${a.tk} ${px.change>=0?'up':'down'} ${Math.abs(px.change).toFixed(2)}% — Signal: ${sig.signal} (${sig.conf}%)`,
+          link:'#', pubDate:new Date().toISOString(), source:'WAR ROOM Analytics', thumbnail:a.logo,
+          sentiment:px.change>3?'pos':px.change<-3?'neg':'neu', isGeo:false });
       });
-      // Add market context
-      if (S.fg) {
-        allItems.unshift({
-          title: `Crypto Fear & Greed Index at ${S.fg.val} — ${S.fg.label}. Market regime: ${REGIME.current?.replace('_',' ')||'Scanning'}`,
-          link: '#', pubDate: new Date().toISOString(),
-          source: 'Market Data', thumbnail: '', sentiment: S.fg.val > 60 ? 'pos' : S.fg.val < 40 ? 'neg' : 'neu', isGeo: false,
-        });
-      }
+      if (S.fg) allItems.unshift({ title:`Fear & Greed: ${S.fg.val} — ${S.fg.label}. Regime: ${REGIME.current?.replace('_',' ')||'Scanning'}`,
+        link:'#', pubDate:new Date().toISOString(), source:'Market Data', thumbnail:'', sentiment:S.fg.val>60?'pos':S.fg.val<40?'neg':'neu', isGeo:false });
     }
-    
     const seen = new Set();
-    S.news = allItems.filter(n => {
-      const key = n.title.slice(0,50).toLowerCase();
-      if (seen.has(key)) return false;
-      seen.add(key); return true;
-    });
+    S.news = allItems.filter(n => { const key=n.title.slice(0,50).toLowerCase(); if(seen.has(key))return false; seen.add(key); return true; });
     S.news.sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate));
     renderNews();
   } catch(e) { console.warn('News fetch failed:', e); }
 };
+
 </script>
 </body>
 </html>
