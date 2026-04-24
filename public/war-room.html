@@ -893,8 +893,8 @@ body.light .lang-select{background:#fff;color:#1A2030;border-color:rgba(0,0,0,0.
     <!-- ALERTS -->
     <div class="alerts-panel" id="alertsPanel">
       <div class="alerts-head">
-        <span class="alerts-title">🚨 Signal Alerts</span>
-        <span class="alerts-clear" onclick="clearAlerts()">CLEAR ALL</span>
+        <span class="alerts-title" data-i18n="alerts.title">🚨 Signal Alerts</span>
+        <span class="alerts-clear" onclick="clearAlerts()" data-i18n="perf.clearAll">CLEAR ALL</span>
       </div>
       <div id="alertsList"></div>
     </div>
@@ -902,9 +902,9 @@ body.light .lang-select{background:#fff;color:#1A2030;border-color:rgba(0,0,0,0.
     <!-- DETAIL PANEL -->
     <div class="detail-panel">
       <div class="detail-head">
-        <span class="detail-htitle" id="detailTitle">SELECT ASSET</span>
+        <span class="detail-htitle" id="detailTitle" data-i18n="detail.select">SELECT ASSET</span>
         <div class="detail-head-right">
-          <button class="copy-btn" onclick="copySignalSummary()">⎘ COPY</button>
+          <button class="copy-btn" onclick="copySignalSummary()" data-i18n="detail.copy">⎘ COPY</button>
           <span class="sig-badge sig-wait" id="detailBadge">--</span>
         </div>
       </div>
