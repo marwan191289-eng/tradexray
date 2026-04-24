@@ -550,6 +550,17 @@ body.light ::-webkit-scrollbar-thumb{background:#C4CDD5}
 .corr-loading{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg2);border-bottom:1px solid var(--br);font-size:10px;color:var(--t2)}
 .corr-loading-bar{flex:1;height:3px;background:var(--bg4);border-radius:2px;overflow:hidden}
 .corr-loading-fill{height:100%;background:var(--g);width:0%;transition:width 0.3s;border-radius:2px}
+
+/* ===== I18N / RTL ===== */
+html[dir="rtl"] body{font-family:'Tajawal','JetBrains Mono',monospace}
+html[dir="rtl"] .nav-ticker .ticker-wrap{animation-direction:reverse}
+html[dir="rtl"] .sort-bar,html[dir="rtl"] .tf-selector,html[dir="rtl"] .corr-controls,html[dir="rtl"] .news-filter-bar{direction:rtl}
+html[dir="rtl"] .tabs{direction:rtl}
+html[dir="rtl"] .cmd{direction:rtl}
+.lang-select{background:var(--bg4);border:1px solid var(--br2);color:var(--t);font-family:var(--mono);font-size:10px;padding:3px 6px;cursor:pointer;border-radius:3px;letter-spacing:0.05em;outline:none}
+.lang-select:hover{border-color:var(--br3)}
+.lang-select option{background:var(--bg3);color:var(--t)}
+body.light .lang-select{background:#fff;color:#1A2030;border-color:rgba(0,0,0,0.15)}
 </style>
 </head>
 <body>
