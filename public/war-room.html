@@ -4977,6 +4977,346 @@ fetchNews = async function() {
   } catch(e) { console.warn('News fetch failed:', e); }
 };
 
+// ═══════════════════════════════════════════════════════════
+// ENHANCEMENTS — TICKER, RADAR, NEWS STATUS, RTL TOGGLE, I18N DEBUG
+// ═══════════════════════════════════════════════════════════
+
+// ─── 1. TICKER FIX: refresh all ticker cells from S.prices on demand ───
+function refreshAllTickers(){
+  try {
+    if (typeof ASSETS === 'undefined' || typeof updateTicker !== 'function') return;
+    ASSETS.forEach(a => {
+      const px = S.prices[a.sym];
+      if (!px) return;
+      // Standard binance pairs use tp-{SYM}; PIEVERSE uses tp-PIEVERSE
+      const pe = document.getElementById('tp-'+a.sym);
+      const ce = document.getElementById('tc-'+a.sym);
+      if (pe && Number.isFinite(px.price)) pe.textContent = '$' + (typeof fmtP==='function'?fmtP(px.price):px.price.toFixed(2));
+      if (ce && Number.isFinite(px.change)) {
+        ce.textContent = (px.change>=0?'+':'') + px.change.toFixed(2) + '%';
+        ce.className = 'tick-ch ' + (px.change>=0?'up':'dn');
+      }
+    });
+  } catch(e){ console.warn('refreshAllTickers:', e); }
+}
+// Patch fetchTickerSnapshots to refresh ticker DOM after prices land
+if (typeof fetchTickerSnapshots === 'function') {
+  const _origFTS = fetchTickerSnapshots;
+  fetchTickerSnapshots = async function(...args){
+    const r = await _origFTS.apply(this, args);
+    refreshAllTickers();
+    return r;
+  };
+}
+// Patch pollExternalAssets to refresh ticker for external coins (e.g. PIEVERSE)
+if (typeof pollExternalAssets === 'function') {
+  const _origPEA = pollExternalAssets;
+  pollExternalAssets = async function(){
+    const r = await _origPEA.apply(this, arguments);
+    refreshAllTickers();
+    return r;
+  };
+}
+// Periodic safety net: every 5s force a ticker refresh
+setInterval(refreshAllTickers, 5000);
+// First refresh after 1s
+setTimeout(refreshAllTickers, 1500);
+
+// ─── 2. RADAR FIX: ensure renderRadar is robust + auto-redraw when data lands ───
+if (typeof renderRadar === 'function') {
+  const _origRenderRadar = renderRadar;
+  renderRadar = function(){
+    try { _origRenderRadar(); }
+    catch(e){ console.warn('renderRadar error:', e); }
+    // Force redraw of all SVGs even if some indicators are missing (use neutral defaults)
+    try {
+      ASSETS.forEach(a => {
+        const svg = document.getElementById('radar-'+a.sym);
+        if (!svg) return;
+        // If empty (no indicators yet), draw a placeholder ring so radar is never blank
+        if (!svg.innerHTML.trim()) {
+          svg.innerHTML = `
+            <circle cx="85" cy="85" r="68" fill="none" stroke="rgba(200,220,240,0.08)" stroke-width="1"/>
+            <circle cx="85" cy="85" r="34" fill="none" stroke="rgba(200,220,240,0.05)" stroke-width="1"/>
+            <text x="85" y="89" text-anchor="middle" fill="#6A8A9A" font-size="10" font-family="JetBrains Mono">loading…</text>`;
+        }
+      });
+    } catch(e){}
+  };
+}
+// Auto-redraw radar after each refresh cycle
+setInterval(()=>{ try { if(typeof renderRadar==='function') renderRadar(); } catch(e){} }, 15000);
+
+// ─── 3. NEWS STATUS BAR + TRANSLATION CLEANUP + per-card translation toggle ───
+const NEWS_STATE = { status:'idle', lastFetch:null, error:null, source:'live' };
+const NEWS_TOGGLE = {}; // title → bool (true = show original)
+
+function setNewsStatus(status, meta){
+  NEWS_STATE.status = status;
+  if (meta?.error !== undefined) NEWS_STATE.error = meta.error;
+  if (meta?.source) NEWS_STATE.source = meta.source;
+  if (status === 'ok') NEWS_STATE.lastFetch = Date.now();
+  const dot = document.getElementById('newsStatusDot');
+  const txt = document.getElementById('newsStatusText');
+  const mta = document.getElementById('newsStatusMeta');
+  if (!dot || !txt) return;
+  const map = {
+    idle:{c:'#7A9AB0', k:'news.statusIdle', d:'Idle'},
+    loading:{c:'#FFB020', k:'news.statusLoading', d:'Loading…'},
+    ok:{c:'#00E5A0', k:'news.statusOk', d:'Live'},
+    cached:{c:'#4AABFF', k:'news.statusCached', d:'Cached'},
+    failed:{c:'#FF3E3E', k:'news.statusFailed', d:'Failed'},
+    translating:{c:'#B060FF', k:'news.statusTranslating', d:'Translating…'},
+    transFailed:{c:'#FF6B9D', k:'news.statusTransFailed', d:'Translation failed'},
+  };
+  const m = map[status] || map.idle;
+  dot.style.background = m.c;
+  dot.style.color = m.c;
+  txt.textContent = (typeof t==='function' ? t(m.k, m.d) : m.d);
+  if (mta) {
+    let suffix = '';
+    if (status==='ok' || status==='cached') {
+      const ago = NEWS_STATE.lastFetch ? Math.round((Date.now()-NEWS_STATE.lastFetch)/1000) : 0;
+      suffix = `· ${S.news?.length||0} · ${ago}s`;
+    } else if ((status==='failed' || status==='transFailed') && NEWS_STATE.error) {
+      suffix = '· ' + String(NEWS_STATE.error).slice(0,40);
+    }
+    mta.textContent = suffix;
+  }
+}
+
+// Cleanup filter for AI-translated text:
+//   - collapse repeated chars/words
+//   - normalize Arabic-Indic digits to ASCII
+//   - strip surrounding quotes/brackets
+//   - normalize whitespace
+function cleanTranslation(text){
+  if (!text) return text;
+  let s = String(text).trim();
+  // strip surrounding quotes
+  s = s.replace(/^[«"'""'`\(\[]+|[»"'""'`\)\]]+$/g, '');
+  // collapse 3+ same chars to 2 (but keep digits)
+  s = s.replace(/([^\d\s])\1{2,}/g, '$1$1');
+  // collapse repeated words ("BTC BTC BTC" → "BTC")
+  s = s.replace(/\b(\w{2,})\b(?:\s+\1\b){1,}/gi, '$1');
+  // normalize Arabic-Indic & Persian digits → ASCII
+  const arabicDigits = '٠١٢٣٤٥٦٧٨٩';
+  const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+  s = s.replace(/[٠-٩]/g, d => String(arabicDigits.indexOf(d)));
+  s = s.replace(/[۰-۹]/g, d => String(persianDigits.indexOf(d)));
+  // normalize % spacing
+  s = s.replace(/\s*%\s*/g, '% ').replace(/\s+%/g, '%');
+  // collapse multiple spaces
+  s = s.replace(/\s{2,}/g, ' ').trim();
+  return s;
+}
+
+// Wrap fetchNews with status updates
+if (typeof fetchNews === 'function') {
+  const _origFetchNews2 = fetchNews;
+  fetchNews = async function(){
+    setNewsStatus('loading');
+    try {
+      const r = await _origFetchNews2.apply(this, arguments);
+      if (S.news && S.news.length) setNewsStatus('ok');
+      else setNewsStatus('failed', {error:'No items returned'});
+      return r;
+    } catch(e){
+      setNewsStatus('failed', {error: e?.message || 'fetch error'});
+    }
+  };
+}
+// Wrap translateNewsAsync with status + cleanup
+if (typeof translateNewsAsync === 'function') {
+  const _origTNA = translateNewsAsync;
+  translateNewsAsync = async function(){
+    if (CURRENT_LANG === 'en' || !S.news || !S.news.length) return;
+    setNewsStatus('translating');
+    const lang = CURRENT_LANG;
+    const langName = (typeof I18N_NAMES!=='undefined'&&I18N_NAMES[lang]) || 'English';
+    const targets = S.news.slice(0, 30).filter(n => !NEWS_T_CACHE[lang+'|'+n.title]);
+    if (!targets.length) { setNewsStatus('ok'); return; }
+    let okCount = 0, failCount = 0, lastErr = null;
+    for (const n of targets) {
+      const key = lang+'|'+n.title;
+      NEWS_T_CACHE[key] = n.title;
+      try {
+        const resp = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            model:'google/gemini-2.5-flash-lite',
+            messages:[
+              {role:'system', content:`You are a professional crypto news translator. Translate the user message to ${langName}. Output ONLY the translation, no quotes, no explanation, no repetition.`},
+              {role:'user', content:n.title}
+            ]
+          })
+        });
+        if (resp.ok) {
+          const j = await resp.json();
+          const tr = j?.choices?.[0]?.message?.content?.trim();
+          if (tr) { NEWS_T_CACHE[key] = cleanTranslation(tr); okCount++; }
+        } else {
+          failCount++; lastErr = 'HTTP '+resp.status;
+        }
+      } catch(e) { failCount++; lastErr = e?.message || 'network'; }
+    }
+    if (failCount && !okCount) setNewsStatus('transFailed', {error:lastErr});
+    else setNewsStatus('ok');
+    if (typeof renderNews === 'function') renderNews();
+  };
+}
+// Override renderNews to add per-card translation toggle
+if (typeof renderNews === 'function') {
+  const _origRenderNews = renderNews;
+  renderNews = function(){
+    _origRenderNews();
+    // Inject toggle buttons after rendering
+    try {
+      const lang = CURRENT_LANG;
+      if (lang === 'en') return;
+      document.querySelectorAll('.news-item').forEach((el, i) => {
+        const n = (S.news||[])[i]; if (!n) return;
+        if (el.querySelector('.news-trans-toggle')) return;
+        const hasTrans = !!NEWS_T_CACHE[lang+'|'+n.title];
+        if (!hasTrans) return;
+        const btn = document.createElement('button');
+        btn.className = 'news-trans-toggle';
+        btn.style.cssText = 'position:absolute;top:4px;right:4px;background:rgba(176,96,255,0.15);border:1px solid rgba(176,96,255,0.3);color:#B060FF;font-size:8px;padding:2px 6px;border-radius:3px;cursor:pointer;font-family:var(--mono);letter-spacing:0.05em;z-index:2';
+        const showOrig = NEWS_TOGGLE[n.title];
+        btn.textContent = showOrig ? 'AR/Trans' : 'Original';
+        btn.title = showOrig ? 'Show translation' : 'Show original';
+        el.style.position = 'relative';
+        btn.onclick = (e)=>{ e.preventDefault(); e.stopPropagation(); NEWS_TOGGLE[n.title] = !NEWS_TOGGLE[n.title];
+          const titleEl = el.querySelector('.news-title');
+          if (titleEl) titleEl.textContent = NEWS_TOGGLE[n.title] ? n.title : (NEWS_T_CACHE[lang+'|'+n.title] || n.title);
+          btn.textContent = NEWS_TOGGLE[n.title] ? 'AR/Trans' : 'Original';
+        };
+        el.appendChild(btn);
+      });
+    } catch(e){ console.warn('news toggle inject:', e); }
+  };
+}
+
+// ─── 4. RTL/LTR MANUAL TOGGLE (independent of language) ───
+//   Modes: 'auto' (follows language), 'ltr' (force), 'rtl' (force)
+let _dirOverride = (function(){ try { return localStorage.getItem('wr_dir_override') || 'auto'; } catch(e){ return 'auto'; }})();
+function applyDirOverride(){
+  const html = document.documentElement;
+  const langDir = (typeof I18N_RTL!=='undefined' && I18N_RTL.includes(CURRENT_LANG)) ? 'rtl' : 'ltr';
+  const dir = (_dirOverride === 'auto') ? langDir : _dirOverride;
+  html.setAttribute('dir', dir);
+  // Also apply to specific layout containers (scatter / mini-matrix etc.)
+  document.querySelectorAll('.layout, .corr-matrix, .radar-grid, .heatmap-grid, .cards-grid, .screener-wrap, .news-filter-bar, .sort-bar, .tf-selector, .corr-controls, .tabs, .cmd, #scatterMini, #miniMatrix').forEach(el => {
+    if (el) el.style.direction = dir;
+  });
+  const lbl = document.getElementById('dirToggleLabel');
+  if (lbl) lbl.textContent = _dirOverride.toUpperCase();
+}
+function toggleDirOverride(){
+  const order = ['auto','ltr','rtl'];
+  _dirOverride = order[(order.indexOf(_dirOverride)+1) % order.length];
+  try { localStorage.setItem('wr_dir_override', _dirOverride); } catch(e){}
+  applyDirOverride();
+}
+// Patch setLang to respect override
+if (typeof setLang === 'function') {
+  const _origSetLang = setLang;
+  setLang = function(lang){
+    _origSetLang(lang);
+    applyDirOverride();
+  };
+}
+setTimeout(applyDirOverride, 100);
+
+// ─── 5. I18N DEBUG MODAL: scan all keys across all langs ───
+function openI18nDebug(){
+  let modal = document.getElementById('i18nDebugModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'i18nDebugModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)';
+    modal.innerHTML = `<div style="background:var(--bg2);border:1px solid var(--br3);border-radius:8px;max-width:900px;width:100%;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.7)">
+      <div style="padding:14px 18px;border-bottom:1px solid var(--br2);display:flex;justify-content:space-between;align-items:center;background:var(--bg3)">
+        <div style="font-family:var(--orb);font-size:14px;color:var(--g);letter-spacing:0.14em;font-weight:900">🌐 I18N DEBUG · MISSING KEYS</div>
+        <button onclick="document.getElementById('i18nDebugModal').remove()" style="background:transparent;border:1px solid var(--br2);color:var(--t2);padding:4px 10px;cursor:pointer;font-family:var(--mono);font-size:11px">✕ CLOSE</button>
+      </div>
+      <div id="i18nDebugBody" style="padding:16px;overflow:auto;font-family:var(--mono);font-size:11px;color:var(--t)"></div>
+    </div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  }
+  const body = document.getElementById('i18nDebugBody');
+  const langs = Object.keys(I18N);
+  // Collect all keys used anywhere
+  const allKeys = new Set();
+  langs.forEach(l => Object.keys(I18N[l]||{}).forEach(k => allKeys.add(k)));
+  // Also gather keys referenced in the DOM
+  document.querySelectorAll('[data-i18n],[data-i18n-html],[data-i18n-title],[data-i18n-placeholder]').forEach(el => {
+    ['data-i18n','data-i18n-html','data-i18n-title','data-i18n-placeholder'].forEach(a => {
+      const k = el.getAttribute(a); if (k) allKeys.add(k);
+    });
+  });
+  const totalKeys = allKeys.size;
+  let html = `<div style="margin-bottom:12px;color:var(--t2)">Total unique keys discovered: <b style="color:var(--g)">${totalKeys}</b> · Languages: <b style="color:var(--g)">${langs.length}</b></div>`;
+  html += `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">`;
+  langs.forEach(l => {
+    const dict = I18N[l] || {};
+    const present = Object.keys(dict).length;
+    const missing = [...allKeys].filter(k => !(k in dict));
+    const empty = Object.keys(dict).filter(k => !dict[k] || !String(dict[k]).trim());
+    const completion = totalKeys ? Math.round(((totalKeys-missing.length)/totalKeys)*100) : 100;
+    const color = completion>=95?'var(--g)':completion>=80?'var(--a)':'var(--r)';
+    html += `<div style="background:var(--bg3);border:1px solid var(--br2);border-radius:6px;padding:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-family:var(--orb);font-weight:700;color:var(--t);letter-spacing:0.1em">${l.toUpperCase()} ${I18N_NAMES?.[l]||''}</span>
+        <span style="color:${color};font-weight:700">${completion}%</span>
+      </div>
+      <div style="font-size:10px;color:var(--t3);margin-bottom:6px">${present}/${totalKeys} keys · ${missing.length} missing · ${empty.length} empty</div>
+      ${missing.length ? `<details><summary style="cursor:pointer;color:var(--r);font-size:10px">⚠ ${missing.length} missing</summary>
+        <div style="max-height:150px;overflow:auto;margin-top:6px;padding:6px;background:var(--bg);border-radius:4px;font-size:9px;color:var(--r);line-height:1.6">${missing.slice(0,80).map(k=>`<div>· ${k}</div>`).join('')}${missing.length>80?'<div style="color:var(--t3)">…+'+(missing.length-80)+' more</div>':''}</div>
+      </details>` : '<div style="color:var(--g);font-size:10px">✓ Complete</div>'}
+    </div>`;
+  });
+  html += `</div>`;
+  // Test: find DOM elements whose key is missing in current language
+  const cur = CURRENT_LANG;
+  const curDict = I18N[cur]||{};
+  const domMissing = [];
+  document.querySelectorAll('[data-i18n],[data-i18n-html],[data-i18n-title]').forEach(el => {
+    ['data-i18n','data-i18n-html','data-i18n-title'].forEach(a => {
+      const k = el.getAttribute(a);
+      if (k && !(k in curDict)) domMissing.push({key:k, attr:a, tag:el.tagName.toLowerCase()});
+    });
+  });
+  if (domMissing.length) {
+    html += `<div style="margin-top:14px;padding:10px;background:rgba(255,62,62,0.08);border:1px solid rgba(255,62,62,0.3);border-radius:6px">
+      <div style="color:var(--r);font-weight:700;margin-bottom:6px">⚠ DOM elements with missing keys for current language (${cur.toUpperCase()})</div>
+      <div style="max-height:140px;overflow:auto;font-size:10px">${domMissing.slice(0,40).map(d=>`<div>· &lt;${d.tag}&gt; <code style="color:var(--a)">${d.key}</code></div>`).join('')}</div>
+    </div>`;
+  }
+  body.innerHTML = html;
+}
+
+// Add news status keys for all 8 languages (best-effort additive)
+(function addNewsStatusKeys(){
+  if (typeof I18N === 'undefined') return;
+  const ext = {
+    en:{'news.statusIdle':'Idle','news.statusLoading':'Loading…','news.statusOk':'Live','news.statusCached':'Cached','news.statusFailed':'Failed','news.statusTranslating':'Translating…','news.statusTransFailed':'Translation failed'},
+    ar:{'news.statusIdle':'خامل','news.statusLoading':'جارٍ التحميل…','news.statusOk':'مباشر','news.statusCached':'مخزّن','news.statusFailed':'فشل','news.statusTranslating':'جارٍ الترجمة…','news.statusTransFailed':'فشلت الترجمة'},
+    es:{'news.statusIdle':'Inactivo','news.statusLoading':'Cargando…','news.statusOk':'En vivo','news.statusCached':'Caché','news.statusFailed':'Falló','news.statusTranslating':'Traduciendo…','news.statusTransFailed':'Traducción falló'},
+    fr:{'news.statusIdle':'Inactif','news.statusLoading':'Chargement…','news.statusOk':'En direct','news.statusCached':'Cache','news.statusFailed':'Échec','news.statusTranslating':'Traduction…','news.statusTransFailed':'Échec traduction'},
+    de:{'news.statusIdle':'Leerlauf','news.statusLoading':'Lädt…','news.statusOk':'Live','news.statusCached':'Cache','news.statusFailed':'Fehler','news.statusTranslating':'Übersetzen…','news.statusTransFailed':'Übersetzung fehlgeschlagen'},
+    ru:{'news.statusIdle':'Ожидание','news.statusLoading':'Загрузка…','news.statusOk':'В эфире','news.statusCached':'Кэш','news.statusFailed':'Ошибка','news.statusTranslating':'Перевод…','news.statusTransFailed':'Ошибка перевода'},
+    tr:{'news.statusIdle':'Boşta','news.statusLoading':'Yükleniyor…','news.statusOk':'Canlı','news.statusCached':'Önbellek','news.statusFailed':'Başarısız','news.statusTranslating':'Çevriliyor…','news.statusTransFailed':'Çeviri başarısız'},
+    zh:{'news.statusIdle':'空闲','news.statusLoading':'加载中…','news.statusOk':'实时','news.statusCached':'缓存','news.statusFailed':'失败','news.statusTranslating':'翻译中…','news.statusTransFailed':'翻译失败'},
+  };
+  Object.keys(ext).forEach(l => { if (I18N[l]) Object.assign(I18N[l], ext[l]); });
+  if (typeof applyI18n === 'function') setTimeout(applyI18n, 50);
+})();
+
+// Init news status to idle
+setTimeout(()=>setNewsStatus('idle'), 500);
+
 </script>
 </body>
 </html>
