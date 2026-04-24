@@ -621,64 +621,64 @@ body.light .lang-select{background:#fff;color:#1A2030;border-color:rgba(0,0,0,0.
 <!-- COMMAND BAR -->
 <div class="cmd">
   <div class="cmd-cell">
-    <div class="cmd-label">Fear & Greed</div>
+    <div class="cmd-label" data-i18n="cmd.fg">Fear & Greed</div>
     <div class="cmd-val" id="fgVal">--</div>
-    <div class="cmd-sub" id="fgLabel">Loading...</div>
+    <div class="cmd-sub" id="fgLabel" data-i18n="common.loading">Loading...</div>
     <div class="cmd-accent" id="fgAccent"></div>
   </div>
   <div class="cmd-cell">
-    <div class="cmd-label">Total Market Cap</div>
+    <div class="cmd-label" data-i18n="cmd.mcap">Total Market Cap</div>
     <div class="cmd-val" id="mcapVal">--</div>
     <div class="cmd-sub" id="mcapChange">--</div>
   </div>
   <div class="cmd-cell">
-    <div class="cmd-label">BTC Dominance</div>
+    <div class="cmd-label" data-i18n="cmd.btcDom">BTC Dominance</div>
     <div class="cmd-val" id="btcDom">--</div>
     <div class="cmd-sub" id="ethDom">ETH --</div>
   </div>
   <div class="cmd-cell">
-    <div class="cmd-label">Market Regime</div>
-    <div class="cmd-val" id="regimeVal" style="font-size:13px;letter-spacing:0.04em">SCANNING</div>
-    <div class="cmd-sub" id="regimeSub">Awaiting data</div>
+    <div class="cmd-label" data-i18n="cmd.regime">Market Regime</div>
+    <div class="cmd-val" id="regimeVal" style="font-size:13px;letter-spacing:0.04em" data-i18n="common.scanning">SCANNING</div>
+    <div class="cmd-sub" id="regimeSub" data-i18n="common.awaitingData">Awaiting data</div>
   </div>
   <div class="cmd-cell">
-    <div class="cmd-label">Active Signals</div>
+    <div class="cmd-label" data-i18n="cmd.activeSig">Active Signals</div>
     <div class="cmd-val" id="activeCount">0</div>
     <div class="cmd-sub" id="signalSummary">0 BUY · 0 SELL</div>
   </div>
   <div class="cmd-cell">
-    <div class="cmd-label">Avg Confidence</div>
+    <div class="cmd-label" data-i18n="cmd.avgConf">Avg Confidence</div>
     <div class="cmd-val" id="avgConf">--</div>
-    <div class="cmd-sub" id="confRange">Range --</div>
+    <div class="cmd-sub" id="confRange" data-i18n="common.range">Range --</div>
   </div>
   <div class="cmd-cell">
-    <div class="cmd-label">MTF Consensus</div>
+    <div class="cmd-label" data-i18n="cmd.mtf">MTF Consensus</div>
     <div class="cmd-val" id="mtfConVal">--</div>
-    <div class="cmd-sub" id="mtfConSub">Alignment --</div>
+    <div class="cmd-sub" id="mtfConSub" data-i18n="common.alignment">Alignment --</div>
   </div>
   <div class="cmd-cell">
-    <div class="cmd-label">24h Vol Spike</div>
+    <div class="cmd-label" data-i18n="cmd.volSpike">24h Vol Spike</div>
     <div class="cmd-val" id="volSpikeVal">--</div>
-    <div class="cmd-sub" id="volSpikeSub">vs avg</div>
+    <div class="cmd-sub" id="volSpikeSub" data-i18n="common.vsAvg">vs avg</div>
   </div>
 </div>
 
 <!-- TABS -->
 <div class="tabs">
-  <button class="tab-btn active" onclick="switchTab('matrix',this)">⚡ Signals</button>
-  <button class="tab-btn" onclick="switchTab('screener',this)">📊 Screener</button>
-  <button class="tab-btn" onclick="switchTab('heatmap',this)">🔥 Heatmap</button>
-  <button class="tab-btn" onclick="switchTab('radar',this)">📡 Radar</button>
-  <button class="tab-btn" onclick="switchTab('corr',this)">🔗 Corr</button>
-  <button class="tab-btn" onclick="switchTab('perf',this)">📈 Performance</button>
-  <button class="tab-btn" onclick="switchTab('news',this)">📰 News</button>
-  <button class="tab-btn" onclick="switchTab('briefing',this)">🤖 AI Brief</button>
-  <button class="tab-btn" onclick="switchTab('chart',this)">📊 SuperChart</button>
+  <button class="tab-btn active" onclick="switchTab('matrix',this)">⚡ <span data-i18n="tab.signals">Signals</span></button>
+  <button class="tab-btn" onclick="switchTab('screener',this)">📊 <span data-i18n="tab.screener">Screener</span></button>
+  <button class="tab-btn" onclick="switchTab('heatmap',this)">🔥 <span data-i18n="tab.heatmap">Heatmap</span></button>
+  <button class="tab-btn" onclick="switchTab('radar',this)">📡 <span data-i18n="tab.radar">Radar</span></button>
+  <button class="tab-btn" onclick="switchTab('corr',this)">🔗 <span data-i18n="tab.corr">Corr</span></button>
+  <button class="tab-btn" onclick="switchTab('perf',this)">📈 <span data-i18n="tab.perf">Performance</span></button>
+  <button class="tab-btn" onclick="switchTab('news',this)">📰 <span data-i18n="tab.news">News</span></button>
+  <button class="tab-btn" onclick="switchTab('briefing',this)">🤖 <span data-i18n="tab.brief">AI Brief</span></button>
+  <button class="tab-btn" onclick="switchTab('chart',this)">📊 <span data-i18n="tab.chart">SuperChart</span></button>
 </div>
 
 <!-- TIMEFRAME SELECTOR -->
 <div class="tf-selector">
-  <span class="tf-label">TF</span>
+  <span class="tf-label" data-i18n="tf.label">TF</span>
   <button class="tf-btn" onclick="switchTF('5m',this)">5m</button>
   <button class="tf-btn" onclick="switchTF('15m',this)">15m</button>
   <button class="tf-btn active" onclick="switchTF('1h',this)">1H</button>
@@ -687,19 +687,19 @@ body.light .lang-select{background:#fff;color:#1A2030;border-color:rgba(0,0,0,0.
   <button class="tf-btn" onclick="switchTF('1w',this)">1W</button>
   <button class="tf-btn" onclick="switchTF('1M',this)">1M</button>
   <span style="flex:1"></span>
-  <button class="tf-btn" onclick="toggleAlertsModal()" title="Price Alerts">🔔 Alerts</button>
+  <button class="tf-btn" onclick="toggleAlertsModal()" data-i18n-title="alerts.priceTitle" title="Price Alerts">🔔 <span data-i18n="alerts.btn">Alerts</span></button>
 </div>
 <!-- SORT BAR -->
 <div class="sort-bar" id="sortBar">
-  <span class="sort-lbl">Sort by</span>
-  <button class="sort-btn active" onclick="sortCards('score',this)">Score</button>
-  <button class="sort-btn" onclick="sortCards('conf',this)">Conf%</button>
-  <button class="sort-btn" onclick="sortCards('change',this)">24h Chg</button>
+  <span class="sort-lbl" data-i18n="sort.by">Sort by</span>
+  <button class="sort-btn active" onclick="sortCards('score',this)" data-i18n="sort.score">Score</button>
+  <button class="sort-btn" onclick="sortCards('conf',this)" data-i18n="sort.conf">Conf%</button>
+  <button class="sort-btn" onclick="sortCards('change',this)" data-i18n="sort.chg">24h Chg</button>
   <button class="sort-btn" onclick="sortCards('rsi',this)">RSI</button>
-  <button class="sort-btn" onclick="sortCards('vol',this)">Volume</button>
-  <button class="sort-btn" onclick="sortCards('name',this)">Name</button>
+  <button class="sort-btn" onclick="sortCards('vol',this)" data-i18n="sort.vol">Volume</button>
+  <button class="sort-btn" onclick="sortCards('name',this)" data-i18n="sort.name">Name</button>
   <span style="margin-left:6px"></span>
-  <button class="sort-dir" id="sortDirBtn" onclick="toggleSortDir()" title="Direction">▼</button>
+  <button class="sort-dir" id="sortDirBtn" onclick="toggleSortDir()" data-i18n-title="sort.dir" title="Direction">▼</button>
 </div>
 
 <!-- MAIN LAYOUT -->
