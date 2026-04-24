@@ -821,6 +821,12 @@ body.light .lang-select{background:#fff;color:#1A2030;border-color:rgba(0,0,0,0.
         <button class="nf-btn" onclick="filterNews('bullish',this)" data-i18n="news.bullish">Bullish</button>
         <button class="nf-btn" onclick="filterNews('bearish',this)" data-i18n="news.bearish">Bearish</button>
         <button class="nf-btn" onclick="filterNews('neutral',this)" data-i18n="news.neutral">Neutral</button>
+        <span style="flex:1"></span>
+        <span id="newsStatus" style="display:inline-flex;align-items:center;gap:6px;font-size:10px;font-family:var(--mono);color:var(--t2);letter-spacing:0.06em" title="News Fetch Status">
+          <span id="newsStatusDot" style="width:8px;height:8px;border-radius:50%;background:var(--t3);box-shadow:0 0 6px currentColor"></span>
+          <span id="newsStatusText" data-i18n="news.statusIdle">Idle</span>
+          <span id="newsStatusMeta" style="color:var(--t3);font-size:9px"></span>
+        </span>
       </div>
       <div id="newsGrid">
         <div class="loading"><div class="ld-bar"><div class="ld-prog"></div></div><div class="ld-txt" data-i18n="news.fetching">Fetching market news...</div></div>
