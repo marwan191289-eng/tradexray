@@ -709,39 +709,39 @@ body.light .lang-select{background:#fff;color:#1A2030;border-color:rgba(0,0,0,0.
     <!-- SIGNAL MATRIX TAB -->
     <div class="tab-content active" id="tab-matrix">
       <div class="section-bar">
-        <span class="section-title">Signal Matrix — All Assets</span>
-        <span class="live-tag" id="lastUpdate">Awaiting stream</span>
+        <span class="section-title" data-i18n="sec.signalMatrix">Signal Matrix — All Assets</span>
+        <span class="live-tag" id="lastUpdate" data-i18n="common.awaitStream">Awaiting stream</span>
       </div>
       <div class="cards-grid" id="cardsGrid">
         <div class="loading" style="grid-column:1/-1">
           <div class="ld-bar"><div class="ld-prog"></div></div>
-          <div class="ld-txt">Fetching klines &amp; computing indicators...</div>
+          <div class="ld-txt" data-i18n="common.fetching">Fetching klines &amp; computing indicators...</div>
         </div>
       </div>
     </div>
 
     <!-- SCREENER TAB -->
     <div class="tab-content" id="tab-screener">
-      <div class="section-bar"><span class="section-title">Market Screener</span><span class="live-tag" id="screenerUpdate">Live</span></div>
+      <div class="section-bar"><span class="section-title" data-i18n="sec.screener">Market Screener</span><span class="live-tag" id="screenerUpdate" data-i18n="common.live">Live</span></div>
       <div class="screener-wrap">
         <table class="screener-table" id="screenerTable">
           <thead>
             <tr>
-              <th onclick="screenerSort('name')">Asset <span class="sort-arrow">↕</span></th>
-              <th onclick="screenerSort('price')">Price <span class="sort-arrow">↕</span></th>
-              <th onclick="screenerSort('change')">24h % <span class="sort-arrow">↕</span></th>
-              <th onclick="screenerSort('signal')">Signal <span class="sort-arrow">↕</span></th>
-              <th onclick="screenerSort('score')">Score <span class="sort-arrow">↕</span></th>
-              <th onclick="screenerSort('conf')">Conf <span class="sort-arrow">↕</span></th>
+              <th onclick="screenerSort('name')" data-i18n="th.asset">Asset <span class="sort-arrow">↕</span></th>
+              <th onclick="screenerSort('price')" data-i18n="th.price">Price <span class="sort-arrow">↕</span></th>
+              <th onclick="screenerSort('change')" data-i18n="th.chg24">24h % <span class="sort-arrow">↕</span></th>
+              <th onclick="screenerSort('signal')" data-i18n="th.signal">Signal <span class="sort-arrow">↕</span></th>
+              <th onclick="screenerSort('score')" data-i18n="th.score">Score <span class="sort-arrow">↕</span></th>
+              <th onclick="screenerSort('conf')" data-i18n="th.conf">Conf <span class="sort-arrow">↕</span></th>
               <th onclick="screenerSort('rsi')">RSI <span class="sort-arrow">↕</span></th>
               <th onclick="screenerSort('adx')">ADX <span class="sort-arrow">↕</span></th>
-              <th onclick="screenerSort('vol')">Vol Ratio <span class="sort-arrow">↕</span></th>
-              <th onclick="screenerSort('mtf')">MTF Align <span class="sort-arrow">↕</span></th>
-              <th>Score Bar</th>
+              <th onclick="screenerSort('vol')" data-i18n="th.volRatio">Vol Ratio <span class="sort-arrow">↕</span></th>
+              <th onclick="screenerSort('mtf')" data-i18n="th.mtfAlign">MTF Align <span class="sort-arrow">↕</span></th>
+              <th data-i18n="th.scoreBar">Score Bar</th>
             </tr>
           </thead>
           <tbody id="screenerBody">
-            <tr><td colspan="11" style="text-align:center;padding:2rem;color:var(--t2)">Loading data...</td></tr>
+            <tr><td colspan="11" style="text-align:center;padding:2rem;color:var(--t2)" data-i18n="common.loadingData">Loading data...</td></tr>
           </tbody>
         </table>
       </div>
@@ -749,72 +749,72 @@ body.light .lang-select{background:#fff;color:#1A2030;border-color:rgba(0,0,0,0.
 
     <!-- HEATMAP TAB -->
     <div class="tab-content" id="tab-heatmap">
-      <div class="section-bar"><span class="section-title">24-Hour Performance Heatmap</span></div>
+      <div class="section-bar"><span class="section-title" data-i18n="sec.heatmap">24-Hour Performance Heatmap</span></div>
       <div class="heatmap-grid" id="heatmapGrid">
-        <div class="loading" style="grid-column:1/-1"><div class="ld-bar"><div class="ld-prog"></div></div><div class="ld-txt">Loading...</div></div>
+        <div class="loading" style="grid-column:1/-1"><div class="ld-bar"><div class="ld-prog"></div></div><div class="ld-txt" data-i18n="common.loading">Loading...</div></div>
       </div>
     </div>
 
     <!-- RADAR TAB -->
     <div class="tab-content" id="tab-radar">
-      <div class="section-bar"><span class="section-title">Multi-Indicator Radar Analysis</span></div>
+      <div class="section-bar"><span class="section-title" data-i18n="sec.radar">Multi-Indicator Radar Analysis</span></div>
       <div class="radar-grid" id="radarGrid">
-        <div class="loading" style="grid-column:1/-1"><div class="ld-bar"><div class="ld-prog"></div></div><div class="ld-txt">Computing...</div></div>
+        <div class="loading" style="grid-column:1/-1"><div class="ld-bar"><div class="ld-prog"></div></div><div class="ld-txt" data-i18n="common.computing">Computing...</div></div>
       </div>
     </div>
 
     <!-- CORRELATION TAB -->
     <div class="tab-content" id="tab-corr">
-      <div class="section-bar"><span class="section-title">Rolling Correlation Matrix</span></div>
+      <div class="section-bar"><span class="section-title" data-i18n="sec.corr">Rolling Correlation Matrix</span></div>
       <div class="corr-controls" style="display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid var(--br);background:var(--bg2);align-items:center;flex-wrap:wrap">
-        <span style="font-size:9px;color:var(--t3);letter-spacing:0.12em;text-transform:uppercase;font-family:var(--raj)">TF</span>
+        <span style="font-size:9px;color:var(--t3);letter-spacing:0.12em;text-transform:uppercase;font-family:var(--raj)" data-i18n="tf.label">TF</span>
         <button class="tf-btn active" onclick="setCorrTF('1h',this)">1H</button>
         <button class="tf-btn" onclick="setCorrTF('4h',this)">4H</button>
         <button class="tf-btn" onclick="setCorrTF('1d',this)">1D</button>
         <span style="flex:1"></span>
-        <span style="font-size:9px;color:var(--t3);letter-spacing:0.12em;text-transform:uppercase;font-family:var(--raj)">Window</span>
+        <span style="font-size:9px;color:var(--t3);letter-spacing:0.12em;text-transform:uppercase;font-family:var(--raj)" data-i18n="corr.window">Window</span>
         <button class="tf-btn active" onclick="setCorrWindow(20,this)">20</button>
         <button class="tf-btn" onclick="setCorrWindow(40,this)">40</button>
         <button class="tf-btn" onclick="setCorrWindow(60,this)">60</button>
       </div>
-      <div class="corr-matrix" id="corrMatrix"><div class="loading"><div class="ld-bar"><div class="ld-prog"></div></div><div class="ld-txt">Computing correlations...</div></div></div>
+      <div class="corr-matrix" id="corrMatrix"><div class="loading"><div class="ld-bar"><div class="ld-prog"></div></div><div class="ld-txt" data-i18n="corr.computing">Computing correlations...</div></div></div>
     </div>
 
     <!-- PERFORMANCE TAB -->
     <div class="tab-content" id="tab-perf">
       <div class="section-bar">
-        <span class="section-title">Signal Performance Tracker</span>
-        <button class="sort-btn" onclick="clearPerformance()" style="font-size:9px">CLEAR ALL</button>
+        <span class="section-title" data-i18n="sec.perf">Signal Performance Tracker</span>
+        <button class="sort-btn" onclick="clearPerformance()" style="font-size:9px" data-i18n="perf.clearAll">CLEAR ALL</button>
       </div>
       <div class="perf-grid" id="perfStats">
-        <div class="perf-stat"><div class="ps-label">Total Signals</div><div class="ps-val" id="ps-total">0</div><div class="ps-sub">logged</div></div>
-        <div class="perf-stat"><div class="ps-label">Win Rate</div><div class="ps-val" id="ps-wr">--</div><div class="ps-sub">TP hit / closed</div></div>
-        <div class="perf-stat"><div class="ps-label">Profit Factor</div><div class="ps-val" id="ps-pf">--</div><div class="ps-sub">gross win / loss</div></div>
-        <div class="perf-stat"><div class="ps-label">Avg R</div><div class="ps-val" id="ps-avgr">--</div><div class="ps-sub">risk units per trade</div></div>
-        <div class="perf-stat"><div class="ps-label">Expectancy</div><div class="ps-val" id="ps-exp">--</div><div class="ps-sub">R per trade</div></div>
-        <div class="perf-stat"><div class="ps-label">Best Signal</div><div class="ps-val" id="ps-best" style="font-size:13px">--</div><div class="ps-sub">asset + R</div></div>
-        <div class="perf-stat"><div class="ps-label">Max Streak</div><div class="ps-val" id="ps-streak">--</div><div class="ps-sub">W/L consecutive</div></div>
-        <div class="perf-stat"><div class="ps-label">Open</div><div class="ps-val" id="ps-open">0</div><div class="ps-sub">monitoring</div></div>
+        <div class="perf-stat"><div class="ps-label" data-i18n="perf.totalSig">Total Signals</div><div class="ps-val" id="ps-total">0</div><div class="ps-sub" data-i18n="perf.logged">logged</div></div>
+        <div class="perf-stat"><div class="ps-label" data-i18n="perf.winRate">Win Rate</div><div class="ps-val" id="ps-wr">--</div><div class="ps-sub" data-i18n="perf.tpHit">TP hit / closed</div></div>
+        <div class="perf-stat"><div class="ps-label" data-i18n="perf.pf">Profit Factor</div><div class="ps-val" id="ps-pf">--</div><div class="ps-sub" data-i18n="perf.gwl">gross win / loss</div></div>
+        <div class="perf-stat"><div class="ps-label" data-i18n="perf.avgR">Avg R</div><div class="ps-val" id="ps-avgr">--</div><div class="ps-sub" data-i18n="perf.riskUnits">risk units per trade</div></div>
+        <div class="perf-stat"><div class="ps-label" data-i18n="perf.exp">Expectancy</div><div class="ps-val" id="ps-exp">--</div><div class="ps-sub" data-i18n="perf.rPerTrade">R per trade</div></div>
+        <div class="perf-stat"><div class="ps-label" data-i18n="perf.bestSig">Best Signal</div><div class="ps-val" id="ps-best" style="font-size:13px">--</div><div class="ps-sub" data-i18n="perf.assetR">asset + R</div></div>
+        <div class="perf-stat"><div class="ps-label" data-i18n="perf.maxStreak">Max Streak</div><div class="ps-val" id="ps-streak">--</div><div class="ps-sub" data-i18n="perf.wlConsec">W/L consecutive</div></div>
+        <div class="perf-stat"><div class="ps-label" data-i18n="perf.open">Open</div><div class="ps-val" id="ps-open">0</div><div class="ps-sub" data-i18n="perf.monitoring">monitoring</div></div>
       </div>
-      <div style="padding:8px 12px;border-bottom:1px solid var(--br);background:var(--bg2);font-size:9px;color:var(--t3);letter-spacing:0.06em">
+      <div style="padding:8px 12px;border-bottom:1px solid var(--br);background:var(--bg2);font-size:9px;color:var(--t3);letter-spacing:0.06em" data-i18n="perf.rules">
         Signals with confidence ≥ 70% auto-logged · Outcomes checked every 30s against live prices · SL = 1×ATR · TP1 = 1.5×ATR · TP2 = 2.5×ATR
       </div>
       <div class="perf-log-wrap">
-        <div id="perfLog"><div class="empty-state">No signals logged yet.<br>High-confidence signals (≥70%) are tracked automatically.</div></div>
+        <div id="perfLog"><div class="empty-state" data-i18n-html="perf.empty">No signals logged yet.<br>High-confidence signals (≥70%) are tracked automatically.</div></div>
       </div>
     </div>
 
     <!-- NEWS TAB -->
     <div class="tab-content" id="tab-news">
-      <div class="section-bar"><span class="section-title">Crypto Market Intelligence</span><span class="live-tag">AUTO-REFRESH</span></div>
+      <div class="section-bar"><span class="section-title" data-i18n="sec.news">Crypto Market Intelligence</span><span class="live-tag" data-i18n="news.autoRefresh">AUTO-REFRESH</span></div>
       <div class="news-filter-bar" id="newsFilters">
-        <button class="nf-btn active" onclick="filterNews('all',this)">All</button>
-        <button class="nf-btn" onclick="filterNews('bullish',this)">Bullish</button>
-        <button class="nf-btn" onclick="filterNews('bearish',this)">Bearish</button>
-        <button class="nf-btn" onclick="filterNews('neutral',this)">Neutral</button>
+        <button class="nf-btn active" onclick="filterNews('all',this)" data-i18n="news.all">All</button>
+        <button class="nf-btn" onclick="filterNews('bullish',this)" data-i18n="news.bullish">Bullish</button>
+        <button class="nf-btn" onclick="filterNews('bearish',this)" data-i18n="news.bearish">Bearish</button>
+        <button class="nf-btn" onclick="filterNews('neutral',this)" data-i18n="news.neutral">Neutral</button>
       </div>
       <div id="newsGrid">
-        <div class="loading"><div class="ld-bar"><div class="ld-prog"></div></div><div class="ld-txt">Fetching market news...</div></div>
+        <div class="loading"><div class="ld-bar"><div class="ld-prog"></div></div><div class="ld-txt" data-i18n="news.fetching">Fetching market news...</div></div>
       </div>
     </div>
 
