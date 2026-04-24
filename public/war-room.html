@@ -3049,28 +3049,64 @@ function drawRadarChart(sym){
 // RENDER — NEWS
 // ═══════════════════════════════════════════════════════════
 
+// News title translation cache (keyed by lang+title)
+const NEWS_T_CACHE = {};
+async function translateNewsAsync(){
+  if (CURRENT_LANG === 'en' || !S.news || !S.news.length) return;
+  const lang = CURRENT_LANG;
+  const langName = I18N_NAMES[lang] || 'English';
+  const targets = S.news.slice(0, 30).filter(n => !NEWS_T_CACHE[lang+'|'+n.title]);
+  if (!targets.length) return;
+  for (const n of targets) {
+    const key = lang+'|'+n.title;
+    NEWS_T_CACHE[key] = n.title; // mark to prevent duplicate
+    try {
+      const resp = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          model:'google/gemini-2.5-flash-lite',
+          messages:[
+            {role:'system', content:`You are a translator. Translate the user message to ${langName}. Output ONLY the translation, no quotes, no explanation.`},
+            {role:'user', content:n.title}
+          ]
+        })
+      });
+      if (resp.ok) {
+        const j = await resp.json();
+        const tr = j?.choices?.[0]?.message?.content?.trim();
+        if (tr) { NEWS_T_CACHE[key] = tr; }
+      }
+    } catch(e) {}
+  }
+  renderNews();
+}
+
 function renderNews(){
   const filter=S.newsFilter;
   let items=S.news;
   if(filter!=='all')items=items.filter(n=>filter==='bullish'?n.sentiment==='pos':filter==='bearish'?n.sentiment==='neg':n.sentiment==='neu');
   const grid=document.getElementById('newsGrid');
-  if(!items.length){grid.innerHTML='<div class="empty-state">No news matching filter or still loading...</div>';return;}
+  if(!items.length){grid.innerHTML='<div class="empty-state">'+t('news.fetching','Loading...')+'</div>';return;}
+  const lang=CURRENT_LANG;
   grid.innerHTML=`<div class="news-grid">${items.map(n=>{
-    const sentLabel=n.sentiment==='pos'?'BULLISH':n.sentiment==='neg'?'BEARISH':'NEUTRAL';
+    const sentLabel = n.sentiment==='pos'?t('news.bullish','BULLISH').toUpperCase():n.sentiment==='neg'?t('news.bearish','BEARISH').toUpperCase():t('news.neutral','NEUTRAL').toUpperCase();
     const d=new Date(n.pubDate);
-    const timeStr=isNaN(d)?n.pubDate:d.toLocaleString();
+    const timeStr=isNaN(d)?n.pubDate:d.toLocaleString(lang);
+    const title = (lang!=='en' && NEWS_T_CACHE[lang+'|'+n.title]) ? NEWS_T_CACHE[lang+'|'+n.title] : n.title;
     return`<a class="news-item" href="${n.link}" target="_blank" rel="noopener">
       <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
         ${n.thumbnail?`<img class="news-icon" src="${n.thumbnail}" alt="" onerror="this.style.display='none'">`:'<div class="news-icon" style="display:flex;align-items:center;justify-content:center;font-size:16px">📰</div>'}
         <span class="news-source">${n.source.slice(0,10)}</span>
       </div>
       <div class="news-body">
-        <div class="news-title">${n.title}</div>
+        <div class="news-title">${title}</div>
         <div class="news-meta">${timeStr}</div>
       </div>
       <span class="news-sentiment ${n.sentiment}">${sentLabel}</span>
     </a>`;
   }).join('')}</div>`;
+  // Kick off async translation if needed (non-blocking)
+  if (lang !== 'en') { setTimeout(translateNewsAsync, 50); }
 }
 
 function filterNews(f,btn){
