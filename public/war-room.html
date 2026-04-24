@@ -612,10 +612,10 @@ body.light .lang-select{background:#fff;color:#1A2030;border-color:rgba(0,0,0,0.
 <!-- RISK DISCLAIMER (always visible, dismissible per session) -->
 <div id="riskBar" style="background:linear-gradient(90deg,rgba(255,176,32,0.12),rgba(255,62,62,0.10));border-bottom:1px solid rgba(255,176,32,0.35);padding:6px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:10.5px;color:var(--t);letter-spacing:0.04em">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <span style="color:var(--a);font-weight:700;letter-spacing:0.12em">⚠ RISK NOTICE</span>
-    <span style="color:var(--t2)">This platform is an analytical tool for educational and research use. Signals are <b style="color:var(--t)">probability estimates</b>, not guaranteed outcomes. Crypto trading involves substantial risk of capital loss. Never trade with funds you cannot afford to lose. <a href="#methodology" onclick="document.getElementById('methodologyModal').style.display='flex';return false;" style="color:var(--g);text-decoration:underline;cursor:pointer">Read methodology →</a></span>
+    <span style="color:var(--a);font-weight:700;letter-spacing:0.12em" data-i18n="risk.notice">⚠ RISK NOTICE</span>
+    <span style="color:var(--t2)" data-i18n-html="risk.body">This platform is an analytical tool for educational and research use. Signals are <b style="color:var(--t)">probability estimates</b>, not guaranteed outcomes. Crypto trading involves substantial risk of capital loss. Never trade with funds you cannot afford to lose. <a href="#methodology" onclick="document.getElementById('methodologyModal').style.display='flex';return false;" style="color:var(--g);text-decoration:underline;cursor:pointer">Read methodology →</a></span>
   </div>
-  <button onclick="this.parentElement.style.display='none'" style="background:transparent;border:1px solid var(--br2);color:var(--t2);font-family:var(--mono);font-size:10px;padding:2px 8px;cursor:pointer;letter-spacing:0.08em">DISMISS</button>
+  <button onclick="this.parentElement.style.display='none'" style="background:transparent;border:1px solid var(--br2);color:var(--t2);font-family:var(--mono);font-size:10px;padding:2px 8px;cursor:pointer;letter-spacing:0.08em" data-i18n="risk.dismiss">DISMISS</button>
 </div>
 
 <!-- COMMAND BAR -->
