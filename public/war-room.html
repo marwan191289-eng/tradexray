@@ -998,6 +998,250 @@ body.light .lang-select{background:#fff;color:#1A2030;border-color:rgba(0,0,0,0.
 
 <script>
 // ═══════════════════════════════════════════════════════════
+// I18N ENGINE — 8 LANGUAGES (zero impact on analytics engines)
+// ═══════════════════════════════════════════════════════════
+const I18N_LANGS = ['en','ar','es','fr','de','ru','tr','zh'];
+const I18N_RTL = ['ar'];
+const I18N_NAMES = { en:'English', ar:'العربية', es:'Español', fr:'Français', de:'Deutsch', ru:'Русский', tr:'Türkçe', zh:'中文' };
+
+const I18N = {
+  en: {
+    'nav.subtitle':'Decision Intelligence · Educational Use Only','nav.dict':'Dictionary','nav.dictTitle':'Indicator Dictionary','nav.init':'Init...',
+    'risk.notice':'⚠ RISK NOTICE','risk.body':'This platform is an analytical tool for educational and research use. Signals are <b style="color:var(--t)">probability estimates</b>, not guaranteed outcomes. Crypto trading involves substantial risk. Never trade with funds you cannot afford to lose. <a href="#methodology" onclick="document.getElementById(\'methodologyModal\').style.display=\'flex\';return false;" style="color:var(--g);text-decoration:underline;cursor:pointer">Read methodology →</a>','risk.dismiss':'DISMISS',
+    'cmd.fg':'Fear & Greed','cmd.mcap':'Total Market Cap','cmd.btcDom':'BTC Dominance','cmd.regime':'Market Regime','cmd.activeSig':'Active Signals','cmd.avgConf':'Avg Confidence','cmd.mtf':'MTF Consensus','cmd.volSpike':'24h Vol Spike',
+    'common.loading':'Loading...','common.loadingData':'Loading data...','common.scanning':'SCANNING','common.awaitingData':'Awaiting data','common.range':'Range --','common.alignment':'Alignment --','common.vsAvg':'vs avg','common.awaitStream':'Awaiting stream','common.fetching':'Fetching klines & computing indicators...','common.live':'Live','common.computing':'Computing...',
+    'tab.signals':'Signals','tab.screener':'Screener','tab.heatmap':'Heatmap','tab.radar':'Radar','tab.corr':'Corr','tab.perf':'Performance','tab.news':'News','tab.brief':'AI Brief','tab.chart':'SuperChart',
+    'tf.label':'TF','alerts.btn':'Alerts','alerts.priceTitle':'Price Alerts','alerts.title':'🚨 Signal Alerts',
+    'sort.by':'Sort by','sort.score':'Score','sort.conf':'Conf%','sort.chg':'24h Chg','sort.vol':'Volume','sort.name':'Name','sort.dir':'Direction',
+    'sec.signalMatrix':'Signal Matrix — All Assets','sec.screener':'Market Screener','sec.heatmap':'24-Hour Performance Heatmap','sec.radar':'Multi-Indicator Radar Analysis','sec.corr':'Rolling Correlation Matrix','sec.perf':'Signal Performance Tracker','sec.news':'Crypto Market Intelligence','sec.brief':'AI Tactical Briefing','sec.chart':'TradingView SuperChart',
+    'th.asset':'Asset','th.price':'Price','th.chg24':'24h %','th.signal':'Signal','th.score':'Score','th.conf':'Conf','th.volRatio':'Vol Ratio','th.mtfAlign':'MTF Align','th.scoreBar':'Score Bar',
+    'corr.window':'Window','corr.computing':'Computing correlations...',
+    'perf.clearAll':'CLEAR ALL','perf.totalSig':'Total Signals','perf.logged':'logged','perf.winRate':'Win Rate','perf.tpHit':'TP hit / closed','perf.pf':'Profit Factor','perf.gwl':'gross win / loss','perf.avgR':'Avg R','perf.riskUnits':'risk units per trade','perf.exp':'Expectancy','perf.rPerTrade':'R per trade','perf.bestSig':'Best Signal','perf.assetR':'asset + R','perf.maxStreak':'Max Streak','perf.wlConsec':'W/L consecutive','perf.open':'Open','perf.monitoring':'monitoring','perf.rules':'Signals with confidence ≥ 70% auto-logged · Outcomes checked every 30s · SL = 1×ATR · TP1 = 1.5×ATR · TP2 = 2.5×ATR','perf.empty':'No signals logged yet.<br>High-confidence signals (≥70%) are tracked automatically.',
+    'news.autoRefresh':'AUTO-REFRESH','news.all':'All','news.bullish':'Bullish','news.bearish':'Bearish','news.neutral':'Neutral','news.fetching':'Fetching market news...',
+    'brief.engine':'QUANT ENGINE · 7-TF','brief.generate':'▶ GENERATE BRIEF','brief.intro':'Powered by AI — click GENERATE BRIEF for a comprehensive tactical analysis based on all live indicators, multi-timeframe confluence, regime context, and risk parameters.','chart.live':'LIVE CHART',
+    'detail.select':'SELECT ASSET','detail.copy':'⎘ COPY','detail.empty':'Click any card to view<br>full indicator breakdown',
+    'log.title':'Signal Log','log.events':'events','log.empty':'Signals appear here<br>as market conditions shift',
+    'sig.BUY':'BUY','sig.SELL':'SELL','sig.HOLD':'HOLD','sig.WAIT':'WAIT','sig.LONG':'LONG','sig.SHORT':'SHORT','sig.NO_TRADE':'NO TRADE',
+    'reg.bull_trend':'BULL TREND','reg.bear_trend':'BEAR TREND','reg.range':'RANGING','reg.high_vol':'HIGH VOL','reg.low_vol':'LOW VOL','reg.choppy':'CHOPPY',
+    'lbl.entry':'Entry','lbl.stop':'Stop Loss','lbl.tp1':'TP1','lbl.tp2':'TP2','lbl.tp3':'TP3','lbl.risk':'Risk','lbl.reward':'Reward','lbl.rr':'R/R','lbl.confidence':'Confidence','lbl.score':'Score','lbl.tf':'Timeframe',
+  },
+  ar: {
+    'nav.subtitle':'ذكاء القرار · للأغراض التعليمية فقط','nav.dict':'القاموس','nav.dictTitle':'قاموس المؤشرات','nav.init':'جارٍ التهيئة...',
+    'risk.notice':'⚠ تنبيه مخاطر','risk.body':'هذه المنصة أداة تحليلية للأغراض التعليمية والبحثية. الإشارات هي <b style="color:var(--t)">تقديرات احتمالية</b> وليست نتائج مضمونة. تداول العملات الرقمية ينطوي على مخاطر كبيرة. لا تتداول بأموال لا يمكنك تحمل خسارتها. <a href="#methodology" onclick="document.getElementById(\'methodologyModal\').style.display=\'flex\';return false;" style="color:var(--g);text-decoration:underline;cursor:pointer">اقرأ المنهجية ←</a>','risk.dismiss':'إخفاء',
+    'cmd.fg':'الخوف والطمع','cmd.mcap':'القيمة السوقية الكلية','cmd.btcDom':'هيمنة البيتكوين','cmd.regime':'حالة السوق','cmd.activeSig':'الإشارات النشطة','cmd.avgConf':'متوسط الثقة','cmd.mtf':'إجماع الفريمات','cmd.volSpike':'قفزة الحجم 24س',
+    'common.loading':'جارٍ التحميل...','common.loadingData':'جارٍ تحميل البيانات...','common.scanning':'جارٍ المسح','common.awaitingData':'بانتظار البيانات','common.range':'النطاق --','common.alignment':'التوافق --','common.vsAvg':'مقابل المتوسط','common.awaitStream':'بانتظار البث','common.fetching':'جلب الشموع وحساب المؤشرات...','common.live':'مباشر','common.computing':'جارٍ الحساب...',
+    'tab.signals':'الإشارات','tab.screener':'الفاحص','tab.heatmap':'الخريطة الحرارية','tab.radar':'الرادار','tab.corr':'الارتباط','tab.perf':'الأداء','tab.news':'الأخبار','tab.brief':'موجز الذكاء','tab.chart':'الشارت',
+    'tf.label':'الفريم','alerts.btn':'تنبيهات','alerts.priceTitle':'تنبيهات السعر','alerts.title':'🚨 تنبيهات الإشارات',
+    'sort.by':'ترتيب حسب','sort.score':'النتيجة','sort.conf':'الثقة%','sort.chg':'تغير 24س','sort.vol':'الحجم','sort.name':'الاسم','sort.dir':'الاتجاه',
+    'sec.signalMatrix':'مصفوفة الإشارات — جميع الأصول','sec.screener':'فاحص السوق','sec.heatmap':'خريطة أداء 24 ساعة','sec.radar':'تحليل رادار متعدد المؤشرات','sec.corr':'مصفوفة الارتباط المتدحرج','sec.perf':'متتبع أداء الإشارات','sec.news':'استخبارات سوق الكريبتو','sec.brief':'موجز تكتيكي بالذكاء الاصطناعي','sec.chart':'شارت TradingView',
+    'th.asset':'الأصل','th.price':'السعر','th.chg24':'24س %','th.signal':'الإشارة','th.score':'النتيجة','th.conf':'الثقة','th.volRatio':'نسبة الحجم','th.mtfAlign':'توافق الفريمات','th.scoreBar':'شريط النتيجة',
+    'corr.window':'النافذة','corr.computing':'حساب الارتباطات...',
+    'perf.clearAll':'مسح الكل','perf.totalSig':'إجمالي الإشارات','perf.logged':'مسجلة','perf.winRate':'معدل الفوز','perf.tpHit':'TP محقق / مغلق','perf.pf':'معامل الربح','perf.gwl':'إجمالي ربح/خسارة','perf.avgR':'متوسط R','perf.riskUnits':'وحدة مخاطرة لكل صفقة','perf.exp':'التوقع','perf.rPerTrade':'R لكل صفقة','perf.bestSig':'أفضل إشارة','perf.assetR':'الأصل + R','perf.maxStreak':'أطول سلسلة','perf.wlConsec':'فوز/خسارة متتالي','perf.open':'مفتوحة','perf.monitoring':'تحت المراقبة','perf.rules':'الإشارات بثقة ≥ 70% تُسجل تلقائياً · النتائج تُفحص كل 30 ثانية · SL = 1×ATR · TP1 = 1.5×ATR · TP2 = 2.5×ATR','perf.empty':'لا توجد إشارات مسجلة بعد.<br>الإشارات عالية الثقة (≥70%) تُتابع تلقائياً.',
+    'news.autoRefresh':'تحديث تلقائي','news.all':'الكل','news.bullish':'صاعد','news.bearish':'هابط','news.neutral':'محايد','news.fetching':'جلب أخبار السوق...',
+    'brief.engine':'محرك كمي · 7 فريمات','brief.generate':'▶ توليد الموجز','brief.intro':'مدعوم بالذكاء الاصطناعي — اضغط توليد الموجز للحصول على تحليل تكتيكي شامل بناءً على جميع المؤشرات الحية وتوافق الفريمات الزمنية وحالة السوق ومعايير المخاطر.','chart.live':'شارت مباشر',
+    'detail.select':'اختر أصلاً','detail.copy':'⎘ نسخ','detail.empty':'اضغط أي بطاقة لعرض<br>التفصيل الكامل للمؤشرات',
+    'log.title':'سجل الإشارات','log.events':'حدث','log.empty':'تظهر الإشارات هنا<br>عند تغير ظروف السوق',
+    'sig.BUY':'شراء','sig.SELL':'بيع','sig.HOLD':'انتظار','sig.WAIT':'انتظار','sig.LONG':'لونغ','sig.SHORT':'شورت','sig.NO_TRADE':'لا تداول',
+    'reg.bull_trend':'اتجاه صاعد','reg.bear_trend':'اتجاه هابط','reg.range':'تذبذب جانبي','reg.high_vol':'تقلب مرتفع','reg.low_vol':'تقلب منخفض','reg.choppy':'متموج',
+    'lbl.entry':'الدخول','lbl.stop':'وقف الخسارة','lbl.tp1':'هدف 1','lbl.tp2':'هدف 2','lbl.tp3':'هدف 3','lbl.risk':'المخاطرة','lbl.reward':'العائد','lbl.rr':'R/R','lbl.confidence':'الثقة','lbl.score':'النتيجة','lbl.tf':'الفريم الزمني',
+  },
+  es: {
+    'nav.subtitle':'Inteligencia de Decisiones · Solo uso educativo','nav.dict':'Diccionario','nav.dictTitle':'Diccionario de indicadores','nav.init':'Iniciando...',
+    'risk.notice':'⚠ AVISO DE RIESGO','risk.body':'Esta plataforma es una herramienta analítica para uso educativo. Las señales son <b style="color:var(--t)">estimaciones de probabilidad</b>, no resultados garantizados. Operar criptomonedas conlleva riesgos sustanciales. <a href="#methodology" onclick="document.getElementById(\'methodologyModal\').style.display=\'flex\';return false;" style="color:var(--g);text-decoration:underline;cursor:pointer">Leer metodología →</a>','risk.dismiss':'DESCARTAR',
+    'cmd.fg':'Miedo y Codicia','cmd.mcap':'Capitalización Total','cmd.btcDom':'Dominio BTC','cmd.regime':'Régimen del Mercado','cmd.activeSig':'Señales Activas','cmd.avgConf':'Confianza Media','cmd.mtf':'Consenso MTF','cmd.volSpike':'Pico Vol 24h',
+    'common.loading':'Cargando...','common.loadingData':'Cargando datos...','common.scanning':'ESCANEANDO','common.awaitingData':'Esperando datos','common.range':'Rango --','common.alignment':'Alineación --','common.vsAvg':'vs media','common.awaitStream':'Esperando stream','common.fetching':'Obteniendo velas y calculando indicadores...','common.live':'En vivo','common.computing':'Calculando...',
+    'tab.signals':'Señales','tab.screener':'Escáner','tab.heatmap':'Mapa de calor','tab.radar':'Radar','tab.corr':'Correl.','tab.perf':'Rendimiento','tab.news':'Noticias','tab.brief':'IA Brief','tab.chart':'Gráfico',
+    'tf.label':'TF','alerts.btn':'Alertas','alerts.priceTitle':'Alertas de Precio','alerts.title':'🚨 Alertas de señal',
+    'sort.by':'Ordenar por','sort.score':'Puntuación','sort.conf':'Conf%','sort.chg':'Cambio 24h','sort.vol':'Volumen','sort.name':'Nombre','sort.dir':'Dirección',
+    'sec.signalMatrix':'Matriz de Señales — Todos los activos','sec.screener':'Escáner de Mercado','sec.heatmap':'Mapa de calor 24 horas','sec.radar':'Análisis Radar Multi-indicador','sec.corr':'Matriz de Correlación','sec.perf':'Rastreador de Rendimiento','sec.news':'Inteligencia del Mercado Cripto','sec.brief':'Briefing Táctico IA','sec.chart':'TradingView SuperChart',
+    'th.asset':'Activo','th.price':'Precio','th.chg24':'24h %','th.signal':'Señal','th.score':'Punt.','th.conf':'Conf','th.volRatio':'Ratio Vol','th.mtfAlign':'Align MTF','th.scoreBar':'Barra',
+    'corr.window':'Ventana','corr.computing':'Calculando correlaciones...',
+    'perf.clearAll':'BORRAR','perf.totalSig':'Total Señales','perf.logged':'registradas','perf.winRate':'Tasa Ganancia','perf.tpHit':'TP / cerradas','perf.pf':'Factor Beneficio','perf.gwl':'ganancia/pérdida','perf.avgR':'R Medio','perf.riskUnits':'unidades por trade','perf.exp':'Expectativa','perf.rPerTrade':'R por trade','perf.bestSig':'Mejor Señal','perf.assetR':'activo + R','perf.maxStreak':'Racha Máx','perf.wlConsec':'G/P consecutivo','perf.open':'Abiertas','perf.monitoring':'monitoreando','perf.rules':'Señales con confianza ≥ 70% auto-registradas · Verificadas cada 30s · SL = 1×ATR · TP1 = 1.5×ATR · TP2 = 2.5×ATR','perf.empty':'Sin señales aún.<br>Las señales de alta confianza (≥70%) se rastrean automáticamente.',
+    'news.autoRefresh':'AUTO','news.all':'Todas','news.bullish':'Alcista','news.bearish':'Bajista','news.neutral':'Neutral','news.fetching':'Obteniendo noticias...',
+    'brief.engine':'MOTOR CUANT · 7-TF','brief.generate':'▶ GENERAR','brief.intro':'Impulsado por IA — clic en GENERAR para análisis táctico completo.','chart.live':'GRÁFICO EN VIVO',
+    'detail.select':'SELECCIONAR','detail.copy':'⎘ COPIAR','detail.empty':'Haz clic en cualquier tarjeta<br>para ver el desglose completo',
+    'log.title':'Registro','log.events':'eventos','log.empty':'Las señales aparecen aquí',
+    'sig.BUY':'COMPRAR','sig.SELL':'VENDER','sig.HOLD':'MANTENER','sig.WAIT':'ESPERAR','sig.LONG':'LARGO','sig.SHORT':'CORTO','sig.NO_TRADE':'NO OPERAR',
+    'reg.bull_trend':'TENDENCIA ALCISTA','reg.bear_trend':'TENDENCIA BAJISTA','reg.range':'RANGO','reg.high_vol':'ALTA VOL','reg.low_vol':'BAJA VOL','reg.choppy':'INESTABLE',
+    'lbl.entry':'Entrada','lbl.stop':'Stop','lbl.tp1':'TP1','lbl.tp2':'TP2','lbl.tp3':'TP3','lbl.risk':'Riesgo','lbl.reward':'Recompensa','lbl.rr':'R/R','lbl.confidence':'Confianza','lbl.score':'Puntuación','lbl.tf':'Marco temporal',
+  },
+  fr: {
+    'nav.subtitle':'Intelligence Décisionnelle · Usage éducatif uniquement','nav.dict':'Dictionnaire','nav.dictTitle':'Dictionnaire des indicateurs','nav.init':'Initialisation...',
+    'risk.notice':'⚠ AVIS DE RISQUE','risk.body':'Cette plateforme est un outil analytique à usage éducatif. Les signaux sont des <b style="color:var(--t)">estimations de probabilité</b>, pas des résultats garantis. Le trading crypto comporte des risques importants. <a href="#methodology" onclick="document.getElementById(\'methodologyModal\').style.display=\'flex\';return false;" style="color:var(--g);text-decoration:underline;cursor:pointer">Lire la méthodologie →</a>','risk.dismiss':'IGNORER',
+    'cmd.fg':'Peur & Cupidité','cmd.mcap':'Capitalisation Totale','cmd.btcDom':'Dominance BTC','cmd.regime':'Régime du Marché','cmd.activeSig':'Signaux Actifs','cmd.avgConf':'Confiance Moy','cmd.mtf':'Consensus MTF','cmd.volSpike':'Pic Vol 24h',
+    'common.loading':'Chargement...','common.loadingData':'Chargement des données...','common.scanning':'ANALYSE','common.awaitingData':'En attente','common.range':'Plage --','common.alignment':'Alignement --','common.vsAvg':'vs moy','common.awaitStream':'En attente du flux','common.fetching':'Récupération des bougies et calcul des indicateurs...','common.live':'En direct','common.computing':'Calcul...',
+    'tab.signals':'Signaux','tab.screener':'Scanner','tab.heatmap':'Heatmap','tab.radar':'Radar','tab.corr':'Corr','tab.perf':'Performance','tab.news':'Actualités','tab.brief':'IA Brief','tab.chart':'Graphique',
+    'tf.label':'TF','alerts.btn':'Alertes','alerts.priceTitle':'Alertes de Prix','alerts.title':'🚨 Alertes de signal',
+    'sort.by':'Trier par','sort.score':'Score','sort.conf':'Conf%','sort.chg':'Chgt 24h','sort.vol':'Volume','sort.name':'Nom','sort.dir':'Direction',
+    'sec.signalMatrix':'Matrice de Signaux — Tous les actifs','sec.screener':'Scanner de Marché','sec.heatmap':'Heatmap Performance 24h','sec.radar':'Analyse Radar Multi-Indicateurs','sec.corr':'Matrice de Corrélation','sec.perf':'Suivi de Performance','sec.news':'Intelligence du Marché Crypto','sec.brief':'Briefing Tactique IA','sec.chart':'TradingView SuperChart',
+    'th.asset':'Actif','th.price':'Prix','th.chg24':'24h %','th.signal':'Signal','th.score':'Score','th.conf':'Conf','th.volRatio':'Ratio Vol','th.mtfAlign':'Align MTF','th.scoreBar':'Barre',
+    'corr.window':'Fenêtre','corr.computing':'Calcul des corrélations...',
+    'perf.clearAll':'EFFACER','perf.totalSig':'Total Signaux','perf.logged':'enregistrés','perf.winRate':'Taux de Réussite','perf.tpHit':'TP / clôturés','perf.pf':'Facteur de Profit','perf.gwl':'gain/perte brut','perf.avgR':'R Moyen','perf.riskUnits':'unités par trade','perf.exp':'Espérance','perf.rPerTrade':'R par trade','perf.bestSig':'Meilleur Signal','perf.assetR':'actif + R','perf.maxStreak':'Série Max','perf.wlConsec':'G/P consécutif','perf.open':'Ouverts','perf.monitoring':'surveillance','perf.rules':'Signaux ≥ 70% auto-enregistrés · Vérifiés toutes les 30s · SL = 1×ATR · TP1 = 1.5×ATR · TP2 = 2.5×ATR','perf.empty':'Aucun signal enregistré.<br>Les signaux haute confiance (≥70%) sont suivis automatiquement.',
+    'news.autoRefresh':'AUTO','news.all':'Tous','news.bullish':'Haussier','news.bearish':'Baissier','news.neutral':'Neutre','news.fetching':'Récupération des actualités...',
+    'brief.engine':'MOTEUR QUANT · 7-TF','brief.generate':'▶ GÉNÉRER','brief.intro':'Propulsé par IA — cliquez sur GÉNÉRER pour une analyse tactique complète.','chart.live':'GRAPHIQUE EN DIRECT',
+    'detail.select':'SÉLECTIONNER','detail.copy':'⎘ COPIER','detail.empty':'Cliquez sur une carte<br>pour voir les détails',
+    'log.title':'Journal','log.events':'événements','log.empty':'Les signaux apparaissent ici',
+    'sig.BUY':'ACHETER','sig.SELL':'VENDRE','sig.HOLD':'GARDER','sig.WAIT':'ATTENDRE','sig.LONG':'LONG','sig.SHORT':'SHORT','sig.NO_TRADE':'NE PAS TRADER',
+    'reg.bull_trend':'TENDANCE HAUSSIÈRE','reg.bear_trend':'TENDANCE BAISSIÈRE','reg.range':'RANGE','reg.high_vol':'VOL ÉLEVÉE','reg.low_vol':'VOL FAIBLE','reg.choppy':'INSTABLE',
+    'lbl.entry':'Entrée','lbl.stop':'Stop','lbl.tp1':'TP1','lbl.tp2':'TP2','lbl.tp3':'TP3','lbl.risk':'Risque','lbl.reward':'Gain','lbl.rr':'R/R','lbl.confidence':'Confiance','lbl.score':'Score','lbl.tf':'Unité de temps',
+  },
+  de: {
+    'nav.subtitle':'Entscheidungsintelligenz · Nur für Bildungszwecke','nav.dict':'Wörterbuch','nav.dictTitle':'Indikator-Wörterbuch','nav.init':'Initialisierung...',
+    'risk.notice':'⚠ RISIKOHINWEIS','risk.body':'Diese Plattform ist ein Analysetool zu Bildungszwecken. Signale sind <b style="color:var(--t)">Wahrscheinlichkeitsschätzungen</b>, keine Garantien. Krypto-Trading birgt erhebliche Risiken. <a href="#methodology" onclick="document.getElementById(\'methodologyModal\').style.display=\'flex\';return false;" style="color:var(--g);text-decoration:underline;cursor:pointer">Methodik lesen →</a>','risk.dismiss':'SCHLIESSEN',
+    'cmd.fg':'Angst & Gier','cmd.mcap':'Marktkapitalisierung','cmd.btcDom':'BTC-Dominanz','cmd.regime':'Marktregime','cmd.activeSig':'Aktive Signale','cmd.avgConf':'Ø Konfidenz','cmd.mtf':'MTF-Konsens','cmd.volSpike':'Vol-Spitze 24h',
+    'common.loading':'Lädt...','common.loadingData':'Lädt Daten...','common.scanning':'SCANNEN','common.awaitingData':'Warte auf Daten','common.range':'Bereich --','common.alignment':'Ausrichtung --','common.vsAvg':'vs Ø','common.awaitStream':'Warte auf Stream','common.fetching':'Hole Kerzen & berechne Indikatoren...','common.live':'Live','common.computing':'Berechne...',
+    'tab.signals':'Signale','tab.screener':'Screener','tab.heatmap':'Heatmap','tab.radar':'Radar','tab.corr':'Korr','tab.perf':'Performance','tab.news':'News','tab.brief':'KI-Brief','tab.chart':'Chart',
+    'tf.label':'TF','alerts.btn':'Alarme','alerts.priceTitle':'Preisalarme','alerts.title':'🚨 Signal-Alarme',
+    'sort.by':'Sortieren','sort.score':'Score','sort.conf':'Konf%','sort.chg':'24h Änd','sort.vol':'Volumen','sort.name':'Name','sort.dir':'Richtung',
+    'sec.signalMatrix':'Signal-Matrix — Alle Assets','sec.screener':'Markt-Screener','sec.heatmap':'24h Performance-Heatmap','sec.radar':'Multi-Indikator Radar','sec.corr':'Rolling Correlation Matrix','sec.perf':'Signal Performance Tracker','sec.news':'Krypto-Marktintelligenz','sec.brief':'KI Taktik-Briefing','sec.chart':'TradingView SuperChart',
+    'th.asset':'Asset','th.price':'Preis','th.chg24':'24h %','th.signal':'Signal','th.score':'Score','th.conf':'Konf','th.volRatio':'Vol-Ratio','th.mtfAlign':'MTF-Align','th.scoreBar':'Score-Bar',
+    'corr.window':'Fenster','corr.computing':'Berechne Korrelationen...',
+    'perf.clearAll':'LÖSCHEN','perf.totalSig':'Signale gesamt','perf.logged':'erfasst','perf.winRate':'Gewinnrate','perf.tpHit':'TP / geschlossen','perf.pf':'Profit-Faktor','perf.gwl':'Gewinn/Verlust','perf.avgR':'Ø R','perf.riskUnits':'Risiko-Einheiten','perf.exp':'Erwartung','perf.rPerTrade':'R pro Trade','perf.bestSig':'Bestes Signal','perf.assetR':'Asset + R','perf.maxStreak':'Max Serie','perf.wlConsec':'G/V in Folge','perf.open':'Offen','perf.monitoring':'überwacht','perf.rules':'Signale mit Konfidenz ≥ 70% automatisch erfasst · Alle 30s geprüft · SL = 1×ATR · TP1 = 1.5×ATR · TP2 = 2.5×ATR','perf.empty':'Noch keine Signale erfasst.',
+    'news.autoRefresh':'AUTO','news.all':'Alle','news.bullish':'Bullisch','news.bearish':'Bärisch','news.neutral':'Neutral','news.fetching':'Lade News...',
+    'brief.engine':'QUANT-ENGINE · 7-TF','brief.generate':'▶ GENERIEREN','brief.intro':'KI-gestützt — klicken Sie GENERIEREN für eine umfassende taktische Analyse.','chart.live':'LIVE-CHART',
+    'detail.select':'AUSWÄHLEN','detail.copy':'⎘ KOPIEREN','detail.empty':'Klicken Sie eine Karte<br>für die volle Indikator-Aufschlüsselung',
+    'log.title':'Signal-Log','log.events':'Ereignisse','log.empty':'Signale erscheinen hier',
+    'sig.BUY':'KAUFEN','sig.SELL':'VERKAUFEN','sig.HOLD':'HALTEN','sig.WAIT':'WARTEN','sig.LONG':'LONG','sig.SHORT':'SHORT','sig.NO_TRADE':'KEIN TRADE',
+    'reg.bull_trend':'AUFWÄRTSTREND','reg.bear_trend':'ABWÄRTSTREND','reg.range':'SEITWÄRTS','reg.high_vol':'HOHE VOL','reg.low_vol':'NIEDRIGE VOL','reg.choppy':'WACKELIG',
+    'lbl.entry':'Einstieg','lbl.stop':'Stop','lbl.tp1':'TP1','lbl.tp2':'TP2','lbl.tp3':'TP3','lbl.risk':'Risiko','lbl.reward':'Gewinn','lbl.rr':'R/R','lbl.confidence':'Konfidenz','lbl.score':'Score','lbl.tf':'Zeitrahmen',
+  },
+  ru: {
+    'nav.subtitle':'Интеллект решений · Только для образования','nav.dict':'Словарь','nav.dictTitle':'Словарь индикаторов','nav.init':'Инициализация...',
+    'risk.notice':'⚠ ПРЕДУПРЕЖДЕНИЕ','risk.body':'Эта платформа — аналитический инструмент для образования. Сигналы являются <b style="color:var(--t)">вероятностными оценками</b>, а не гарантированными результатами. Торговля крипто сопряжена со значительным риском. <a href="#methodology" onclick="document.getElementById(\'methodologyModal\').style.display=\'flex\';return false;" style="color:var(--g);text-decoration:underline;cursor:pointer">Методология →</a>','risk.dismiss':'СКРЫТЬ',
+    'cmd.fg':'Страх и Жадность','cmd.mcap':'Общая капитализация','cmd.btcDom':'Доминация BTC','cmd.regime':'Режим рынка','cmd.activeSig':'Активные сигналы','cmd.avgConf':'Средняя уверенность','cmd.mtf':'Консенсус MTF','cmd.volSpike':'Всплеск объёма 24ч',
+    'common.loading':'Загрузка...','common.loadingData':'Загрузка данных...','common.scanning':'СКАНИРОВАНИЕ','common.awaitingData':'Ожидание','common.range':'Диапазон --','common.alignment':'Выравн --','common.vsAvg':'vs средн','common.awaitStream':'Ожидание потока','common.fetching':'Получение свечей и расчёт индикаторов...','common.live':'Live','common.computing':'Вычисление...',
+    'tab.signals':'Сигналы','tab.screener':'Скринер','tab.heatmap':'Тепл. карта','tab.radar':'Радар','tab.corr':'Корр','tab.perf':'Эффект.','tab.news':'Новости','tab.brief':'ИИ Бриф','tab.chart':'График',
+    'tf.label':'TF','alerts.btn':'Сигналы','alerts.priceTitle':'Ценовые алерты','alerts.title':'🚨 Сигналы',
+    'sort.by':'Сорт.','sort.score':'Счёт','sort.conf':'Увер%','sort.chg':'24ч %','sort.vol':'Объём','sort.name':'Имя','sort.dir':'Напр.',
+    'sec.signalMatrix':'Матрица сигналов — Все активы','sec.screener':'Скринер рынка','sec.heatmap':'Тепловая карта 24ч','sec.radar':'Мульти-индикаторный радар','sec.corr':'Матрица корреляции','sec.perf':'Трекер эффективности','sec.news':'Крипто-разведка рынка','sec.brief':'Тактический брифинг ИИ','sec.chart':'TradingView SuperChart',
+    'th.asset':'Актив','th.price':'Цена','th.chg24':'24ч %','th.signal':'Сигнал','th.score':'Счёт','th.conf':'Увер','th.volRatio':'Vol Ratio','th.mtfAlign':'MTF Align','th.scoreBar':'Шкала',
+    'corr.window':'Окно','corr.computing':'Расчёт корреляций...',
+    'perf.clearAll':'ОЧИСТИТЬ','perf.totalSig':'Всего сигналов','perf.logged':'записано','perf.winRate':'Винрейт','perf.tpHit':'TP / закр','perf.pf':'Profit Factor','perf.gwl':'прибыль/убыток','perf.avgR':'Ср R','perf.riskUnits':'единиц риска','perf.exp':'Ожидание','perf.rPerTrade':'R/трейд','perf.bestSig':'Лучший сигнал','perf.assetR':'актив + R','perf.maxStreak':'Макс серия','perf.wlConsec':'W/L подряд','perf.open':'Открытые','perf.monitoring':'мониторинг','perf.rules':'Сигналы ≥ 70% автоматически записываются · Проверка каждые 30с · SL = 1×ATR · TP1 = 1.5×ATR','perf.empty':'Сигналов пока нет.',
+    'news.autoRefresh':'АВТО','news.all':'Все','news.bullish':'Бычьи','news.bearish':'Медвежьи','news.neutral':'Нейтр','news.fetching':'Загрузка новостей...',
+    'brief.engine':'QUANT · 7-TF','brief.generate':'▶ СОЗДАТЬ','brief.intro':'На базе ИИ — нажмите СОЗДАТЬ для полного тактического анализа.','chart.live':'ЖИВОЙ ГРАФИК',
+    'detail.select':'ВЫБЕРИТЕ','detail.copy':'⎘ КОПИЯ','detail.empty':'Нажмите карточку<br>для полного разбора',
+    'log.title':'Лог сигналов','log.events':'событий','log.empty':'Сигналы появятся здесь',
+    'sig.BUY':'ПОКУПКА','sig.SELL':'ПРОДАЖА','sig.HOLD':'ДЕРЖАТЬ','sig.WAIT':'ЖДАТЬ','sig.LONG':'ЛОНГ','sig.SHORT':'ШОРТ','sig.NO_TRADE':'НЕ ТОРГОВАТЬ',
+    'reg.bull_trend':'БЫЧИЙ ТРЕНД','reg.bear_trend':'МЕДВЕЖИЙ ТРЕНД','reg.range':'ФЛЭТ','reg.high_vol':'ВЫС ВОЛАТ','reg.low_vol':'НИЗК ВОЛАТ','reg.choppy':'НЕСТАБ',
+    'lbl.entry':'Вход','lbl.stop':'Стоп','lbl.tp1':'TP1','lbl.tp2':'TP2','lbl.tp3':'TP3','lbl.risk':'Риск','lbl.reward':'Прибыль','lbl.rr':'R/R','lbl.confidence':'Уверенность','lbl.score':'Счёт','lbl.tf':'Таймфрейм',
+  },
+  tr: {
+    'nav.subtitle':'Karar Zekası · Sadece Eğitim Amaçlı','nav.dict':'Sözlük','nav.dictTitle':'Gösterge Sözlüğü','nav.init':'Başlatılıyor...',
+    'risk.notice':'⚠ RİSK UYARISI','risk.body':'Bu platform eğitim amaçlı analitik bir araçtır. Sinyaller <b style="color:var(--t)">olasılık tahminleridir</b>, garanti değildir. Kripto ticareti büyük risk içerir. <a href="#methodology" onclick="document.getElementById(\'methodologyModal\').style.display=\'flex\';return false;" style="color:var(--g);text-decoration:underline;cursor:pointer">Metodoloji →</a>','risk.dismiss':'KAPAT',
+    'cmd.fg':'Korku ve Açgözlülük','cmd.mcap':'Toplam Piyasa Değeri','cmd.btcDom':'BTC Dominansı','cmd.regime':'Piyasa Rejimi','cmd.activeSig':'Aktif Sinyaller','cmd.avgConf':'Ort. Güven','cmd.mtf':'MTF Uzlaşı','cmd.volSpike':'24s Hacim Sıçrama',
+    'common.loading':'Yükleniyor...','common.loadingData':'Veri yükleniyor...','common.scanning':'TARANIYOR','common.awaitingData':'Veri bekleniyor','common.range':'Aralık --','common.alignment':'Hizalama --','common.vsAvg':'ort. karşı','common.awaitStream':'Akış bekleniyor','common.fetching':'Mumlar alınıyor ve göstergeler hesaplanıyor...','common.live':'Canlı','common.computing':'Hesaplanıyor...',
+    'tab.signals':'Sinyaller','tab.screener':'Tarayıcı','tab.heatmap':'Isı Haritası','tab.radar':'Radar','tab.corr':'Korel','tab.perf':'Performans','tab.news':'Haberler','tab.brief':'AI Brief','tab.chart':'Grafik',
+    'tf.label':'TF','alerts.btn':'Uyarılar','alerts.priceTitle':'Fiyat Uyarıları','alerts.title':'🚨 Sinyal Uyarıları',
+    'sort.by':'Sırala','sort.score':'Skor','sort.conf':'Güven%','sort.chg':'24s %','sort.vol':'Hacim','sort.name':'İsim','sort.dir':'Yön',
+    'sec.signalMatrix':'Sinyal Matrisi — Tüm Varlıklar','sec.screener':'Piyasa Tarayıcısı','sec.heatmap':'24 Saatlik Performans Isı Haritası','sec.radar':'Çoklu-Gösterge Radar Analizi','sec.corr':'Korelasyon Matrisi','sec.perf':'Sinyal Performans Takipçisi','sec.news':'Kripto Piyasa İstihbaratı','sec.brief':'AI Taktik Brifingi','sec.chart':'TradingView SuperChart',
+    'th.asset':'Varlık','th.price':'Fiyat','th.chg24':'24s %','th.signal':'Sinyal','th.score':'Skor','th.conf':'Güven','th.volRatio':'Hacim Oranı','th.mtfAlign':'MTF Hizalama','th.scoreBar':'Skor Bar',
+    'corr.window':'Pencere','corr.computing':'Korelasyonlar hesaplanıyor...',
+    'perf.clearAll':'TEMİZLE','perf.totalSig':'Toplam Sinyal','perf.logged':'kayıtlı','perf.winRate':'Kazanma Oranı','perf.tpHit':'TP / kapalı','perf.pf':'Kar Faktörü','perf.gwl':'kazanç/kayıp','perf.avgR':'Ort R','perf.riskUnits':'risk birimi','perf.exp':'Beklenti','perf.rPerTrade':'R / işlem','perf.bestSig':'En İyi Sinyal','perf.assetR':'varlık + R','perf.maxStreak':'Maks Seri','perf.wlConsec':'K/Z üst üste','perf.open':'Açık','perf.monitoring':'izleniyor','perf.rules':'Güveni ≥ 70% sinyaller otomatik kaydedilir · Her 30s kontrol · SL = 1×ATR · TP1 = 1.5×ATR','perf.empty':'Henüz sinyal yok.',
+    'news.autoRefresh':'OTO','news.all':'Tümü','news.bullish':'Yükseliş','news.bearish':'Düşüş','news.neutral':'Nötr','news.fetching':'Haberler yükleniyor...',
+    'brief.engine':'QUANT · 7-TF','brief.generate':'▶ OLUŞTUR','brief.intro':'AI destekli — kapsamlı taktik analiz için OLUŞTUR\'a tıklayın.','chart.live':'CANLI GRAFİK',
+    'detail.select':'SEÇ','detail.copy':'⎘ KOPYA','detail.empty':'Tam dökümü görmek için<br>bir kart tıklayın',
+    'log.title':'Sinyal Günlüğü','log.events':'olay','log.empty':'Sinyaller burada görünür',
+    'sig.BUY':'AL','sig.SELL':'SAT','sig.HOLD':'TUT','sig.WAIT':'BEKLE','sig.LONG':'LONG','sig.SHORT':'SHORT','sig.NO_TRADE':'İŞLEM YOK',
+    'reg.bull_trend':'YÜKSELİŞ TRENDİ','reg.bear_trend':'DÜŞÜŞ TRENDİ','reg.range':'YATAY','reg.high_vol':'YÜK VOL','reg.low_vol':'DÜŞ VOL','reg.choppy':'DALGALI',
+    'lbl.entry':'Giriş','lbl.stop':'Stop','lbl.tp1':'TP1','lbl.tp2':'TP2','lbl.tp3':'TP3','lbl.risk':'Risk','lbl.reward':'Kazanç','lbl.rr':'R/R','lbl.confidence':'Güven','lbl.score':'Skor','lbl.tf':'Zaman Dilimi',
+  },
+  zh: {
+    'nav.subtitle':'决策智能 · 仅供教育用途','nav.dict':'词典','nav.dictTitle':'指标词典','nav.init':'初始化...',
+    'risk.notice':'⚠ 风险提示','risk.body':'本平台为教育研究用分析工具。信号是<b style="color:var(--t)">概率估计</b>，并非保证结果。加密货币交易风险极高。<a href="#methodology" onclick="document.getElementById(\'methodologyModal\').style.display=\'flex\';return false;" style="color:var(--g);text-decoration:underline;cursor:pointer">查看方法论 →</a>','risk.dismiss':'关闭',
+    'cmd.fg':'恐惧与贪婪','cmd.mcap':'总市值','cmd.btcDom':'BTC占比','cmd.regime':'市场状态','cmd.activeSig':'活跃信号','cmd.avgConf':'平均置信度','cmd.mtf':'多周期共识','cmd.volSpike':'24小时成交量突增',
+    'common.loading':'加载中...','common.loadingData':'加载数据中...','common.scanning':'扫描中','common.awaitingData':'等待数据','common.range':'范围 --','common.alignment':'对齐 --','common.vsAvg':'对比均值','common.awaitStream':'等待数据流','common.fetching':'获取K线并计算指标...','common.live':'实时','common.computing':'计算中...',
+    'tab.signals':'信号','tab.screener':'筛选器','tab.heatmap':'热力图','tab.radar':'雷达','tab.corr':'相关性','tab.perf':'表现','tab.news':'新闻','tab.brief':'AI简报','tab.chart':'超级图表',
+    'tf.label':'周期','alerts.btn':'提醒','alerts.priceTitle':'价格提醒','alerts.title':'🚨 信号提醒',
+    'sort.by':'排序','sort.score':'分数','sort.conf':'置信%','sort.chg':'24h涨跌','sort.vol':'成交量','sort.name':'名称','sort.dir':'方向',
+    'sec.signalMatrix':'信号矩阵 — 所有资产','sec.screener':'市场筛选器','sec.heatmap':'24小时表现热力图','sec.radar':'多指标雷达分析','sec.corr':'滚动相关性矩阵','sec.perf':'信号表现追踪','sec.news':'加密市场情报','sec.brief':'AI战术简报','sec.chart':'TradingView超级图表',
+    'th.asset':'资产','th.price':'价格','th.chg24':'24h %','th.signal':'信号','th.score':'分数','th.conf':'置信','th.volRatio':'成交量比','th.mtfAlign':'MTF对齐','th.scoreBar':'分数条',
+    'corr.window':'窗口','corr.computing':'计算相关性中...',
+    'perf.clearAll':'清除全部','perf.totalSig':'总信号数','perf.logged':'已记录','perf.winRate':'胜率','perf.tpHit':'TP命中/已平','perf.pf':'盈利因子','perf.gwl':'总盈/亏','perf.avgR':'平均R','perf.riskUnits':'风险单位','perf.exp':'期望','perf.rPerTrade':'每笔R','perf.bestSig':'最佳信号','perf.assetR':'资产 + R','perf.maxStreak':'最大连胜','perf.wlConsec':'连续胜/负','perf.open':'开放','perf.monitoring':'监控中','perf.rules':'置信度 ≥ 70% 的信号自动记录 · 每30秒检查 · SL = 1×ATR · TP1 = 1.5×ATR · TP2 = 2.5×ATR','perf.empty':'暂无信号记录。',
+    'news.autoRefresh':'自动刷新','news.all':'全部','news.bullish':'看涨','news.bearish':'看跌','news.neutral':'中性','news.fetching':'获取市场新闻中...',
+    'brief.engine':'量化引擎 · 7周期','brief.generate':'▶ 生成简报','brief.intro':'AI驱动 — 点击生成简报获取全面战术分析。','chart.live':'实时图表',
+    'detail.select':'选择资产','detail.copy':'⎘ 复制','detail.empty':'点击任意卡片<br>查看完整指标分析',
+    'log.title':'信号日志','log.events':'事件','log.empty':'信号将显示在此处',
+    'sig.BUY':'买入','sig.SELL':'卖出','sig.HOLD':'持有','sig.WAIT':'等待','sig.LONG':'做多','sig.SHORT':'做空','sig.NO_TRADE':'不交易',
+    'reg.bull_trend':'上升趋势','reg.bear_trend':'下降趋势','reg.range':'区间震荡','reg.high_vol':'高波动','reg.low_vol':'低波动','reg.choppy':'震荡',
+    'lbl.entry':'入场','lbl.stop':'止损','lbl.tp1':'TP1','lbl.tp2':'TP2','lbl.tp3':'TP3','lbl.risk':'风险','lbl.reward':'回报','lbl.rr':'R/R','lbl.confidence':'置信度','lbl.score':'分数','lbl.tf':'时间周期',
+  },
+};
+
+let CURRENT_LANG = (function(){
+  try {
+    const saved = localStorage.getItem('warroom_lang');
+    if (saved && I18N_LANGS.includes(saved)) return saved;
+    const nav = (navigator.language||'en').slice(0,2).toLowerCase();
+    return I18N_LANGS.includes(nav) ? nav : 'en';
+  } catch(e) { return 'en'; }
+})();
+
+function t(key, fallback) {
+  const dict = I18N[CURRENT_LANG] || I18N.en;
+  if (dict[key] != null) return dict[key];
+  if (I18N.en[key] != null) return I18N.en[key];
+  return fallback != null ? fallback : key;
+}
+
+function applyI18n(root) {
+  root = root || document;
+  // text content
+  root.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const v = t(key, null);
+    if (v != null) el.textContent = v;
+  });
+  // HTML content (allows <b>, <a>, <br>)
+  root.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.getAttribute('data-i18n-html');
+    const v = t(key, null);
+    if (v != null) el.innerHTML = v;
+  });
+  // titles / placeholders
+  root.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const v = t(el.getAttribute('data-i18n-title'), null);
+    if (v != null) el.setAttribute('title', v);
+  });
+  root.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const v = t(el.getAttribute('data-i18n-placeholder'), null);
+    if (v != null) el.setAttribute('placeholder', v);
+  });
+}
+
+function setLang(lang) {
+  if (!I18N_LANGS.includes(lang)) lang = 'en';
+  CURRENT_LANG = lang;
+  try { localStorage.setItem('warroom_lang', lang); } catch(e){}
+  const html = document.documentElement;
+  html.setAttribute('lang', lang);
+  html.setAttribute('dir', I18N_RTL.includes(lang) ? 'rtl' : 'ltr');
+  applyI18n();
+  const sel = document.getElementById('langSelect');
+  if (sel && sel.value !== lang) sel.value = lang;
+  // Refresh dynamic renderers if available
+  try { if (typeof renderCards === 'function') renderCards(); } catch(e){}
+  try { if (typeof renderScreener === 'function') renderScreener(); } catch(e){}
+  try { if (typeof renderNews === 'function') renderNews(); } catch(e){}
+  try { if (typeof renderHeatmap === 'function') renderHeatmap(); } catch(e){}
+  try { if (typeof renderRadar === 'function') renderRadar(); } catch(e){}
+  try { if (typeof renderCorrelation === 'function') renderCorrelation(); } catch(e){}
+  try { if (typeof renderDetailPanel === 'function' && window.S && S.selected) renderDetailPanel(S.selected); } catch(e){}
+  // Re-translate news titles asynchronously
+  try { if (typeof translateNewsAsync === 'function') translateNewsAsync(); } catch(e){}
+}
+
+// Translate signal/regime tokens (used by render functions)
+function tSig(s){ return t('sig.'+String(s).toUpperCase().replace(/\s+/g,'_'), s); }
+function tReg(r){ return t('reg.'+String(r||'').toLowerCase(), r||''); }
+
+// Apply once DOM ready (script runs after body)
+document.addEventListener('DOMContentLoaded', () => { setLang(CURRENT_LANG); });
+// Apply immediately too
+setTimeout(() => setLang(CURRENT_LANG), 0);
+
+// ═══════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════════
 const ASSETS = [
