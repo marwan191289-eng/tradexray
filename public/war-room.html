@@ -1872,7 +1872,7 @@ async function fetchKlines(sym,interval='1h',limit=100,retries=2){
     }
   }
   try{
-    const r=await fetch(`${MARKET_PROXY}?kind=klines&symbol=${encodeURIComponent(sym)}&interval=${encodeURIComponent(interval)}&limit=${encodeURIComponent(limit)}`);
+    const r=await fetch(`${MARKET_PROXY}?kind=klines&symbol=${encodeURIComponent(sym)}&interval=${encodeURIComponent(interval)}&limit=${encodeURIComponent(limit)}`, {headers:{'apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNieXdrcGduYWZ6YWF0bWRyamZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMTEyNDEsImV4cCI6MjA5Mjc4NzI0MX0.4CIZ7OVUz16FEbbeSKKy8PaFCWyP-jHPmHSIgwMEVWc'}});
     if(r.ok){
       const d=await r.json();
       if(Array.isArray(d)&&d.length)return d.map(k=>({t:k[0],o:+k[1],h:+k[2],l:+k[3],c:+k[4],v:+k[5]}));
@@ -1902,7 +1902,7 @@ async function fetchTickerSnapshot(sym,retries=2){
     }
   }
   try{
-    const r=await fetch(`${MARKET_PROXY}?kind=ticker&symbol=${encodeURIComponent(sym)}`);
+    const r=await fetch(`${MARKET_PROXY}?kind=ticker&symbol=${encodeURIComponent(sym)}`, {headers:{'apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNieXdrcGduYWZ6YWF0bWRyamZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMTEyNDEsImV4cCI6MjA5Mjc4NzI0MX0.4CIZ7OVUz16FEbbeSKKy8PaFCWyP-jHPmHSIgwMEVWc'}});
     if(r.ok){
       const data=await r.json();
       if(data?.symbol&&Number.isFinite(+data.lastPrice))return {sym,data};
