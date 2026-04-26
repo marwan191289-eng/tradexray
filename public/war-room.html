@@ -2992,18 +2992,25 @@ function renderRadar(){
     const ind=S.indicators[a.sym]?.[S.currentTF];
     const px=S.prices[a.sym];
     const logoHTML=a.logo?`<img src="${a.logo}" alt="${a.tk}" style="width:22px;height:22px;border-radius:50%;box-shadow:0 0 6px rgba(0,0,0,0.4)" onerror="this.style.display='none'">`:'';
-    // Raw data for radar
+    // Raw data for radar (guard against missing indicators)
+    const _rsi = (ind && typeof ind.rsi === 'number') ? ind.rsi : null;
+    const _mfi = (ind && typeof ind.mfi === 'number') ? ind.mfi : null;
+    const _vr  = (ind && typeof ind.volRatio === 'number') ? ind.volRatio : null;
+    const _adx = (ind && ind.adx && typeof ind.adx.adx === 'number') ? ind.adx.adx : null;
+    const _macdH = (ind && ind.macd && typeof ind.macd.hist === 'number') ? ind.macd.hist : null;
+    const _ema9 = ind?.ema9, _ema21 = ind?.ema21;
+    const _bbPct = (ind && ind.bb && px && typeof px.price === 'number' && (ind.bb.upper - ind.bb.lower)) ? ((px.price - ind.bb.lower) / (ind.bb.upper - ind.bb.lower) * 100) : null;
     const rawData = `<div class="radar-raw">
       <div style="font-family:var(--raj);font-size:10px;color:var(--g);margin-bottom:4px;letter-spacing:0.1em">📊 RAW RADAR VALUES — ${a.tk}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 10px">
-        <span style="color:var(--t3)">RSI</span><span style="color:${ind?.rsi<30?'var(--g)':ind?.rsi>70?'var(--r)':'var(--t)'}">${ind?.rsi?.toFixed(1)??'--'} → ${(ind?.rsi!==null?(ind.rsi/100*100).toFixed(0):'50')}%</span>
-        <span style="color:var(--t3)">MACD</span><span style="color:${ind?.macd?.hist>0?'var(--g)':'var(--r)'}">${ind?.macd?.hist?.toFixed(5)??'--'} → ${ind?.macd?(ind.macd.hist>0?'75':'25'):'50'}%</span>
-        <span style="color:var(--t3)">EMA Stack</span><span style="color:${ind?.ema9>ind?.ema21?'var(--g)':'var(--r)'}">${ind?.ema9>ind?.ema21?'Bull ▲':'Bear ▼'} → ${ind?.ema9>ind?.ema21?'75':'25'}%</span>
-        <span style="color:var(--t3)">BB%</span><span style="color:var(--t)">${ind?.bb&&px?((px.price-ind.bb.lower)/(ind.bb.upper-ind.bb.lower)*100).toFixed(0)+'%':'--'}</span>
-        <span style="color:var(--t3)">Volume</span><span style="color:${ind?.volRatio>2?'var(--r)':'var(--t)'}">${ind?.volRatio?.toFixed(2)??'--'}x → ${ind?.volRatio?(Math.min(ind.volRatio/3,1)*100).toFixed(0):'50'}%</span>
-        <span style="color:var(--t3)">ADX</span><span style="color:${ind?.adx?.adx>25?'var(--g)':'var(--t3)'}">${ind?.adx?.adx?.toFixed(1)??'--'} → ${ind?.adx?(Math.min(ind.adx.adx/100,1)*100).toFixed(0):'0'}%</span>
+        <span style="color:var(--t3)">RSI</span><span style="color:${_rsi!==null&&_rsi<30?'var(--g)':_rsi!==null&&_rsi>70?'var(--r)':'var(--t)'}">${_rsi!==null?_rsi.toFixed(1):'--'} → ${_rsi!==null?_rsi.toFixed(0):'50'}%</span>
+        <span style="color:var(--t3)">MACD</span><span style="color:${_macdH!==null&&_macdH>0?'var(--g)':'var(--r)'}">${_macdH!==null?_macdH.toFixed(5):'--'} → ${_macdH!==null?(_macdH>0?'75':'25'):'50'}%</span>
+        <span style="color:var(--t3)">EMA Stack</span><span style="color:${_ema9>_ema21?'var(--g)':'var(--r)'}">${_ema9>_ema21?'Bull ▲':'Bear ▼'} → ${_ema9>_ema21?'75':'25'}%</span>
+        <span style="color:var(--t3)">BB%</span><span style="color:var(--t)">${_bbPct!==null?_bbPct.toFixed(0)+'%':'--'}</span>
+        <span style="color:var(--t3)">Volume</span><span style="color:${_vr!==null&&_vr>2?'var(--r)':'var(--t)'}">${_vr!==null?_vr.toFixed(2)+'x':'--'} → ${_vr!==null?(Math.min(_vr/3,1)*100).toFixed(0):'50'}%</span>
+        <span style="color:var(--t3)">ADX</span><span style="color:${_adx!==null&&_adx>25?'var(--g)':'var(--t3)'}">${_adx!==null?_adx.toFixed(1):'--'} → ${_adx!==null?(Math.min(_adx/100,1)*100).toFixed(0):'0'}%</span>
         <span style="color:var(--t3)">Ichimoku</span><span style="color:${ind?.ichimoku?.priceAboveCloud?'var(--g)':ind?.ichimoku?.priceBelowCloud?'var(--r)':'var(--a)'}">${ind?.ichimoku?(ind.ichimoku.priceAboveCloud?'Above ↑':ind.ichimoku.priceBelowCloud?'Below ↓':'Inside'):'--'}</span>
-        <span style="color:var(--t3)">MFI</span><span style="color:${ind?.mfi<25?'var(--g)':ind?.mfi>75?'var(--r)':'var(--t)'}">${ind?.mfi?.toFixed(1)??'--'} → ${ind?.mfi!==null?(ind.mfi).toFixed(0):'50'}%</span>
+        <span style="color:var(--t3)">MFI</span><span style="color:${_mfi!==null&&_mfi<25?'var(--g)':_mfi!==null&&_mfi>75?'var(--r)':'var(--t)'}">${_mfi!==null?_mfi.toFixed(1):'--'} → ${_mfi!==null?_mfi.toFixed(0):'50'}%</span>
       </div>
     </div>`;
     return`<div class="radar-cell" onclick="this.classList.toggle('show-raw')">
