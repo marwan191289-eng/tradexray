@@ -1802,6 +1802,7 @@ const BINANCE_MIRRORS = [
   'https://api3.binance.com/api/v3',
   'https://api4.binance.com/api/v3',
 ];
+const MARKET_PROXY = 'https://sbywkpgnafzaatmdrjfr.supabase.co/functions/v1/binance-market';
 const ANALYSIS_TFS = ['5m','15m','1h','4h','1d','1w','1M'];
 let _activeMirror = 0;
 
@@ -1870,6 +1871,13 @@ async function fetchKlines(sym,interval='1h',limit=100,retries=2){
       clearTimeout(timeout);
     }
   }
+  try{
+    const r=await fetch(`${MARKET_PROXY}?kind=klines&symbol=${encodeURIComponent(sym)}&interval=${encodeURIComponent(interval)}&limit=${encodeURIComponent(limit)}`);
+    if(r.ok){
+      const d=await r.json();
+      if(Array.isArray(d)&&d.length)return d.map(k=>({t:k[0],o:+k[1],h:+k[2],l:+k[3],c:+k[4],v:+k[5]}));
+    }
+  }catch(e){}
   console.warn(`fetchKlines failed: ${sym} ${interval}`);
   return null;
 }
@@ -1893,6 +1901,13 @@ async function fetchTickerSnapshot(sym,retries=2){
       clearTimeout(timeout);
     }
   }
+  try{
+    const r=await fetch(`${MARKET_PROXY}?kind=ticker&symbol=${encodeURIComponent(sym)}`);
+    if(r.ok){
+      const data=await r.json();
+      if(data?.symbol&&Number.isFinite(+data.lastPrice))return {sym,data};
+    }
+  }catch(e){}
   return {sym,data:null};
 }
 
