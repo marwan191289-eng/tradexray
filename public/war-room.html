@@ -3032,19 +3032,19 @@ function renderRadar(){
 }
 
 function drawRadarChart(sym){
-  const tf=S.currentTF,ind=S.indicators[sym]?.[tf];
-  if(!ind)return;
+  const tf=S.currentTF,ind=S.indicators[sym]?.[tf]||{};
   const svg=document.getElementById('radar-'+sym);if(!svg)return;
   const cx=85,cy=85,maxR=68;
+  const px=S.prices[sym];
   const axes=[
-    {label:'RSI',val:ind.rsi!==null?ind.rsi/100:0.5},
-    {label:'MACD',val:ind.macd?(ind.macd.hist>0?0.75:0.25):0.5},
-    {label:'EMA',val:ind.ema9&&ind.ema21?(ind.ema9>ind.ema21?0.75:0.25):0.5},
-    {label:'BB%',val:ind.bb&&S.prices[sym]?Math.min(Math.max((S.prices[sym].price-ind.bb.lower)/(ind.bb.upper-ind.bb.lower),0),1):0.5},
-    {label:'Vol',val:ind.volRatio?Math.min(ind.volRatio/3,1):0.5},
-    {label:'ADX',val:ind.adx?Math.min(ind.adx.adx/100,1):0},
+    {label:'RSI',val:typeof ind.rsi==='number'?ind.rsi/100:0.5},
+    {label:'MACD',val:ind.macd&&typeof ind.macd.hist==='number'?(ind.macd.hist>0?0.75:0.25):0.5},
+    {label:'EMA',val:typeof ind.ema9==='number'&&typeof ind.ema21==='number'?(ind.ema9>ind.ema21?0.75:0.25):0.5},
+    {label:'BB%',val:ind.bb&&px&&(ind.bb.upper-ind.bb.lower)?Math.min(Math.max((px.price-ind.bb.lower)/(ind.bb.upper-ind.bb.lower),0),1):0.5},
+    {label:'Vol',val:typeof ind.volRatio==='number'?Math.min(ind.volRatio/3,1):0.5},
+    {label:'ADX',val:ind.adx&&typeof ind.adx.adx==='number'?Math.min(ind.adx.adx/100,1):0.3},
     {label:'ICH',val:ind.ichimoku?(ind.ichimoku.priceAboveCloud?0.85:ind.ichimoku.priceBelowCloud?0.15:0.5):0.5},
-    {label:'MFI',val:ind.mfi!==null?ind.mfi/100:0.5},
+    {label:'MFI',val:typeof ind.mfi==='number'?ind.mfi/100:0.5},
   ];
   const step=(2*Math.PI)/axes.length;
   const pts=axes.map((ax,i)=>{const ang=i*step-Math.PI/2,r=ax.val*maxR;return{x:cx+r*Math.cos(ang),y:cy+r*Math.sin(ang)};});
