@@ -5396,6 +5396,136 @@ function openI18nDebug(){
 // Init news status to idle
 setTimeout(()=>setNewsStatus('idle'), 500);
 
+// ═══════════════════════════════════════════════════════════
+// ── DYNAMIC SCREENER SEARCH (session-only) ─────────────────
+// ═══════════════════════════════════════════════════════════
+const COIN_COLORS = ['#FF6B9D','#4AABFF','#9945FF','#F3BA2F','#00AAE4','#0033AD','#C2A633','#E84142','#8DC351','#B6509E','#A6A9AA','#26A17B'];
+function pickColor(sym){ let h=0; for (const c of sym) h = (h*31 + c.charCodeAt(0)) >>> 0; return COIN_COLORS[h % COIN_COLORS.length]; }
+
+async function screenerAddSearched(raw) {
+  try {
+    if (!raw) return;
+    let sym = String(raw).trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+    if (!sym) return;
+    if (!sym.endsWith('USDT')) sym = sym + 'USDT';
+    if (ASSETS.find(a => a.sym === sym)) { alert('هذه العملة موجودة بالفعل'); return; }
+    const r = await fetch(`https://sbywkpgnafzaatmdrjfr.supabase.co/functions/v1/binance-market?kind=ticker&symbol=${sym}`, {
+      headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNieXdrcGduYWZ6YWF0bWRyamZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMTEyNDEsImV4cCI6MjA5Mjc4NzI0MX0.4CIZ7OVUz16FEbbeSKKy8PaFCWyP-jHPmHSIgwMEVWc' }
+    });
+    if (!r.ok) { alert('لم يتم العثور على هذا الزوج في Binance'); return; }
+    const tk = sym.replace(/USDT$/,'');
+    ASSETS.push({ sym, name: tk, tk, color: pickColor(sym), logo: '', _session: true });
+    document.getElementById('screenerSearch').value = '';
+    updateSessionAssetsLabel();
+    try {
+      if (typeof fetchKlines === 'function') {
+        for (const tf of ['5m','15m','1h','4h','1d','1w','1M']) {
+          const k = await fetchKlines(sym, tf, 200);
+          if (k && k.length) {
+            S.klines[sym] = S.klines[sym] || {};
+            S.klines[sym][tf] = k;
+            if (typeof computeIndicators === 'function') {
+              S.indicators[sym] = S.indicators[sym] || {};
+              S.indicators[sym][tf] = computeIndicators(k);
+            }
+            if (typeof generateSignal === 'function') {
+              S.signals[sym] = S.signals[sym] || {};
+              S.signals[sym][tf] = generateSignal(S.indicators[sym][tf], k);
+            }
+          }
+        }
+      }
+    } catch(e) { console.warn('fetch new asset:', e); }
+    if (typeof renderScreener === 'function') renderScreener();
+    if (typeof renderCards === 'function') renderCards();
+  } catch (e) {
+    console.error(e); alert('فشل الإضافة: ' + (e.message || e));
+  }
+}
+
+function screenerClearSession() {
+  for (let i = ASSETS.length - 1; i >= 0; i--) if (ASSETS[i]._session) ASSETS.splice(i, 1);
+  updateSessionAssetsLabel();
+  if (typeof renderScreener === 'function') renderScreener();
+  if (typeof renderCards === 'function') renderCards();
+}
+
+function updateSessionAssetsLabel() {
+  const el = document.getElementById('sessionAssetsCount');
+  if (!el) return;
+  const n = ASSETS.filter(a => a._session).length;
+  el.textContent = n ? `(${n} مؤقتة)` : '';
+}
+
+// ═══════════════════════════════════════════════════════════
+// ── SUPABASE SESSION (auth UI binding) ─────────────────────
+// ═══════════════════════════════════════════════════════════
+(function initWarRoomAuth(){
+  const SUPA_URL = 'https://sbywkpgnafzaatmdrjfr.supabase.co';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNieXdrcGduYWZ6YWF0bWRyamZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMTEyNDEsImV4cCI6MjA5Mjc4NzI0MX0.4CIZ7OVUz16FEbbeSKKy8PaFCWyP-jHPmHSIgwMEVWc';
+
+  function getStoredSession() {
+    try {
+      const k = Object.keys(localStorage).find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
+      if (!k) return null;
+      const raw = JSON.parse(localStorage.getItem(k) || 'null');
+      if (!raw) return null;
+      return raw.access_token ? raw : (raw.currentSession || null);
+    } catch { return null; }
+  }
+
+  async function loadProfile(token, userId) {
+    try {
+      const [p, r] = await Promise.all([
+        fetch(`${SUPA_URL}/rest/v1/profiles?select=display_name,avatar_url&user_id=eq.${userId}`, {
+          headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}` }
+        }).then(x => x.ok ? x.json() : []),
+        fetch(`${SUPA_URL}/rest/v1/user_roles?select=role&user_id=eq.${userId}`, {
+          headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}` }
+        }).then(x => x.ok ? x.json() : []),
+      ]);
+      return { profile: p?.[0] || null, role: r?.[0]?.role || 'user' };
+    } catch { return { profile: null, role: 'user' }; }
+  }
+
+  async function refreshAuthUI() {
+    const sess = getStoredSession();
+    const loginLink = document.getElementById('loginLink');
+    const userInfo = document.getElementById('userInfo');
+    if (!sess?.access_token || !sess?.user) {
+      if (loginLink) loginLink.style.display = 'inline-block';
+      if (userInfo) userInfo.style.display = 'none';
+      return;
+    }
+    if (loginLink) loginLink.style.display = 'none';
+    if (userInfo) userInfo.style.display = 'inline-flex';
+    const { profile, role } = await loadProfile(sess.access_token, sess.user.id);
+    const name = profile?.display_name || sess.user.email?.split('@')[0] || 'User';
+    document.getElementById('userName').textContent = name;
+    const av = document.getElementById('userAvatar');
+    if (profile?.avatar_url) { av.src = profile.avatar_url; av.style.display = 'inline-block'; }
+    else av.style.display = 'none';
+    document.getElementById('adminLink').style.display = role === 'admin' ? 'inline-block' : 'none';
+  }
+
+  window.wrSignOut = async function() {
+    try {
+      const sess = getStoredSession();
+      if (sess?.access_token) {
+        await fetch(`${SUPA_URL}/auth/v1/logout`, {
+          method: 'POST',
+          headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${sess.access_token}` }
+        });
+      }
+    } catch {}
+    Object.keys(localStorage).filter(k => k.startsWith('sb-')).forEach(k => localStorage.removeItem(k));
+    location.href = '/auth';
+  };
+
+  window.addEventListener('storage', refreshAuthUI);
+  refreshAuthUI();
+  setInterval(refreshAuthUI, 30000);
+})();
 </script>
 </body>
 </html>
