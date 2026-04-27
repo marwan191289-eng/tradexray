@@ -4102,7 +4102,7 @@ function renderScreener() {
     const scoreColor = score > 0 ? 'var(--g)' : score < 0 ? 'var(--r)' : 'var(--a)';
     const chg = px?.change ?? 0;
     return `<tr onclick="selectCard('${a.sym}');switchTab('matrix',document.querySelector('.tab-btn'))">
-      <td style="color:${a.color}">${a.tk}<span style="color:var(--t2);font-size:9px;margin-left:4px">${a.name.slice(0,8)}</span></td>
+      <td style="color:${a.color}"><span style="display:inline-flex;align-items:center;gap:6px">${a.logo?`<img src="${a.logo}" alt="${a.tk}" style="width:18px;height:18px;border-radius:50%;background:#fff1" onerror="this.style.display='none'"/>`:''}<span>${a.tk}<span style="color:var(--t2);font-size:9px;margin-left:4px">${a.name.slice(0,8)}</span></span></span></td>
       <td style="font-family:var(--orb)">$${fmtP(px?.price)}</td>
       <td style="color:${chg>=0?'var(--g)':'var(--r)'};font-weight:600">${chg>=0?'+':''}${chg.toFixed(2)}%</td>
       <td><span class="sig-badge sig-${sc}">${sig?.signal??'WAIT'}</span></td>
