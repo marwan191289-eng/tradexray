@@ -44,6 +44,51 @@ export type Database = {
         }
         Relationships: []
       }
+      signal_log: {
+        Row: {
+          confidence: number
+          created_at: string
+          entry: number
+          features: Json
+          id: string
+          outcome: string | null
+          pnl_pct: number | null
+          resolved_at: string | null
+          side: string
+          stop: number | null
+          symbol: string
+          target: number | null
+        }
+        Insert: {
+          confidence?: number
+          created_at?: string
+          entry: number
+          features?: Json
+          id?: string
+          outcome?: string | null
+          pnl_pct?: number | null
+          resolved_at?: string | null
+          side: string
+          stop?: number | null
+          symbol: string
+          target?: number | null
+        }
+        Update: {
+          confidence?: number
+          created_at?: string
+          entry?: number
+          features?: Json
+          id?: string
+          outcome?: string | null
+          pnl_pct?: number | null
+          resolved_at?: string | null
+          side?: string
+          stop?: number | null
+          symbol?: string
+          target?: number | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -70,6 +115,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_delete_user: { Args: { _target_user: string }; Returns: undefined }
+      admin_list_users: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          created_at: string
+          display_name: string
+          email: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }[]
+      }
+      admin_set_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _target_user: string
+        }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

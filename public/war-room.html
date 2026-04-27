@@ -595,7 +595,7 @@ body.light .lang-select{background:#fff;color:#1A2030;border-color:rgba(0,0,0,0.
       <span class="tick-item"><span class="tick-sym">BCH</span><span class="tick-p" id="tp-BCHUSDT">—</span><span class="tick-ch" id="tc-BCHUSDT">—</span></span>
       <span class="tick-item"><span class="tick-sym">AAVE</span><span class="tick-p" id="tp-AAVEUSDT">—</span><span class="tick-ch" id="tc-AAVEUSDT">—</span></span>
       <span class="tick-item"><span class="tick-sym">LTC</span><span class="tick-p" id="tp-LTCUSDT">—</span><span class="tick-ch" id="tc-LTCUSDT">—</span></span>
-      <span class="tick-item" title="External feed (CoinGecko) — limited TA"><span class="tick-sym" style="color:#FF6B9D">PIEVERSE<span style="font-size:8px;color:#FFB020;margin-left:3px;letter-spacing:0.1em">EXT</span></span><span class="tick-p" id="tp-PIEVERSE">—</span><span class="tick-ch" id="tc-PIEVERSE">—</span></span>
+      
     </div>
   </div>
   <div class="nav-right">
@@ -617,6 +617,15 @@ body.light .lang-select{background:#fff;color:#1A2030;border-color:rgba(0,0,0,0.
     <div class="ws-status"><div class="ws-dot" id="wsDot"></div><span class="ws-label" id="wsLabel" data-i18n="nav.init">Init...</span></div>
     <div class="alert-bell" id="alertBell" onclick="toggleAlerts()">🔔<span class="badge" id="alertBadge">0</span></div>
     <div class="nav-clock" id="clock">00:00:00</div>
+    <div id="userBox" style="display:flex;align-items:center;gap:8px;margin-left:8px;font-family:var(--mono);font-size:11px">
+      <a id="loginLink" href="/auth" style="color:var(--b0);text-decoration:none;padding:4px 10px;border:1px solid var(--br2);border-radius:4px;display:none">دخول</a>
+      <div id="userInfo" style="display:none;align-items:center;gap:6px">
+        <img id="userAvatar" src="" alt="" style="width:22px;height:22px;border-radius:50%;background:var(--bg3);object-fit:cover" onerror="this.style.display='none'"/>
+        <span id="userName" style="color:var(--t)"></span>
+        <a id="adminLink" href="/admin" title="لوحة المطور" style="color:var(--a);text-decoration:none;padding:2px 6px;border:1px solid var(--a);border-radius:3px;font-size:9px;display:none">ADMIN</a>
+        <button onclick="wrSignOut()" style="background:transparent;color:var(--t3);border:1px solid var(--br2);border-radius:3px;padding:3px 8px;cursor:pointer;font-size:10px;font-family:var(--mono)">خروج</button>
+      </div>
+    </div>
   </div>
 </nav>
 
@@ -734,6 +743,14 @@ body.light .lang-select{background:#fff;color:#1A2030;border-color:rgba(0,0,0,0.
     <!-- SCREENER TAB -->
     <div class="tab-content" id="tab-screener">
       <div class="section-bar"><span class="section-title" data-i18n="sec.screener">Market Screener</span><span class="live-tag" id="screenerUpdate" data-i18n="common.live">Live</span></div>
+      <div style="display:flex;gap:8px;padding:10px 12px;background:var(--bg2);border-bottom:1px solid var(--br);align-items:center;flex-wrap:wrap">
+        <input id="screenerSearch" type="text" placeholder="🔎 ابحث بالرمز (مثال: LINK, MATIC, ARB) — يضاف مؤقتاً للجلسة"
+          style="flex:1;min-width:240px;background:var(--bg3);color:var(--t);border:1px solid var(--br2);padding:7px 12px;border-radius:4px;font-family:var(--mono);font-size:12px"
+          onkeydown="if(event.key==='Enter') screenerAddSearched(this.value)" />
+        <button class="tf-btn" onclick="screenerAddSearched(document.getElementById('screenerSearch').value)" style="font-size:11px;padding:6px 14px">إضافة</button>
+        <button class="tf-btn" onclick="screenerClearSession()" title="حذف العملات المؤقتة" style="font-size:11px;padding:6px 12px">↺ تنظيف</button>
+        <span id="sessionAssetsCount" style="font-size:10px;color:var(--t3);font-family:var(--mono)"></span>
+      </div>
       <div class="screener-wrap">
         <table class="screener-table" id="screenerTable">
           <thead>
@@ -852,7 +869,7 @@ body.light .lang-select{background:#fff;color:#1A2030;border-color:rgba(0,0,0,0.
             <option value="BCHUSDT">BCH / USDT</option>
             <option value="AAVEUSDT">AAVE / USDT</option>
             <option value="LTCUSDT">LTC / USDT</option>
-            <option value="PIEVERSE">PieVerse (External · Limited TA)</option>
+            
           </select>
           <select id="briefingLang" style="background:var(--bg4);border:1px solid var(--br2);color:var(--t);font-family:var(--mono);font-size:11px;padding:6px 10px;cursor:pointer">
             <option value="en">English</option>
@@ -1273,7 +1290,7 @@ const ASSETS = [
   { sym:'BCHUSDT',  name:'Bitcoin Cash',tk:'BCH',  color:'#8DC351', logo:'https://assets.coingecko.com/coins/images/780/small/bitcoin-cash-circle.png' },
   { sym:'AAVEUSDT', name:'Aave',        tk:'AAVE', color:'#B6509E', logo:'https://assets.coingecko.com/coins/images/12645/small/AAVE.png' },
   { sym:'LTCUSDT',  name:'Litecoin',    tk:'LTC',  color:'#A6A9AA', logo:'https://assets.coingecko.com/coins/images/2/small/litecoin.png' },
-  { sym:'PIEVERSE', name:'PieVerse',    tk:'PIEVERSE', color:'#FF6B9D', external:true, geckoId:'pieverse', logo:'' },
+  
 ];
 
 const BREST = 'https://api.binance.com/api/v3';
@@ -4094,7 +4111,7 @@ function renderScreener() {
     const scoreColor = score > 0 ? 'var(--g)' : score < 0 ? 'var(--r)' : 'var(--a)';
     const chg = px?.change ?? 0;
     return `<tr onclick="selectCard('${a.sym}');switchTab('matrix',document.querySelector('.tab-btn'))">
-      <td style="color:${a.color}">${a.tk}<span style="color:var(--t2);font-size:9px;margin-left:4px">${a.name.slice(0,8)}</span></td>
+      <td style="color:${a.color}"><span style="display:inline-flex;align-items:center;gap:6px">${a.logo?`<img src="${a.logo}" alt="${a.tk}" style="width:18px;height:18px;border-radius:50%;background:#fff1" onerror="this.style.display='none'"/>`:''}<span>${a.tk}<span style="color:var(--t2);font-size:9px;margin-left:4px">${a.name.slice(0,8)}</span></span></span></td>
       <td style="font-family:var(--orb)">$${fmtP(px?.price)}</td>
       <td style="color:${chg>=0?'var(--g)':'var(--r)'};font-weight:600">${chg>=0?'+':''}${chg.toFixed(2)}%</td>
       <td><span class="sig-badge sig-${sc}">${sig?.signal??'WAIT'}</span></td>
@@ -5379,6 +5396,136 @@ function openI18nDebug(){
 // Init news status to idle
 setTimeout(()=>setNewsStatus('idle'), 500);
 
+// ═══════════════════════════════════════════════════════════
+// ── DYNAMIC SCREENER SEARCH (session-only) ─────────────────
+// ═══════════════════════════════════════════════════════════
+const COIN_COLORS = ['#FF6B9D','#4AABFF','#9945FF','#F3BA2F','#00AAE4','#0033AD','#C2A633','#E84142','#8DC351','#B6509E','#A6A9AA','#26A17B'];
+function pickColor(sym){ let h=0; for (const c of sym) h = (h*31 + c.charCodeAt(0)) >>> 0; return COIN_COLORS[h % COIN_COLORS.length]; }
+
+async function screenerAddSearched(raw) {
+  try {
+    if (!raw) return;
+    let sym = String(raw).trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+    if (!sym) return;
+    if (!sym.endsWith('USDT')) sym = sym + 'USDT';
+    if (ASSETS.find(a => a.sym === sym)) { alert('هذه العملة موجودة بالفعل'); return; }
+    const r = await fetch(`https://sbywkpgnafzaatmdrjfr.supabase.co/functions/v1/binance-market?kind=ticker&symbol=${sym}`, {
+      headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNieXdrcGduYWZ6YWF0bWRyamZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMTEyNDEsImV4cCI6MjA5Mjc4NzI0MX0.4CIZ7OVUz16FEbbeSKKy8PaFCWyP-jHPmHSIgwMEVWc' }
+    });
+    if (!r.ok) { alert('لم يتم العثور على هذا الزوج في Binance'); return; }
+    const tk = sym.replace(/USDT$/,'');
+    ASSETS.push({ sym, name: tk, tk, color: pickColor(sym), logo: '', _session: true });
+    document.getElementById('screenerSearch').value = '';
+    updateSessionAssetsLabel();
+    try {
+      if (typeof fetchKlines === 'function') {
+        for (const tf of ['5m','15m','1h','4h','1d','1w','1M']) {
+          const k = await fetchKlines(sym, tf, 200);
+          if (k && k.length) {
+            S.klines[sym] = S.klines[sym] || {};
+            S.klines[sym][tf] = k;
+            if (typeof computeIndicators === 'function') {
+              S.indicators[sym] = S.indicators[sym] || {};
+              S.indicators[sym][tf] = computeIndicators(k);
+            }
+            if (typeof generateSignal === 'function') {
+              S.signals[sym] = S.signals[sym] || {};
+              S.signals[sym][tf] = generateSignal(S.indicators[sym][tf], k);
+            }
+          }
+        }
+      }
+    } catch(e) { console.warn('fetch new asset:', e); }
+    if (typeof renderScreener === 'function') renderScreener();
+    if (typeof renderCards === 'function') renderCards();
+  } catch (e) {
+    console.error(e); alert('فشل الإضافة: ' + (e.message || e));
+  }
+}
+
+function screenerClearSession() {
+  for (let i = ASSETS.length - 1; i >= 0; i--) if (ASSETS[i]._session) ASSETS.splice(i, 1);
+  updateSessionAssetsLabel();
+  if (typeof renderScreener === 'function') renderScreener();
+  if (typeof renderCards === 'function') renderCards();
+}
+
+function updateSessionAssetsLabel() {
+  const el = document.getElementById('sessionAssetsCount');
+  if (!el) return;
+  const n = ASSETS.filter(a => a._session).length;
+  el.textContent = n ? `(${n} مؤقتة)` : '';
+}
+
+// ═══════════════════════════════════════════════════════════
+// ── SUPABASE SESSION (auth UI binding) ─────────────────────
+// ═══════════════════════════════════════════════════════════
+(function initWarRoomAuth(){
+  const SUPA_URL = 'https://sbywkpgnafzaatmdrjfr.supabase.co';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNieXdrcGduYWZ6YWF0bWRyamZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMTEyNDEsImV4cCI6MjA5Mjc4NzI0MX0.4CIZ7OVUz16FEbbeSKKy8PaFCWyP-jHPmHSIgwMEVWc';
+
+  function getStoredSession() {
+    try {
+      const k = Object.keys(localStorage).find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
+      if (!k) return null;
+      const raw = JSON.parse(localStorage.getItem(k) || 'null');
+      if (!raw) return null;
+      return raw.access_token ? raw : (raw.currentSession || null);
+    } catch { return null; }
+  }
+
+  async function loadProfile(token, userId) {
+    try {
+      const [p, r] = await Promise.all([
+        fetch(`${SUPA_URL}/rest/v1/profiles?select=display_name,avatar_url&user_id=eq.${userId}`, {
+          headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}` }
+        }).then(x => x.ok ? x.json() : []),
+        fetch(`${SUPA_URL}/rest/v1/user_roles?select=role&user_id=eq.${userId}`, {
+          headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}` }
+        }).then(x => x.ok ? x.json() : []),
+      ]);
+      return { profile: p?.[0] || null, role: r?.[0]?.role || 'user' };
+    } catch { return { profile: null, role: 'user' }; }
+  }
+
+  async function refreshAuthUI() {
+    const sess = getStoredSession();
+    const loginLink = document.getElementById('loginLink');
+    const userInfo = document.getElementById('userInfo');
+    if (!sess?.access_token || !sess?.user) {
+      if (loginLink) loginLink.style.display = 'inline-block';
+      if (userInfo) userInfo.style.display = 'none';
+      return;
+    }
+    if (loginLink) loginLink.style.display = 'none';
+    if (userInfo) userInfo.style.display = 'inline-flex';
+    const { profile, role } = await loadProfile(sess.access_token, sess.user.id);
+    const name = profile?.display_name || sess.user.email?.split('@')[0] || 'User';
+    document.getElementById('userName').textContent = name;
+    const av = document.getElementById('userAvatar');
+    if (profile?.avatar_url) { av.src = profile.avatar_url; av.style.display = 'inline-block'; }
+    else av.style.display = 'none';
+    document.getElementById('adminLink').style.display = role === 'admin' ? 'inline-block' : 'none';
+  }
+
+  window.wrSignOut = async function() {
+    try {
+      const sess = getStoredSession();
+      if (sess?.access_token) {
+        await fetch(`${SUPA_URL}/auth/v1/logout`, {
+          method: 'POST',
+          headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${sess.access_token}` }
+        });
+      }
+    } catch {}
+    Object.keys(localStorage).filter(k => k.startsWith('sb-')).forEach(k => localStorage.removeItem(k));
+    location.href = '/auth';
+  };
+
+  window.addEventListener('storage', refreshAuthUI);
+  refreshAuthUI();
+  setInterval(refreshAuthUI, 30000);
+})();
 </script>
 </body>
 </html>
