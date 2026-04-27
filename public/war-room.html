@@ -734,6 +734,14 @@ body.light .lang-select{background:#fff;color:#1A2030;border-color:rgba(0,0,0,0.
     <!-- SCREENER TAB -->
     <div class="tab-content" id="tab-screener">
       <div class="section-bar"><span class="section-title" data-i18n="sec.screener">Market Screener</span><span class="live-tag" id="screenerUpdate" data-i18n="common.live">Live</span></div>
+      <div style="display:flex;gap:8px;padding:10px 12px;background:var(--bg2);border-bottom:1px solid var(--br);align-items:center;flex-wrap:wrap">
+        <input id="screenerSearch" type="text" placeholder="🔎 ابحث بالرمز (مثال: LINK, MATIC, ARB) — يضاف مؤقتاً للجلسة"
+          style="flex:1;min-width:240px;background:var(--bg3);color:var(--t);border:1px solid var(--br2);padding:7px 12px;border-radius:4px;font-family:var(--mono);font-size:12px"
+          onkeydown="if(event.key==='Enter') screenerAddSearched(this.value)" />
+        <button class="tf-btn" onclick="screenerAddSearched(document.getElementById('screenerSearch').value)" style="font-size:11px;padding:6px 14px">إضافة</button>
+        <button class="tf-btn" onclick="screenerClearSession()" title="حذف العملات المؤقتة" style="font-size:11px;padding:6px 12px">↺ تنظيف</button>
+        <span id="sessionAssetsCount" style="font-size:10px;color:var(--t3);font-family:var(--mono)"></span>
+      </div>
       <div class="screener-wrap">
         <table class="screener-table" id="screenerTable">
           <thead>
