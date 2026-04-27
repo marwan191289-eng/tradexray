@@ -617,6 +617,15 @@ body.light .lang-select{background:#fff;color:#1A2030;border-color:rgba(0,0,0,0.
     <div class="ws-status"><div class="ws-dot" id="wsDot"></div><span class="ws-label" id="wsLabel" data-i18n="nav.init">Init...</span></div>
     <div class="alert-bell" id="alertBell" onclick="toggleAlerts()">🔔<span class="badge" id="alertBadge">0</span></div>
     <div class="nav-clock" id="clock">00:00:00</div>
+    <div id="userBox" style="display:flex;align-items:center;gap:8px;margin-left:8px;font-family:var(--mono);font-size:11px">
+      <a id="loginLink" href="/auth" style="color:var(--b0);text-decoration:none;padding:4px 10px;border:1px solid var(--br2);border-radius:4px;display:none">دخول</a>
+      <div id="userInfo" style="display:none;align-items:center;gap:6px">
+        <img id="userAvatar" src="" alt="" style="width:22px;height:22px;border-radius:50%;background:var(--bg3);object-fit:cover" onerror="this.style.display='none'"/>
+        <span id="userName" style="color:var(--t)"></span>
+        <a id="adminLink" href="/admin" title="لوحة المطور" style="color:var(--a);text-decoration:none;padding:2px 6px;border:1px solid var(--a);border-radius:3px;font-size:9px;display:none">ADMIN</a>
+        <button onclick="wrSignOut()" style="background:transparent;color:var(--t3);border:1px solid var(--br2);border-radius:3px;padding:3px 8px;cursor:pointer;font-size:10px;font-family:var(--mono)">خروج</button>
+      </div>
+    </div>
   </div>
 </nav>
 
