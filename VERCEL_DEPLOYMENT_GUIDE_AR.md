@@ -4,6 +4,8 @@
 
 **ملاحظة:** تم تحديث المنصة لتشمل تحسينات شاملة في SEO والعلامة التجارية (Branding) لضمان انتشار فيروسي وظهور أفضل في محركات البحث. كما تم توليد أصول بصرية جديدة (شعار، أيقونة، صورة OpenGraph) لتعزيز الهوية البصرية للمنصة.
 
+**تحديث هام:** تم تحويل TradeXRay AI إلى منصة تداول متكاملة (Full Trading Ecosystem) تدعم ربط المحافظ، المحافظ الداخلية، التداول الفوري والعقود الآجلة، ونظام رسوم متقدم. للحصول على تفاصيل كاملة حول إعداد هذه الميزات، يرجى الرجوع إلى [دليل إعداد منصة التداول المتكاملة](/TRADING_PLATFORM_SETUP_GUIDE_AR.md).
+
 ---
 
 ## 1. المتطلبات المسبقة (Prerequisites)
@@ -14,6 +16,8 @@
 - حساب على [Stripe](https://stripe.com/) لإدارة الاشتراكات والدفع.
 - قاعدة بيانات PostgreSQL (مثل [Neon](https://neon.tech/) أو [Supabase](https://supabase.com/)).
 - مستودع الكود الخاص بك مرفوع على GitHub.
+- **محافظ Web3**: لإعداد ربط المحافظ الخارجية (MetaMask, WalletConnect) ستحتاج إلى مفاتيح API من مزودي خدمة مثل Infura أو Alchemy.
+- **بيانات السوق**: لإعداد محرك التداول والتحليلات، ستحتاج إلى مفاتيح API من مزودي بيانات السوق مثل CoinGecko أو Binance.
 
 ---
 
@@ -46,6 +50,20 @@ STRIPE_ELITE_YEARLY_PRICE_ID=price_...         # معرف سعر باقة الن
 ```env
 APP_URL=https://tradexray.vercel.app           # رابط المنصة النهائي بعد النشر
 NODE_ENV=production                            # بيئة التشغيل
+```
+
+### متغيرات Web3 والتداول (Web3 & Trading)
+```env
+VITE_WALLET_CONNECT_PROJECT_ID=your_project_id # معرف مشروع WalletConnect
+VITE_INFURA_API_KEY=your_infura_key            # مفتاح API من Infura (أو مزود آخر)
+VITE_TRADING_API_URL=https://api.tradexray.app # رابط API الخاص بمحرك التداول
+VITE_PRICE_FEED_URL=https://api.coingecko.com  # رابط API لمزود بيانات الأسعار
+```
+
+### متغيرات وسائل التواصل الاجتماعي (Social Media)
+```env
+VITE_FACEBOOK_APP_ID=your_facebook_app_id      # معرف تطبيق Facebook
+VITE_TWITTER_HANDLE=@TradeXRayAI               # حساب Twitter للمنصة
 ```
 
 ---
