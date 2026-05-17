@@ -1590,11 +1590,23 @@ function calcAll(sym,tf){
 function generateSignal(sym,tf){
   const ind=S.indicators[sym]?.[tf];
   const px=S.prices[sym];
-  if(!ind||!px)return{signal:'WAIT',score:0,conf:0,reasons:[],tfsAligned:0};
+  if(!ind||!px)return{signal:'WAIT',score:0,conf:0,reasons:[],tfsAligned:0,regime:'unknown',quality:0};
 
   const price=px.price,ch24=px.change;
   let score=0;
+  let bullVotes=0, bearVotes=0;   // for contradiction / quality detection
   const reasons=[];
+
+  // ── REGIME CLASSIFICATION ───────────────────────────────
+  // trending / ranging / volatile — drives adaptive thresholds
+  const atrPct = (ind.atr && price) ? (ind.atr/price)*100 : null;
+  const adxV   = ind.adx?.adx ?? null;
+  let regime = 'mixed';
+  if(adxV!==null && atrPct!==null){
+    if(atrPct >= 6)                         regime = 'volatile';
+    else if(adxV >= 28)                     regime = 'trending';
+    else if(adxV < 18 && atrPct < 2.5)      regime = 'ranging';
+  }
 
   // ── RSI — weight 3 ──────────────────────────────────────
   if(ind.rsi!==null){
