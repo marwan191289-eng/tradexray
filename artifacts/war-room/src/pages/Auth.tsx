@@ -36,7 +36,7 @@ export default function Auth() {
             <Zap className="w-5 h-5 text-emerald-400" />
           </div>
           <div>
-            <span className="text-xl font-bold text-white tracking-tight">TradeXRay</span>
+            <span className="text-xl font-bold text-white tracking-tight">TradeXRay AI</span>
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-[10px] text-emerald-400/80 font-medium uppercase tracking-wider">Decision Intelligence</span>
@@ -96,7 +96,7 @@ export default function Auth() {
           <div className="w-8 h-8 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center">
             <Zap className="w-4 h-4 text-primary" />
           </div>
-          <span className="text-lg font-bold text-foreground">TradeXRay</span>
+          <span className="text-lg font-bold text-foreground">TradeXRay AI</span>
         </div>
 
         <div className="w-full max-w-md">
@@ -108,7 +108,7 @@ export default function Auth() {
             <p className="text-muted-foreground text-sm mt-1.5">
               {mode === "signin"
                 ? "Sign in to access your trading dashboard"
-                : "Start your journey with TradeXRay today"}
+                : "Start your journey with TradeXRay AI today"}
             </p>
           </div>
 

@@ -92,7 +92,7 @@ export const Layout = ({ children, isAdmin = false }: LayoutProps) => {
           <Zap className="w-4 h-4 text-primary" />
         </div>
         <div>
-          <span className="font-bold text-sidebar-foreground text-sm tracking-tight">TradeXRay</span>
+          <span className="font-bold text-sidebar-foreground text-sm tracking-tight">TradeXRay AI</span>
           <div className="flex items-center gap-1 mt-0.5">
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
             <span className="text-[10px] text-primary/70 font-medium">LIVE</span>
@@ -218,7 +218,7 @@ export const Layout = ({ children, isAdmin = false }: LayoutProps) => {
           </Button>
           <div className="flex items-center gap-2">
             <Zap className="w-4 h-4 text-primary" />
-            <span className="font-bold text-sm">TradeXRay</span>
+            <span className="font-bold text-sm">TradeXRay AI</span>
           </div>
           <Avatar className="w-7 h-7">
             <AvatarImage src={user?.imageUrl} />
