@@ -14,6 +14,10 @@ import ForgotPassword from "./pages/ForgotPassword.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import Admin from "./pages/Admin.tsx";
 import SignOut from "./pages/SignOut.tsx";
+import Dashboard from "./pages/Dashboard.tsx";
+import Subscriptions from "./pages/Subscriptions.tsx";
+import Settings from "./pages/Settings.tsx";
+import APIDocumentation from "./pages/APIDocumentation.tsx";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +59,10 @@ function AppRoutes() {
       <Sonner />
       <Routes>
         <Route path="/" element={<Index />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/subscriptions" element={<Subscriptions />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/api-docs" element={<APIDocumentation />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
