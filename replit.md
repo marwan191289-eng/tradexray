@@ -1,6 +1,6 @@
-# [Project name]
+# WAR ROOM
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A probability-driven crypto trading intelligence platform with multi-layer signal scoring, regime-filtered analysis, 20+ technical indicators, and ATR-based risk management.
 
 ## Run & Operate
 
@@ -14,7 +14,9 @@ _Replace the heading above with the project's name, and this line with one sente
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
+- Frontend: React 19 + Vite + Tailwind v3 (postcss) + shadcn/ui + react-router-dom v6
+- Auth: Clerk (whitelabel, proxied via `/clerk` path)
+- API: Express 5 + Clerk middleware
 - DB: PostgreSQL + Drizzle ORM
 - Validation: Zod (`zod/v4`), `drizzle-zod`
 - API codegen: Orval (from OpenAPI spec)
@@ -22,23 +24,41 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/war-room/` — React frontend (Vite, port from `$PORT`)
+- `artifacts/api-server/` — Express API server (port 8080)
+- `lib/db/` — Drizzle ORM schema and client (`profiles`, `userRoles`, `signalLog`)
+- `lib/api-spec/openapi.yaml` — OpenAPI 3.1 spec (source of truth for all API contracts)
+- `artifacts/api-client-react/src/generated/` — auto-generated React Query hooks
+- `lib/api-zod/src/generated/` — auto-generated Zod schemas
+- `artifacts/war-room/public/war-room.html` — the original iframe trading dashboard
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Supabase (auth + DB) replaced with Clerk (auth) + Replit Postgres + Drizzle ORM
+- Lovable `@lovable.dev/cloud-auth-js` removed; Clerk handles Google OAuth and email/password
+- Admin panel uses generated React Query hooks (`useAdminCheck`, `useAdminListUsers`) instead of Supabase RPC calls
+- Clerk is proxied through the API server at `/clerk` so the frontend uses a relative URL (avoids CORS issues in the Replit preview proxy)
+- All API routes live under `/api`; admin routes require both auth + admin role check middleware
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Real-time crypto signal matrix across BTC, ETH, SOL and more
+- Multi-timeframe technical analysis (EMA, MACD, RSI, CCI, MFI, ADX, Ichimoku, SAR)
+- Market regime detection and sentiment scanning
+- Admin panel (Arabic RTL UI) for user and signal management
+- Authentication via Clerk (email/password + Google OAuth)
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Arabic RTL UI for auth/admin pages
+- Keep all Supabase/Lovable references removed — use Clerk + Postgres + Drizzle only
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- After editing `lib/api-spec/openapi.yaml`, always run `pnpm --filter @workspace/api-spec run codegen` to regenerate hooks
+- `war-room.html` in `public/` is served as a static file; it is the original trading dashboard loaded via iframe in `Index.tsx`
+- Clerk peer dependency warnings on React 19.1.0 are harmless (Clerk targets ~19.0.3)
+- The `@clerk/react` `publishableKeyFromHost` utility selects between dev/prod Clerk keys based on hostname
 
 ## Pointers
 
