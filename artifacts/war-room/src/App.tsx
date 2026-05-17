@@ -13,6 +13,7 @@ import Auth from "./pages/Auth.tsx";
 import ForgotPassword from "./pages/ForgotPassword.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import Admin from "./pages/Admin.tsx";
+import SignOut from "./pages/SignOut.tsx";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,7 @@ function AppRoutes() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/signout" element={<SignOut />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

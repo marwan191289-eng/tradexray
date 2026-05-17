@@ -1889,7 +1889,7 @@ const BINANCE_MIRRORS = [
   'https://api3.binance.com/api/v3',
   'https://api4.binance.com/api/v3',
 ];
-const MARKET_PROXY = 'https://sbywkpgnafzaatmdrjfr.supabase.co/functions/v1/binance-market';
+const MARKET_PROXY = null;
 const ANALYSIS_TFS = ['5m','15m','1h','4h','1d','1w','1M'];
 let _activeMirror = 0;
 
@@ -1940,13 +1940,6 @@ function ensurePriceSnapshot(sym,force=false){
 }
 
 async function fetchKlines(sym,interval='1h',limit=100,retries=2){
-  try{
-    const r=await fetch(`${MARKET_PROXY}?kind=klines&symbol=${encodeURIComponent(sym)}&interval=${encodeURIComponent(interval)}&limit=${encodeURIComponent(limit)}`, {headers:{'apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNieXdrcGduYWZ6YWF0bWRyamZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMTEyNDEsImV4cCI6MjA5Mjc4NzI0MX0.4CIZ7OVUz16FEbbeSKKy8PaFCWyP-jHPmHSIgwMEVWc'}});
-    if(r.ok){
-      const d=await r.json();
-      if(Array.isArray(d)&&d.length)return d.map(k=>({t:k[0],o:+k[1],h:+k[2],l:+k[3],c:+k[4],v:+k[5]}));
-    }
-  }catch(e){}
   for(let attempt=0; attempt<=retries; attempt++){
     const base=BINANCE_MIRRORS[(_activeMirror+attempt)%BINANCE_MIRRORS.length];
     let timeout;
@@ -1965,25 +1958,11 @@ async function fetchKlines(sym,interval='1h',limit=100,retries=2){
       clearTimeout(timeout);
     }
   }
-  try{
-    const r=await fetch(`${MARKET_PROXY}?kind=klines&symbol=${encodeURIComponent(sym)}&interval=${encodeURIComponent(interval)}&limit=${encodeURIComponent(limit)}`, {headers:{'apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNieXdrcGduYWZ6YWF0bWRyamZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMTEyNDEsImV4cCI6MjA5Mjc4NzI0MX0.4CIZ7OVUz16FEbbeSKKy8PaFCWyP-jHPmHSIgwMEVWc'}});
-    if(r.ok){
-      const d=await r.json();
-      if(Array.isArray(d)&&d.length)return d.map(k=>({t:k[0],o:+k[1],h:+k[2],l:+k[3],c:+k[4],v:+k[5]}));
-    }
-  }catch(e){}
   console.warn(`fetchKlines failed: ${sym} ${interval}`);
   return null;
 }
 
 async function fetchTickerSnapshot(sym,retries=2){
-  try{
-    const r=await fetch(`${MARKET_PROXY}?kind=ticker&symbol=${encodeURIComponent(sym)}`, {headers:{'apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNieXdrcGduYWZ6YWF0bWRyamZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMTEyNDEsImV4cCI6MjA5Mjc4NzI0MX0.4CIZ7OVUz16FEbbeSKKy8PaFCWyP-jHPmHSIgwMEVWc'}});
-    if(r.ok){
-      const data=await r.json();
-      if(data?.symbol&&Number.isFinite(+data.lastPrice))return {sym,data};
-    }
-  }catch(e){}
   for(let attempt=0; attempt<=retries; attempt++){
     const base=BINANCE_MIRRORS[(_activeMirror+attempt)%BINANCE_MIRRORS.length];
     let timeout;
@@ -2002,13 +1981,6 @@ async function fetchTickerSnapshot(sym,retries=2){
       clearTimeout(timeout);
     }
   }
-  try{
-    const r=await fetch(`${MARKET_PROXY}?kind=ticker&symbol=${encodeURIComponent(sym)}`, {headers:{'apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNieXdrcGduYWZ6YWF0bWRyamZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMTEyNDEsImV4cCI6MjA5Mjc4NzI0MX0.4CIZ7OVUz16FEbbeSKKy8PaFCWyP-jHPmHSIgwMEVWc'}});
-    if(r.ok){
-      const data=await r.json();
-      if(data?.symbol&&Number.isFinite(+data.lastPrice))return {sym,data};
-    }
-  }catch(e){}
   return {sym,data:null};
 }
 
@@ -5479,9 +5451,7 @@ async function screenerAddSearched(raw) {
     if (!sym) return;
     if (!sym.endsWith('USDT')) sym = sym + 'USDT';
     if (ASSETS.find(a => a.sym === sym)) { alert('هذه العملة موجودة بالفعل'); return; }
-    const r = await fetch(`https://sbywkpgnafzaatmdrjfr.supabase.co/functions/v1/binance-market?kind=ticker&symbol=${sym}`, {
-      headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNieXdrcGduYWZ6YWF0bWRyamZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMTEyNDEsImV4cCI6MjA5Mjc4NzI0MX0.4CIZ7OVUz16FEbbeSKKy8PaFCWyP-jHPmHSIgwMEVWc' }
-    });
+    const r = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${sym}`);
     if (!r.ok) { alert('لم يتم العثور على هذا الزوج في Binance'); return; }
     const tk = sym.replace(/USDT$/,'');
     ASSETS.push({ sym, name: tk, tk, color: pickColor(sym), logo: '', _session: true });
@@ -5528,71 +5498,41 @@ function updateSessionAssetsLabel() {
 }
 
 // ═══════════════════════════════════════════════════════════
-// ── SUPABASE SESSION (auth UI binding) ─────────────────────
+// ── CLERK SESSION (auth UI binding) ────────────────────────
 // ═══════════════════════════════════════════════════════════
 (function initWarRoomAuth(){
-  const SUPA_URL = 'https://sbywkpgnafzaatmdrjfr.supabase.co';
-  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNieXdrcGduYWZ6YWF0bWRyamZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMTEyNDEsImV4cCI6MjA5Mjc4NzI0MX0.4CIZ7OVUz16FEbbeSKKy8PaFCWyP-jHPmHSIgwMEVWc';
-
-  function getStoredSession() {
-    try {
-      const k = Object.keys(localStorage).find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
-      if (!k) return null;
-      const raw = JSON.parse(localStorage.getItem(k) || 'null');
-      if (!raw) return null;
-      return raw.access_token ? raw : (raw.currentSession || null);
-    } catch { return null; }
-  }
-
-  async function loadProfile(token, userId) {
-    try {
-      const [p, r] = await Promise.all([
-        fetch(`${SUPA_URL}/rest/v1/profiles?select=display_name,avatar_url&user_id=eq.${userId}`, {
-          headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}` }
-        }).then(x => x.ok ? x.json() : []),
-        fetch(`${SUPA_URL}/rest/v1/user_roles?select=role&user_id=eq.${userId}`, {
-          headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}` }
-        }).then(x => x.ok ? x.json() : []),
-      ]);
-      return { profile: p?.[0] || null, role: r?.[0]?.role || 'user' };
-    } catch { return { profile: null, role: 'user' }; }
-  }
-
   async function refreshAuthUI() {
-    const sess = getStoredSession();
     const loginLink = document.getElementById('loginLink');
     const userInfo = document.getElementById('userInfo');
-    if (!sess?.access_token || !sess?.user) {
+    try {
+      const resp = await fetch('/api/me', { credentials: 'include' });
+      if (!resp.ok) {
+        if (loginLink) loginLink.style.display = 'inline-block';
+        if (userInfo) userInfo.style.display = 'none';
+        return;
+      }
+      const me = await resp.json();
+      if (loginLink) loginLink.style.display = 'none';
+      if (userInfo) userInfo.style.display = 'inline-flex';
+      const nameEl = document.getElementById('userName');
+      if (nameEl) nameEl.textContent = me.displayName || 'User';
+      const av = document.getElementById('userAvatar');
+      if (av) {
+        if (me.avatarUrl) { av.src = me.avatarUrl; av.style.display = 'inline-block'; }
+        else av.style.display = 'none';
+      }
+      const adminLink = document.getElementById('adminLink');
+      if (adminLink) adminLink.style.display = me.isAdmin ? 'inline-block' : 'none';
+    } catch {
       if (loginLink) loginLink.style.display = 'inline-block';
       if (userInfo) userInfo.style.display = 'none';
-      return;
     }
-    if (loginLink) loginLink.style.display = 'none';
-    if (userInfo) userInfo.style.display = 'inline-flex';
-    const { profile, role } = await loadProfile(sess.access_token, sess.user.id);
-    const name = profile?.display_name || sess.user.email?.split('@')[0] || 'User';
-    document.getElementById('userName').textContent = name;
-    const av = document.getElementById('userAvatar');
-    if (profile?.avatar_url) { av.src = profile.avatar_url; av.style.display = 'inline-block'; }
-    else av.style.display = 'none';
-    document.getElementById('adminLink').style.display = role === 'admin' ? 'inline-block' : 'none';
   }
 
-  window.wrSignOut = async function() {
-    try {
-      const sess = getStoredSession();
-      if (sess?.access_token) {
-        await fetch(`${SUPA_URL}/auth/v1/logout`, {
-          method: 'POST',
-          headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${sess.access_token}` }
-        });
-      }
-    } catch {}
-    Object.keys(localStorage).filter(k => k.startsWith('sb-')).forEach(k => localStorage.removeItem(k));
-    location.href = '/auth';
+  window.wrSignOut = function() {
+    window.top.location.href = '/signout';
   };
 
-  window.addEventListener('storage', refreshAuthUI);
   refreshAuthUI();
   setInterval(refreshAuthUI, 30000);
 })();
