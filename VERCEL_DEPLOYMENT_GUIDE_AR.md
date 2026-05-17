@@ -1,172 +1,117 @@
-# دليل نشر منصة TradeXRay AI على Vercel
+# دليل النشر على Vercel لمنصة TradeXRay AI (الإصدار النهائي)
 
-تم إعداد منصة TradeXRay AI بالكامل للنشر السلس على منصة Vercel. يغطي هذا الدليل جميع الخطوات اللازمة، المتغيرات البيئية المطلوبة، وإعدادات النشر لضمان عمل المنصة (الواجهة الأمامية والخلفية) بكفاءة عالية.
+هذا الدليل يوفر تعليمات مفصلة لنشر منصة TradeXRay AI المتكاملة على Vercel، مع الأخذ في الاعتبار جميع التحسينات الأخيرة، بما في ذلك نظام التداول الشامل، ميزات الذكاء الاصطناعي، تحسينات SEO، ونظام إدارة المطور.
 
-**ملاحظة:** تم تحديث المنصة لتشمل تحسينات شاملة في SEO والعلامة التجارية (Branding) لضمان انتشار فيروسي وظهور أفضل في محركات البحث. كما تم توليد أصول بصرية جديدة (شعار، أيقونة، صورة OpenGraph) لتعزيز الهوية البصرية للمنصة.
+## 1. المتطلبات الأساسية (Prerequisites)
 
-**تحديث هام:** تم تحويل TradeXRay AI إلى منصة تداول متكاملة (Full Trading Ecosystem) تدعم ربط المحافظ، المحافظ الداخلية، التداول الفوري والعقود الآجلة، ونظام رسوم متقدم. للحصول على تفاصيل كاملة حول إعداد هذه الميزات، يرجى الرجوع إلى [دليل إعداد منصة التداول المتكاملة](/TRADING_PLATFORM_SETUP_GUIDE_AR.md).
+قبل البدء، تأكد من توفر المتطلبات التالية:
 
----
+-   **حساب GitHub**: لربط مستودع الكود.
+-   **حساب Vercel**: لعملية النشر والاستضافة.
+-   **Node.js و npm/yarn**: مثبتة محلياً (للتطوير والاختبار المحلي).
+-   **Clerk Account**: لإدارة مصادقة المستخدمين.
+-   **Stripe Account**: لمعالجة المدفوعات والاشتراكات.
+-   **PostgreSQL Database**: قاعدة بيانات (يمكن استخدام خدمات مثل Supabase أو Neon).
+-   **MetaMask / WalletConnect**: (اختياري) لاختبار ربط المحافظ.
+-   **AI API Key**: لميزات تحليل المشاعر السوقية المدعومة بالذكاء الاصطناعي.
 
-## 1. المتطلبات المسبقة (Prerequisites)
+## 2. إعداد المتغيرات البيئية (Environment Variables)
 
-قبل البدء في النشر، تأكد من توفر الحسابات والبيانات التالية:
-- حساب على [Vercel](https://vercel.com/) (يفضل ربطه بحساب GitHub الخاص بك).
-- حساب على [Clerk](https://clerk.com/) لإدارة المصادقة وتسجيل الدخول.
-- حساب على [Stripe](https://stripe.com/) لإدارة الاشتراكات والدفع.
-- قاعدة بيانات PostgreSQL (مثل [Neon](https://neon.tech/) أو [Supabase](https://supabase.com/)).
-- مستودع الكود الخاص بك مرفوع على GitHub.
-- **محافظ Web3**: لإعداد ربط المحافظ الخارجية (MetaMask, WalletConnect) ستحتاج إلى مفاتيح API من مزودي خدمة مثل Infura أو Alchemy.
-- **بيانات السوق**: لإعداد محرك التداول والتحليلات، ستحتاج إلى مفاتيح API من مزودي بيانات السوق مثل CoinGecko أو Binance.
+تتطلب المنصة مجموعة من المتغيرات البيئية الحساسة لتعمل بشكل صحيح. يجب إضافتها إلى مشروعك على Vercel (Settings -> Environment Variables).
 
----
+| المتغير | الوصف | مثال القيمة |
+|---|---|---|
+| `VITE_CLERK_PUBLISHABLE_KEY` | مفتاح Clerk العام للواجهة الأمامية | `pk_live_YOUR_CLERK_PUBLISHABLE_KEY` |
+| `CLERK_SECRET_KEY` | مفتاح Clerk السري للواجهة الخلفية | `sk_live_YOUR_CLERK_SECRET_KEY` |
+| `STRIPE_SECRET_KEY` | مفتاح Stripe السري لمعالجة الدفع | `sk_live_YOUR_STRIPE_SECRET_KEY` |
+| `STRIPE_WEBHOOK_SECRET` | مفتاح الويب هوك الخاص بـ Stripe | `whsec_YOUR_STRIPE_WEBHOOK_SECRET` |
+| `DATABASE_URL` | رابط اتصال قاعدة بيانات PostgreSQL | `postgresql://user:password@host:port/database` |
+| `WEB3_PROVIDER_URL` | رابط مزود Web3 (مثل Infura أو Alchemy) | `https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID` |
+| `DEVELOPER_ADMIN_USERNAME` | اسم مستخدم حساب المطور | `marwan191289@yahoo.com` |
+| `DEVELOPER_ADMIN_PASSWORD` | كلمة مرور حساب المطور | `Aa010*+*+*` |
+| `AI_API_KEY` | مفتاح API لخدمة الذكاء الاصطناعي (لتحليل المشاعر) | `YOUR_AI_SERVICE_API_KEY` |
+| `TWITTER_API_KEY` | مفتاح API لتويتر (لتحليل المشاعر) | `YOUR_TWITTER_API_KEY` |
+| `FACEBOOK_APP_ID` | معرف تطبيق فيسبوك (لتحسينات السوشيال ميديا) | `YOUR_FACEBOOK_APP_ID` |
+| `GOOGLE_ANALYTICS_ID` | معرف تتبع Google Analytics | `UA-XXXXX-Y` |
 
-## 2. المتغيرات البيئية المطلوبة (Environment Variables)
+**ملاحظة هامة**: تأكد من أن هذه المتغيرات مضبوطة بشكل صحيح لكل من بيئات التطوير (Development) والإنتاج (Production) على Vercel.
 
-أثناء إعداد المشروع على Vercel، ستحتاج إلى إضافة المتغيرات البيئية التالية. تأكد من تجهيزها مسبقاً:
+## 3. إعداد المشروع على Vercel (Vercel Project Setup)
 
-### متغيرات المصادقة (Clerk)
-```env
-VITE_CLERK_PUBLISHABLE_KEY=pk_test_...         # مفتاح النشر من لوحة تحكم Clerk
-CLERK_SECRET_KEY=sk_test_...                   # المفتاح السري من لوحة تحكم Clerk
-```
+1.  **ربط المستودع**: قم بتسجيل الدخول إلى Vercel، ثم انقر على `Add New...` -> `Project`. اختر مستودع GitHub الخاص بـ `tradexray`.
+2.  **إعدادات البناء (Build Settings)**:
+    *   **Framework Preset**: `Vite` (يجب أن يكتشفه Vercel تلقائياً).
+    *   **Root Directory**: `artifacts/war-room` (هذا هو مجلد الواجهة الأمامية).
+    *   **Build Command**: `npm run build` أو `yarn build`.
+    *   **Output Directory**: `dist`.
+3.  **إعدادات الوظائف (Functions Settings)**:
+    *   **Root Directory**: `artifacts/api-server` (هذا هو مجلد الواجهة الخلفية).
+    *   **Build Command**: `npm run build` أو `yarn build`.
+    *   **Output Directory**: `dist`.
+    *   **Entrypoint**: `src/index.ts` (أو حسب ملف نقطة الدخول الرئيسي للـ API).
+4.  **المتغيرات البيئية**: أضف جميع المتغيرات البيئية المذكورة في القسم 2.
+5.  **النشر (Deploy)**: انقر على `Deploy`. ستقوم Vercel ببناء ونشر مشروعك تلقائياً.
 
-### متغيرات قاعدة البيانات (Database)
-```env
-DATABASE_URL=postgresql://user:password@host/db  # رابط الاتصال بقاعدة البيانات
-```
+## 4. إعداد الـ Webhooks (Webhook Setup)
 
-### متغيرات الدفع والاشتراكات (Stripe)
-```env
-STRIPE_SECRET_KEY=sk_test_...                  # المفتاح السري من Stripe
-STRIPE_WEBHOOK_SECRET=whsec_...                # مفتاح الـ Webhook السري من Stripe
-STRIPE_PRO_MONTHLY_PRICE_ID=price_...          # معرف سعر الباقة الاحترافية (شهري)
-STRIPE_PRO_YEARLY_PRICE_ID=price_...           # معرف سعر الباقة الاحترافية (سنوي)
-STRIPE_ELITE_MONTHLY_PRICE_ID=price_...        # معرف سعر باقة النخبة (شهري)
-STRIPE_ELITE_YEARLY_PRICE_ID=price_...         # معرف سعر باقة النخبة (سنوي)
-```
+### 4.1 Stripe Webhook
 
-### متغيرات النظام (System)
-```env
-APP_URL=https://tradexray.vercel.app           # رابط المنصة النهائي بعد النشر
-NODE_ENV=production                            # بيئة التشغيل
-```
+لضمان تحديث حالة الاشتراكات بشكل صحيح، يجب إعداد Stripe Webhook:
 
-### متغيرات Web3 والتداول (Web3 & Trading)
-```env
-VITE_WALLET_CONNECT_PROJECT_ID=your_project_id # معرف مشروع WalletConnect
-VITE_INFURA_API_KEY=your_infura_key            # مفتاح API من Infura (أو مزود آخر)
-VITE_TRADING_API_URL=https://api.tradexray.app # رابط API الخاص بمحرك التداول
-VITE_PRICE_FEED_URL=https://api.coingecko.com  # رابط API لمزود بيانات الأسعار
-```
+1.  في لوحة تحكم Stripe، انتقل إلى `Developers` -> `Webhooks`.
+2.  انقر على `Add endpoint`.
+3.  أدخل رابط الـ Webhook الخاص بك على Vercel (مثال: `https://your-project-name.vercel.app/api/stripe-webhook`).
+4.  اختر الأحداث التالية للاستماع إليها:
+    *   `checkout.session.completed`
+    *   `customer.subscription.updated`
+    *   `customer.subscription.deleted`
+5.  احفظ الـ Webhook وانسخ `Signing secret` الخاص به إلى متغير `STRIPE_WEBHOOK_SECRET` في Vercel.
 
-### متغيرات وسائل التواصل الاجتماعي (Social Media)
-```env
-VITE_FACEBOOK_APP_ID=your_facebook_app_id      # معرف تطبيق Facebook
-VITE_TWITTER_HANDLE=@TradeXRayAI               # حساب Twitter للمنصة
-```
+### 4.2 Clerk Webhook
 
----
+لضمان مزامنة بيانات المستخدمين مع الواجهة الخلفية:
 
-## 3. خطوات النشر على Vercel
+1.  في لوحة تحكم Clerk، انتقل إلى `Webhooks`.
+2.  انقر على `Add Endpoint`.
+3.  أدخل رابط الـ Webhook الخاص بك على Vercel (مثال: `https://your-project-name.vercel.app/api/clerk-webhook`).
+4.  اختر الأحداث المتعلقة بالمستخدمين (مثل `user.created`, `user.updated`, `user.deleted`).
+5.  احفظ الـ Webhook.
 
-### الخطوة 1: استيراد المشروع
-1. سجل الدخول إلى لوحة تحكم Vercel.
-2. انقر على **"Add New..."** ثم اختر **"Project"**.
-3. قم باستيراد مستودع `tradexray` من GitHub.
+## 5. إعداد قاعدة البيانات (Database Setup)
 
-### الخطوة 2: إعدادات المشروع (Project Settings)
-في صفحة "Configure Project"، تأكد من الإعدادات التالية:
-- **Framework Preset**: سيقوم Vercel باكتشافه تلقائياً كـ `Vite` للواجهة الأمامية.
-- **Root Directory**: إذا كان المشروع يعتمد على بنية Monorepo، تأكد من اختيار المسار الصحيح (مثل `artifacts/war-room` للواجهة الأمامية، و `artifacts/api-server` للواجهة الخلفية). *ملاحظة: إذا كان المشروع يستخدم Turborepo أو مساحات عمل (Workspaces)، فإن Vercel يدعم ذلك تلقائياً.*
-- **Build Command**: `pnpm build` أو `npm run build`
-- **Output Directory**: `dist`
+تأكد من أن قاعدة بيانات PostgreSQL الخاصة بك مستضافة وجاهزة للاستخدام. ستقوم الواجهة الخلفية (API Server) بالاتصال بها باستخدام `DATABASE_URL`.
 
-### الخطوة 3: إضافة المتغيرات البيئية
-قم بنسخ المتغيرات البيئية المذكورة في القسم (2) ولصقها في قسم **Environment Variables**.
+**ملاحظة**: عند النشر لأول مرة، قد تحتاج إلى تشغيل عمليات ترحيل (migrations) لقاعدة البيانات إذا كانت الواجهة الخلفية تستخدم Drizzle ORM. يمكن القيام بذلك عبر Vercel Build Commands أو يدوياً بعد النشر.
 
-### الخطوة 4: بدء النشر
-انقر على زر **"Deploy"**. سيقوم Vercel بتثبيت الاعتمادات، بناء المشروع، ونشره.
+## 6. اختبار ما بعد النشر (Post-Deployment Testing)
 
----
+بعد النشر بنجاح، قم بإجراء الاختبارات التالية:
 
-## 4. إعداد الـ Backend كـ Serverless Functions (إذا لزم الأمر)
+-   **الوصول إلى الواجهة الأمامية**: تأكد من أن الموقع يعمل بشكل صحيح.
+-   **تسجيل الدخول/التسجيل**: اختبر جميع طرق المصادقة (Clerk).
+-   **الاشتراكات والدفع**: قم بإجراء عملية اشتراك تجريبية عبر Stripe.
+-   **ربط المحافظ**: اختبر ربط المحافظ الخارجية (MetaMask, WalletConnect).
+-   **التداول**: قم بإجراء صفقات تجريبية (Spot, Futures).
+-   **لوحة تحكم المطور**: قم بتسجيل الدخول إلى `/admin` باستخدام بيانات حساب المطور (`marwan191289@yahoo.com` / `Aa010*+*+*`) وتأكد من عمل جميع الصلاحيات.
+-   **تحليلات الذكاء الاصطناعي**: تأكد من ظهور إشارات التداول وتحليلات المشاعر.
+-   **SEO**: استخدم أدوات فحص SEO للتأكد من أن الميتاداتا وعلامات OpenGraph تعمل بشكل صحيح.
 
-إذا كان الـ API Server (Express.js) مدمجاً ضمن نفس المستودع وتريد نشره على Vercel، يجب التأكد من وجود ملف `vercel.json` في الجذر (Root) لتوجيه الطلبات:
+## 7. تحديثات المستودع (Repository Updates)
 
-```json
-{
-  "version": 2,
-  "builds": [
-    {
-      "src": "artifacts/war-room/package.json",
-      "use": "@vercel/static-build",
-      "config": { "distDir": "dist" }
-    },
-    {
-      "src": "artifacts/api-server/src/index.ts",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "artifacts/api-server/src/index.ts"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "artifacts/war-room/dist/$1"
-    }
-  ]
-}
-```
-*ملاحظة: البنية أعلاه هي مثال، وقد تختلف قليلاً بناءً على هيكلة المستودع الدقيقة. Vercel يتعامل مع تطبيقات Express كدوال Serverless بكفاءة.*
+تم تحديث مستودع GitHub الخاص بك بجميع التغييرات الأخيرة، بما في ذلك:
 
----
+-   **الواجهة الأمامية**: ميزات التداول، المحافظ، تحسينات UI/UX، SEO.
+-   **الواجهة الخلفية**: API للتداول، المحافظ، Stripe Webhooks، Clerk Webhooks.
+-   **خدمات جديدة**: `marketSentimentService.ts`, `developerPrivilegesService.ts`, `adminAuthService.ts`, `userManagementService.ts`.
+-   **الوثائق**: `WHITEPAPER_AR.md`, `AUDIT_REPORT_AR.AR.md`, `ADMIN_DEVELOPER_GUIDE_AR.md`.
 
-## 5. إعدادات ما بعد النشر (Post-Deployment)
+**لضمان أن Vercel ينشر أحدث إصدار دائمًا، تأكد من أن فرع `main` على GitHub محدث.**
 
-### إعداد Clerk (المصادقة)
-1. اذهب إلى لوحة تحكم Clerk.
-2. أضف رابط المنصة الجديد (مثال: `https://tradexray.vercel.app`) في قسم **Domains**.
-3. قم بتفعيل طرق تسجيل الدخول المطلوبة (Google, Apple, Facebook, Twitter, Email, Phone) من قسم **User & Authentication -> Social Connections**.
+## 8. نصائح إضافية (Additional Tips)
 
-### إعداد Stripe (الدفع)
-1. اذهب إلى لوحة تحكم Stripe -> Developers -> Webhooks.
-2. أضف نقطة نهاية (Endpoint) جديدة تشير إلى: `https://tradexray.vercel.app/api/webhooks/stripe`.
-3. حدد الأحداث المطلوبة (مثل `checkout.session.completed`, `customer.subscription.updated`، إلخ).
-4. انسخ الـ **Signing Secret** وقم بتحديث المتغير `STRIPE_WEBHOOK_SECRET` في Vercel.
+-   **المراقبة**: استخدم أدوات مراقبة Vercel و Clerk و Stripe لمراقبة أداء المنصة وأي أخطاء.
+-   **النسخ الاحتياطي**: قم بإجراء نسخ احتياطي منتظم لقاعدة البيانات الخاصة بك.
+-   **الأمان**: راجع سجلات الأمان بانتظام في لوحة تحكم المطور.
+-   **التحديثات**: ابقَ على اطلاع دائم بأحدث إصدارات المكتبات والتبعيات لضمان الأمان والأداء.
 
----
-
-## 6. أوامر مفيدة للتطوير المحلي (Local Development)
-
-للتطوير واختبار النشر محلياً باستخدام Vercel CLI:
-
-```bash
-# تثبيت Vercel CLI
-npm i -g vercel
-
-# تسجيل الدخول
-vercel login
-
-# سحب المتغيرات البيئية من Vercel
-vercel env pull .env.local
-
-# تشغيل المشروع محلياً بيئة مطابقة لـ Vercel
-vercel dev
-
-# النشر لبيئة الاختبار (Preview)
-vercel
-
-# النشر لبيئة الإنتاج (Production)
-vercel --prod
-```
-
----
-
-**تم إعداد المنصة بنجاح وهي جاهزة للانطلاق! 🚀**
-
-### حالة توليد الصور والفيديوهات (Image and Video Generation Status)
-- **توليد الصور:** تم بنجاح توليد الشعار، الأيقونة، وصورة OpenGraph الفيروسية الجديدة للمنصة. هذه الأصول متوفرة الآن في مجلد `public` ضمن `artifacts/war-room`.
-- **توليد الفيديوهات:** لا تتوفر ميزة توليد الفيديوهات حاليًا ضمن خطة الاشتراك الحالية. يرجى الترقية لفتح هذه الميزة.
+**تهانينا! منصة TradeXRay AI جاهزة الآن للانطلاق وتحقيق الانتشار الفيروسي.** 🚀
