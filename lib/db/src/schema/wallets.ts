@@ -6,7 +6,7 @@ import {
   boolean,
   decimal,
   jsonb,
-  enum as pgEnum,
+  pgEnum,
 } from "drizzle-orm/pg-core";
 
 export const walletTypeEnum = pgEnum("wallet_type", [

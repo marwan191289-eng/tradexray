@@ -7,7 +7,7 @@ import {
   integer,
   decimal,
   jsonb,
-  enum as pgEnum,
+  pgEnum,
 } from "drizzle-orm/pg-core";
 
 export const kycStatusEnum = pgEnum("kyc_status", [

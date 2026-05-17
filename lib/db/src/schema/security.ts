@@ -6,7 +6,7 @@ import {
   boolean,
   integer,
   jsonb,
-  enum as pgEnum,
+  pgEnum,
 } from "drizzle-orm/pg-core";
 
 export const twoFactorMethodEnum = pgEnum("two_factor_method", [
