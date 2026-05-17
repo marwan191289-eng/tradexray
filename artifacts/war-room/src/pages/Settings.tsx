@@ -1,364 +1,309 @@
 import { useState } from "react";
+import { useUser, useClerk } from "@clerk/react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Bell, Lock, Eye, Palette, Code, Trash2, Save } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  User, Bell, Shield, Key, Palette,
+  Copy, RefreshCw, Eye, EyeOff, Check, AlertCircle,
+  Smartphone, Chrome, Apple, Facebook, Twitter,
+  Trash2, Download, Lock,
+} from "lucide-react";
+import { toast } from "sonner";
+
+const ConnectedAccount = ({ provider, icon: Icon, connected, email, onToggle }: any) => (
+  <div className="flex items-center justify-between p-3.5 rounded-xl border bg-card hover:bg-muted/20 transition-colors">
+    <div className="flex items-center gap-3">
+      <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${connected ? "bg-primary/10 border border-primary/20" : "bg-muted border border-border"}`}>
+        <Icon className={`w-4 h-4 ${connected ? "text-primary" : "text-muted-foreground"}`} />
+      </div>
+      <div>
+        <p className="font-semibold text-foreground text-sm">{provider}</p>
+        <p className="text-xs text-muted-foreground">{connected && email ? email : "Not connected"}</p>
+      </div>
+    </div>
+    <div className="flex items-center gap-2">
+      {connected && <Badge className="text-[10px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20">Connected</Badge>}
+      <Button variant={connected ? "outline" : "default"} size="sm" className="h-7 text-xs" onClick={onToggle}>
+        {connected ? "Disconnect" : "Connect"}
+      </Button>
+    </div>
+  </div>
+);
+
+const ApiKeyItem = ({ name, keyValue, createdAt, lastUsed, onRevoke }: any) => {
+  const [visible, setVisible] = useState(false);
+  const masked = keyValue.slice(0, 8) + "•".repeat(20) + keyValue.slice(-4);
+  return (
+    <div className="p-4 rounded-xl border bg-card space-y-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="font-semibold text-foreground text-sm">{name}</p>
+          <p className="text-xs text-muted-foreground">Created {createdAt} · Last used: {lastUsed}</p>
+        </div>
+        <Button variant="ghost" size="icon" className="w-7 h-7 text-destructive hover:bg-destructive/10" onClick={onRevoke}>
+          <Trash2 className="w-3.5 h-3.5" />
+        </Button>
+      </div>
+      <div className="flex items-center gap-2">
+        <code className="flex-1 text-xs bg-muted px-3 py-2 rounded-lg font-mono text-foreground border border-border truncate">
+          {visible ? keyValue : masked}
+        </code>
+        <Button variant="ghost" size="icon" className="w-8 h-8 flex-shrink-0" onClick={() => setVisible(!visible)}>
+          {visible ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+        </Button>
+        <Button variant="ghost" size="icon" className="w-8 h-8 flex-shrink-0" onClick={() => { navigator.clipboard.writeText(keyValue); toast.success("Copied!"); }}>
+          <Copy className="w-3.5 h-3.5" />
+        </Button>
+      </div>
+    </div>
+  );
+};
 
 const Settings = () => {
-  const [profile, setProfile] = useState({
-    name: "John Trader",
-    email: "john@example.com",
-    phone: "+1 (555) 000-0000",
-    timezone: "UTC",
-    language: "en",
-  });
+  const { user } = useUser();
+  const { signOut } = useClerk();
+  const [notifications, setNotifications] = useState({ emailSignals: true, emailWeeklyReport: true, emailMarketing: false, pushSignals: true, pushPriceAlerts: true, pushSystemUpdates: false, smsSignals: false, smsAlerts: false });
+  const [preferences, setPreferences] = useState({ theme: "dark", language: "en", currency: "USD", timezone: "UTC", defaultTimeframe: "1D", compactMode: false, showPnlInPercent: true, autoRefresh: true, refreshInterval: "30" });
+  const [saving, setSaving] = useState(false);
 
-  const [notifications, setNotifications] = useState({
-    emailSignals: true,
-    emailAnalytics: true,
-    pushNotifications: true,
-    smsAlerts: false,
-    weeklyReport: true,
-    monthlyReport: true,
-  });
-
-  const [privacy, setPrivacy] = useState({
-    profilePublic: false,
-    showStats: false,
-    allowDataCollection: true,
-    twoFactorEnabled: true,
-  });
-
-  const [apiKeys, setApiKeys] = useState([
-    {
-      id: "key_1",
-      name: "Production API Key",
-      key: "sk_live_****...****",
-      created: "2024-01-15",
-      lastUsed: "2024-05-17",
-    },
-  ]);
-
-  const [saved, setSaved] = useState(false);
-
-  const handleProfileChange = (field: string, value: string) => {
-    setProfile({ ...profile, [field]: value });
-    setSaved(false);
-  };
-
-  const handleNotificationChange = (field: string) => {
-    setNotifications({ ...notifications, [field]: !notifications[field as keyof typeof notifications] });
-    setSaved(false);
-  };
-
-  const handlePrivacyChange = (field: string) => {
-    setPrivacy({ ...privacy, [field]: !privacy[field as keyof typeof privacy] });
-    setSaved(false);
-  };
-
-  const handleSave = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
-  };
+  const handleSave = async () => { setSaving(true); await new Promise(r => setTimeout(r, 800)); setSaving(false); toast.success("Settings saved!"); };
+  const userInitials = user?.firstName ? `${user.firstName[0]}${user.lastName?.[0] || ""}`.toUpperCase() : user?.primaryEmailAddress?.emailAddress?.[0]?.toUpperCase() || "U";
 
   return (
-    <div className="w-full h-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-6 overflow-auto">
+    <div className="w-full min-h-full bg-background p-4 md:p-6 overflow-auto">
       <div className="max-w-4xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="space-y-2">
-          <h1 className="text-4xl font-bold text-white">Settings</h1>
-          <p className="text-slate-400">Manage your account and preferences</p>
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">Settings</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Manage your account preferences and integrations</p>
         </div>
 
-        {/* Tabs */}
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="bg-slate-800 border-slate-700">
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="notifications">Notifications</TabsTrigger>
-            <TabsTrigger value="privacy">Privacy & Security</TabsTrigger>
-            <TabsTrigger value="api">API Keys</TabsTrigger>
-            <TabsTrigger value="appearance">Appearance</TabsTrigger>
+          <TabsList className="bg-muted/50 border border-border h-auto p-1 flex-wrap gap-1">
+            <TabsTrigger value="profile" className="text-xs gap-1.5"><User className="w-3 h-3" />Profile</TabsTrigger>
+            <TabsTrigger value="notifications" className="text-xs gap-1.5"><Bell className="w-3 h-3" />Notifications</TabsTrigger>
+            <TabsTrigger value="security" className="text-xs gap-1.5"><Shield className="w-3 h-3" />Security</TabsTrigger>
+            <TabsTrigger value="api" className="text-xs gap-1.5"><Key className="w-3 h-3" />API Keys</TabsTrigger>
+            <TabsTrigger value="preferences" className="text-xs gap-1.5"><Palette className="w-3 h-3" />Preferences</TabsTrigger>
           </TabsList>
 
-          {/* Profile Tab */}
-          <TabsContent value="profile" className="space-y-4">
-            <Card className="bg-slate-800/50 border-slate-700">
-              <CardHeader>
-                <CardTitle>Profile Information</CardTitle>
-                <CardDescription>Update your personal information</CardDescription>
+          <TabsContent value="profile" className="mt-4 space-y-4">
+            <Card className="bg-card border">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Profile Information</CardTitle>
+                <CardDescription>Update your personal details</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input
-                    id="name"
-                    value={profile.name}
-                    onChange={(e) => handleProfileChange("name", e.target.value)}
-                    className="bg-slate-700 border-slate-600"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={profile.email}
-                    onChange={(e) => handleProfileChange("email", e.target.value)}
-                    className="bg-slate-700 border-slate-600"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={profile.phone}
-                    onChange={(e) => handleProfileChange("phone", e.target.value)}
-                    className="bg-slate-700 border-slate-600"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="timezone">Timezone</Label>
-                    <Select value={profile.timezone} onValueChange={(value) => handleProfileChange("timezone", value)}>
-                      <SelectTrigger className="bg-slate-700 border-slate-600">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
-                        <SelectItem value="UTC">UTC</SelectItem>
-                        <SelectItem value="EST">Eastern Time</SelectItem>
-                        <SelectItem value="CST">Central Time</SelectItem>
-                        <SelectItem value="PST">Pacific Time</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="language">Language</Label>
-                    <Select value={profile.language} onValueChange={(value) => handleProfileChange("language", value)}>
-                      <SelectTrigger className="bg-slate-700 border-slate-600">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
-                        <SelectItem value="en">English</SelectItem>
-                        <SelectItem value="ar">العربية</SelectItem>
-                        <SelectItem value="es">Español</SelectItem>
-                        <SelectItem value="fr">Français</SelectItem>
-                      </SelectContent>
-                    </Select>
+              <CardContent className="space-y-5">
+                <div className="flex items-center gap-4">
+                  <Avatar className="w-16 h-16">
+                    <AvatarImage src={user?.imageUrl} />
+                    <AvatarFallback className="bg-primary/20 text-primary text-xl font-bold">{userInitials}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-semibold text-foreground">{user?.fullName || user?.primaryEmailAddress?.emailAddress || "User"}</p>
+                    <p className="text-sm text-muted-foreground">{user?.primaryEmailAddress?.emailAddress}</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Badge className="text-[10px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20">Verified</Badge>
+                      <Badge className="text-[10px] bg-primary/10 text-primary border-primary/20">Pro Plan</Badge>
+                    </div>
                   </div>
                 </div>
-
-                <Button onClick={handleSave} className="bg-emerald-600 hover:bg-emerald-700">
-                  <Save className="w-4 h-4 mr-2" />
-                  Save Changes
+                <Separator />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="firstName" className="text-xs font-medium">First Name</Label>
+                    <Input id="firstName" defaultValue={user?.firstName || ""} placeholder="First name" className="h-9 text-sm" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="lastName" className="text-xs font-medium">Last Name</Label>
+                    <Input id="lastName" defaultValue={user?.lastName || ""} placeholder="Last name" className="h-9 text-sm" />
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="email" className="text-xs font-medium">Email Address</Label>
+                  <div className="flex gap-2">
+                    <Input id="email" defaultValue={user?.primaryEmailAddress?.emailAddress || ""} disabled className="h-9 text-sm bg-muted" />
+                    <Badge className="self-center text-[10px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20 whitespace-nowrap"><Check className="w-2.5 h-2.5 mr-1" />Verified</Badge>
+                  </div>
+                </div>
+                <Button onClick={handleSave} disabled={saving} className="gap-2">
+                  {saving ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                  {saving ? "Saving..." : "Save Changes"}
                 </Button>
+              </CardContent>
+            </Card>
 
-                {saved && (
-                  <Alert className="bg-emerald-900/20 border-emerald-800">
-                    <AlertDescription className="text-emerald-400">
-                      Profile updated successfully!
-                    </AlertDescription>
-                  </Alert>
-                )}
+            <Card className="bg-card border">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Connected Accounts</CardTitle>
+                <CardDescription>Link social accounts for faster sign-in</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <ConnectedAccount provider="Google" icon={Chrome} connected={user?.externalAccounts?.some((a: any) => a.provider === "google") || false} email={user?.externalAccounts?.find((a: any) => a.provider === "google")?.emailAddress} onToggle={() => toast.info("Manage in your profile")} />
+                <ConnectedAccount provider="Apple" icon={Apple} connected={user?.externalAccounts?.some((a: any) => a.provider === "apple") || false} onToggle={() => toast.info("Manage in your profile")} />
+                <ConnectedAccount provider="Facebook" icon={Facebook} connected={user?.externalAccounts?.some((a: any) => a.provider === "facebook") || false} onToggle={() => toast.info("Manage in your profile")} />
+                <ConnectedAccount provider="Twitter / X" icon={Twitter} connected={user?.externalAccounts?.some((a: any) => a.provider === "x") || false} onToggle={() => toast.info("Manage in your profile")} />
+                <ConnectedAccount provider="Phone Number" icon={Smartphone} connected={(user?.phoneNumbers?.length || 0) > 0} email={user?.primaryPhoneNumber?.phoneNumber} onToggle={() => toast.info("Manage in your profile")} />
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card border border-destructive/20">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base text-destructive">Danger Zone</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between p-3.5 rounded-xl border border-destructive/20 bg-destructive/5">
+                  <div>
+                    <p className="font-semibold text-foreground text-sm">Export Account Data</p>
+                    <p className="text-xs text-muted-foreground">Download all your data in JSON format</p>
+                  </div>
+                  <Button variant="outline" size="sm" className="gap-1.5 text-xs h-8"><Download className="w-3 h-3" />Export</Button>
+                </div>
+                <div className="flex items-center justify-between p-3.5 rounded-xl border border-destructive/20 bg-destructive/5">
+                  <div>
+                    <p className="font-semibold text-destructive text-sm">Delete Account</p>
+                    <p className="text-xs text-muted-foreground">Permanently delete your account and all data</p>
+                  </div>
+                  <Button variant="destructive" size="sm" className="gap-1.5 text-xs h-8"><Trash2 className="w-3 h-3" />Delete</Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Notifications Tab */}
-          <TabsContent value="notifications" className="space-y-4">
-            <Card className="bg-slate-800/50 border-slate-700">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Bell className="w-5 h-5" />
-                  Notification Preferences
-                </CardTitle>
-                <CardDescription>Control how you receive updates</CardDescription>
+          <TabsContent value="notifications" className="mt-4 space-y-4">
+            {[
+              { title: "Email Notifications", icon: Bell, items: [{ key: "emailSignals", label: "New Trading Signals", desc: "Get notified when new signals are generated" }, { key: "emailWeeklyReport", label: "Weekly Performance Report", desc: "Receive your weekly analytics summary" }, { key: "emailMarketing", label: "Product Updates & News", desc: "Platform updates and new features" }] },
+              { title: "Push Notifications", icon: Bell, items: [{ key: "pushSignals", label: "Signal Alerts", desc: "Real-time signal notifications in browser" }, { key: "pushPriceAlerts", label: "Price Alerts", desc: "When your set price targets are hit" }, { key: "pushSystemUpdates", label: "System Updates", desc: "Maintenance and system notifications" }] },
+              { title: "SMS Notifications", icon: Smartphone, items: [{ key: "smsSignals", label: "Critical Signal Alerts", desc: "High-confidence signals via SMS" }, { key: "smsAlerts", label: "Price Target Alerts", desc: "Price alerts via text message" }] },
+            ].map((section) => (
+              <Card key={section.title} className="bg-card border">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2"><section.icon className="w-4 h-4 text-primary" />{section.title}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {section.items.map((item) => (
+                    <div key={item.key} className="flex items-center justify-between">
+                      <div><p className="text-sm font-medium text-foreground">{item.label}</p><p className="text-xs text-muted-foreground">{item.desc}</p></div>
+                      <Switch checked={notifications[item.key as keyof typeof notifications]} onCheckedChange={(v) => setNotifications((p) => ({ ...p, [item.key]: v }))} />
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            ))}
+            <Button onClick={handleSave} disabled={saving} className="gap-2">
+              {saving ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+              {saving ? "Saving..." : "Save Notification Settings"}
+            </Button>
+          </TabsContent>
+
+          <TabsContent value="security" className="mt-4 space-y-4">
+            <Card className="bg-card border">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2"><Lock className="w-4 h-4 text-primary" />Two-Factor Authentication</CardTitle>
+                <CardDescription>Add an extra layer of security to your account</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-4">
-                  {Object.entries(notifications).map(([key, value]) => (
-                    <div key={key} className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg border border-slate-600">
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between p-4 rounded-xl border bg-emerald-500/5 border-emerald-500/20">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center"><Smartphone className="w-4 h-4 text-emerald-500" /></div>
+                    <div><p className="font-semibold text-foreground text-sm">Authenticator App</p><p className="text-xs text-muted-foreground">Google Authenticator, Authy, etc.</p></div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge className="text-[10px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20">Enabled</Badge>
+                    <Button variant="outline" size="sm" className="h-7 text-xs">Manage</Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card border">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Active Sessions</CardTitle>
+                <CardDescription>Devices currently signed in to your account</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {[{ device: "Chrome on macOS", location: "Dubai, UAE", current: true, lastActive: "Now" }, { device: "Safari on iPhone", location: "Dubai, UAE", current: false, lastActive: "2 hours ago" }, { device: "Firefox on Windows", location: "London, UK", current: false, lastActive: "3 days ago" }].map((session, i) => (
+                  <div key={i} className="flex items-center justify-between p-3.5 rounded-xl border bg-card hover:bg-muted/20 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-2 h-2 rounded-full ${session.current ? "bg-emerald-500 animate-pulse" : "bg-muted-foreground/40"}`} />
                       <div>
-                        <p className="font-semibold text-white capitalize">
-                          {key.replace(/([A-Z])/g, " $1").trim()}
-                        </p>
-                        <p className="text-sm text-slate-400">
-                          {key === "emailSignals" && "Get notified when new signals are generated"}
-                          {key === "emailAnalytics" && "Receive weekly analytics summaries"}
-                          {key === "pushNotifications" && "Browser push notifications"}
-                          {key === "smsAlerts" && "SMS alerts for urgent signals"}
-                          {key === "weeklyReport" && "Weekly performance report"}
-                          {key === "monthlyReport" && "Monthly detailed report"}
-                        </p>
+                        <p className="font-semibold text-foreground text-sm">{session.device}</p>
+                        <p className="text-xs text-muted-foreground">{session.location} · {session.lastActive}</p>
                       </div>
-                      <Switch
-                        checked={value}
-                        onCheckedChange={() => handleNotificationChange(key)}
-                      />
                     </div>
-                  ))}
-                </div>
-
-                <Button onClick={handleSave} className="bg-emerald-600 hover:bg-emerald-700">
-                  <Save className="w-4 h-4 mr-2" />
-                  Save Preferences
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Privacy & Security Tab */}
-          <TabsContent value="privacy" className="space-y-4">
-            <Card className="bg-slate-800/50 border-slate-700">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Lock className="w-5 h-5" />
-                  Privacy & Security
-                </CardTitle>
-                <CardDescription>Manage your security settings</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-4">
-                  {Object.entries(privacy).map(([key, value]) => (
-                    <div key={key} className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg border border-slate-600">
-                      <div>
-                        <p className="font-semibold text-white capitalize">
-                          {key.replace(/([A-Z])/g, " $1").trim()}
-                        </p>
-                        <p className="text-sm text-slate-400">
-                          {key === "profilePublic" && "Make your profile visible to other users"}
-                          {key === "showStats" && "Share your trading statistics"}
-                          {key === "allowDataCollection" && "Allow us to collect usage data"}
-                          {key === "twoFactorEnabled" && "Require 2FA for account access"}
-                        </p>
-                      </div>
-                      <Switch
-                        checked={value}
-                        onCheckedChange={() => handlePrivacyChange(key)}
-                      />
-                    </div>
-                  ))}
-                </div>
-
-                <div className="pt-4 border-t border-slate-600">
-                  <Button variant="outline" className="border-red-600 text-red-500 hover:bg-red-900/20">
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete Account
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* API Keys Tab */}
-          <TabsContent value="api" className="space-y-4">
-            <Card className="bg-slate-800/50 border-slate-700">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Code className="w-5 h-5" />
-                  API Keys
-                </CardTitle>
-                <CardDescription>Manage your API access</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button className="bg-emerald-600 hover:bg-emerald-700">
-                  Create New API Key
-                </Button>
-
-                <div className="space-y-3">
-                  {apiKeys.map((apiKey) => (
-                    <div
-                      key={apiKey.id}
-                      className="p-4 bg-slate-700/30 rounded-lg border border-slate-600 space-y-2"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-semibold text-white">{apiKey.name}</p>
-                          <p className="text-sm text-slate-400 font-mono">{apiKey.key}</p>
-                        </div>
-                        <Button variant="outline" size="sm" className="border-slate-600">
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <p className="text-slate-400">Created</p>
-                          <p className="text-white">{apiKey.created}</p>
-                        </div>
-                        <div>
-                          <p className="text-slate-400">Last Used</p>
-                          <p className="text-white">{apiKey.lastUsed}</p>
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm" className="border-red-600 text-red-500 w-full">
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Revoke
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Appearance Tab */}
-          <TabsContent value="appearance" className="space-y-4">
-            <Card className="bg-slate-800/50 border-slate-700">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Palette className="w-5 h-5" />
-                  Appearance
-                </CardTitle>
-                <CardDescription>Customize your interface</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Theme</Label>
-                  <div className="grid grid-cols-3 gap-3">
-                    {["light", "dark", "auto"].map((theme) => (
-                      <button
-                        key={theme}
-                        className={`p-3 rounded-lg border-2 capitalize font-semibold transition-colors ${
-                          theme === "dark"
-                            ? "border-emerald-500 bg-slate-700 text-white"
-                            : "border-slate-600 bg-slate-700/30 text-slate-300 hover:border-slate-500"
-                        }`}
-                      >
-                        {theme}
-                      </button>
-                    ))}
+                    {session.current ? <Badge className="text-[10px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20">Current</Badge> : <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive hover:text-destructive">Revoke</Button>}
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Chart Style</Label>
-                  <Select defaultValue="candlestick">
-                    <SelectTrigger className="bg-slate-700 border-slate-600">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
-                      <SelectItem value="candlestick">Candlestick</SelectItem>
-                      <SelectItem value="line">Line</SelectItem>
-                      <SelectItem value="bar">Bar</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <Button onClick={handleSave} className="bg-emerald-600 hover:bg-emerald-700">
-                  <Save className="w-4 h-4 mr-2" />
-                  Save Appearance
-                </Button>
+                ))}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="api" className="mt-4 space-y-4">
+            <Alert className="bg-amber-500/5 border-amber-500/20">
+              <AlertCircle className="h-4 w-4 text-amber-500" />
+              <AlertDescription className="text-sm"><strong>Keep your API keys secret.</strong> Never share them publicly or in client-side code.</AlertDescription>
+            </Alert>
+            <Card className="bg-card border">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div><CardTitle className="text-base">API Keys</CardTitle><CardDescription>Manage keys for programmatic access</CardDescription></div>
+                  <Button size="sm" className="gap-1.5 text-xs" onClick={() => toast.info("Requires Pro plan or higher")}><Key className="w-3.5 h-3.5" />Generate Key</Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <ApiKeyItem name="Production API Key" keyValue="txr_live_sk_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6" createdAt="Jan 15, 2025" lastUsed="2 hours ago" onRevoke={() => toast.success("API key revoked")} />
+                <ApiKeyItem name="Development API Key" keyValue="txr_test_sk_z9y8x7w6v5u4t3s2r1q0p9o8n7m6l5k4" createdAt="Feb 3, 2025" lastUsed="5 days ago" onRevoke={() => toast.success("API key revoked")} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="preferences" className="mt-4 space-y-4">
+            <Card className="bg-card border">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2"><Palette className="w-4 h-4 text-primary" />Display & Appearance</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {[
+                    { label: "Theme", key: "theme", options: [{ value: "dark", label: "Dark (Recommended)" }, { value: "light", label: "Light" }, { value: "system", label: "System Default" }] },
+                    { label: "Language", key: "language", options: [{ value: "en", label: "English" }, { value: "ar", label: "العربية" }, { value: "es", label: "Español" }, { value: "fr", label: "Français" }, { value: "zh", label: "中文" }] },
+                    { label: "Default Currency", key: "currency", options: [{ value: "USD", label: "USD — US Dollar" }, { value: "EUR", label: "EUR — Euro" }, { value: "AED", label: "AED — UAE Dirham" }, { value: "SAR", label: "SAR — Saudi Riyal" }, { value: "BTC", label: "BTC — Bitcoin" }] },
+                    { label: "Timezone", key: "timezone", options: [{ value: "UTC", label: "UTC" }, { value: "Asia/Dubai", label: "Asia/Dubai (UTC+4)" }, { value: "America/New_York", label: "New York (UTC-5)" }, { value: "Europe/London", label: "London (UTC+0)" }] },
+                    { label: "Default Timeframe", key: "defaultTimeframe", options: ["1m","5m","15m","1H","4H","1D","1W"].map(v => ({ value: v, label: v })) },
+                    { label: "Auto-Refresh Interval", key: "refreshInterval", options: [{ value: "10", label: "Every 10 seconds" }, { value: "30", label: "Every 30 seconds" }, { value: "60", label: "Every minute" }, { value: "0", label: "Manual only" }] },
+                  ].map((field) => (
+                    <div key={field.key} className="space-y-1.5">
+                      <Label className="text-xs font-medium">{field.label}</Label>
+                      <Select value={preferences[field.key as keyof typeof preferences] as string} onValueChange={(v) => setPreferences((p) => ({ ...p, [field.key]: v }))}>
+                        <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                        <SelectContent>{field.options.map((opt) => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
+                  ))}
+                </div>
+                <Separator />
+                <div className="space-y-4">
+                  {[{ key: "compactMode", label: "Compact Mode", desc: "Reduce spacing for more data density" }, { key: "showPnlInPercent", label: "Show PnL in Percentage", desc: "Display profit/loss as % instead of absolute" }, { key: "autoRefresh", label: "Auto-Refresh Data", desc: "Automatically refresh signal data" }].map((item) => (
+                    <div key={item.key} className="flex items-center justify-between">
+                      <div><p className="text-sm font-medium text-foreground">{item.label}</p><p className="text-xs text-muted-foreground">{item.desc}</p></div>
+                      <Switch checked={preferences[item.key as keyof typeof preferences] as boolean} onCheckedChange={(v) => setPreferences((p) => ({ ...p, [item.key]: v }))} />
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+            <Button onClick={handleSave} disabled={saving} className="gap-2">
+              {saving ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+              {saving ? "Saving..." : "Save Preferences"}
+            </Button>
           </TabsContent>
         </Tabs>
       </div>

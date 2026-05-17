@@ -1,7 +1,10 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import { getAuth } from "@clerk/express";
 import { db } from "@workspace/db";
 import { eq } from "drizzle-orm";
+// Stripe integration — install with: pnpm add stripe
+// import Stripe from "stripe";
+// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2024-11-20.acacia" });
 
 const router = Router();
 
@@ -309,7 +312,7 @@ router.post("/coupons/apply", requireAuth, async (req: any, res) => {
       return res.status(400).json({ error: "Coupon code is required" });
     }
 
-    // Mock coupon validation
+    // Mock coupon validation (replace with Stripe coupon lookup in production)
     const coupon = {
       code,
       discountType: "percentage",
@@ -322,6 +325,111 @@ router.post("/coupons/apply", requireAuth, async (req: any, res) => {
     req.log.error({ err }, "applyCoupon error");
     res.status(500).json({ error: "Internal server error" });
   }
+});
+
+/**
+ * Create Stripe Checkout session
+ * POST /api/subscriptions/checkout
+ * Body: { planId: string, period: "monthly" | "yearly", couponCode?: string }
+ *
+ * PRODUCTION SETUP:
+ * 1. Install Stripe: pnpm add stripe
+ * 2. Set STRIPE_SECRET_KEY in environment
+ * 3. Create products/prices in Stripe Dashboard
+ * 4. Set STRIPE_PRO_MONTHLY_PRICE_ID, STRIPE_PRO_YEARLY_PRICE_ID, etc.
+ * 5. Uncomment Stripe import at top of file
+ */
+router.post("/checkout", requireAuth, async (req: any, res) => {
+  try {
+    const userId = req.userId;
+    const { planId, period = "monthly", couponCode } = req.body;
+
+    if (!planId) return res.status(400).json({ error: "planId is required" });
+    if (planId === "free") return res.status(400).json({ error: "Cannot checkout free plan" });
+
+    const appUrl = process.env.APP_URL || "https://tradexray.vercel.app";
+
+    // PRODUCTION: Replace mock with actual Stripe checkout session creation
+    // const priceId = planId === "pro"
+    //   ? (period === "yearly" ? process.env.STRIPE_PRO_YEARLY_PRICE_ID : process.env.STRIPE_PRO_MONTHLY_PRICE_ID)
+    //   : (period === "yearly" ? process.env.STRIPE_ELITE_YEARLY_PRICE_ID : process.env.STRIPE_ELITE_MONTHLY_PRICE_ID);
+    // const session = await stripe.checkout.sessions.create({ ... });
+    // return res.json({ url: session.url });
+
+    // Mock response for development
+    res.json({
+      success: true,
+      data: {
+        url: `${appUrl}/subscriptions?success=true&plan=${planId}&period=${period}`,
+        sessionId: `cs_mock_${Date.now()}`,
+      },
+    });
+  } catch (err) {
+    req.log.error({ err }, "checkout error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/**
+ * Create Stripe Customer Portal session
+ * POST /api/subscriptions/portal
+ */
+router.post("/portal", requireAuth, async (req: any, res) => {
+  try {
+    const userId = req.userId;
+    const appUrl = process.env.APP_URL || "https://tradexray.vercel.app";
+
+    // PRODUCTION: Replace mock with actual Stripe portal session
+    // const session = await stripe.billingPortal.sessions.create({
+    //   customer: stripeCustomerId,
+    //   return_url: `${appUrl}/subscriptions`,
+    // });
+    // return res.json({ url: session.url });
+
+    res.json({
+      success: true,
+      data: { url: `${appUrl}/subscriptions` },
+    });
+  } catch (err) {
+    req.log.error({ err }, "portal error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/**
+ * Stripe Webhook Handler
+ * POST /api/webhooks/stripe
+ *
+ * IMPORTANT: Register this route BEFORE express.json() middleware
+ * with express.raw({ type: "application/json" })
+ *
+ * Set STRIPE_WEBHOOK_SECRET from: stripe listen --forward-to localhost:3000/api/webhooks/stripe
+ */
+router.post("/webhooks/stripe", async (req: any, res) => {
+  const sig = req.headers["stripe-signature"];
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  if (!webhookSecret) {
+    return res.status(500).json({ error: "Webhook secret not configured" });
+  }
+
+  // PRODUCTION: Verify webhook signature
+  // let event;
+  // try {
+  //   event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+  // } catch (err: any) {
+  //   return res.status(400).json({ error: `Webhook Error: ${err.message}` });
+  // }
+  //
+  // switch (event.type) {
+  //   case "checkout.session.completed": ...
+  //   case "customer.subscription.updated": ...
+  //   case "customer.subscription.deleted": ...
+  //   case "invoice.payment_succeeded": ...
+  //   case "invoice.payment_failed": ...
+  // }
+
+  res.json({ received: true });
 });
 
 export default router;
