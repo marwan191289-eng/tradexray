@@ -1,6 +1,6 @@
 import express, { type Express, type Request } from "express";
 import cors from "cors";
-import pinoHttp from "pino-http";
+import { pinoHttp } from "pino-http";
 import { type IncomingMessage, type ServerResponse } from "node:http";
 import { clerkMiddleware } from "@clerk/express";
 import { publishableKeyFromHost } from "@clerk/shared/keys";
