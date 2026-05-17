@@ -94,7 +94,8 @@ export const CreateSignalBody = zod.object({
   "entry": zod.number(),
   "stop": zod.number().optional(),
   "target": zod.number().optional(),
-  "confidence": zod.number()
+  "confidence": zod.number(),
+  "features": zod.record(zod.unknown()).optional()
 })
 
 

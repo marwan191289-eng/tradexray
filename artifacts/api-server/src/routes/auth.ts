@@ -20,7 +20,7 @@ router.get("/me", (req: any, res) => {
 
     res.json({
       userId,
-      user: auth.user,
+      sessionClaims: auth.sessionClaims,
       sessionId: auth.sessionId,
     });
   } catch (err) {
