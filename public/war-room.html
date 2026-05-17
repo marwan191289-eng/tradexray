@@ -1768,14 +1768,30 @@ function generateSignal(sym,tf){
     else if(atFib&&score<0){score-=0.5;reasons.push('Price at Fibonacci resistance level');}
   }
 
-  // ── VOLUME AMPLIFICATION ─────────────────────────────────
-  if(ind.volRatio>2.5&&score!==0){
-    const amp=score>0?Math.ceil(score*0.22):Math.floor(score*0.22);
-    score+=amp;
-    reasons.push(`Volume spike ${ind.volRatio.toFixed(1)}x avg — signal amplified`);
+  // Track bull/bear pressure from sign of score deltas so far
+  if(score>0) bullVotes++; else if(score<0) bearVotes++;
+
+  // ── VOLUME AMPLIFICATION (capped) ───────────────────────
+  if(ind.volRatio>2.5 && score!==0){
+    // multiplicative but capped to ±3 absolute points
+    const factor = Math.min(0.35, 0.10 + (ind.volRatio-2.5)*0.05);
+    let amp = score * factor;
+    amp = Math.max(-3, Math.min(3, amp));
+    score += amp;
+    reasons.push(`Volume spike ${ind.volRatio.toFixed(1)}x avg — signal amplified ${amp>0?'+':''}${amp.toFixed(1)}`);
   }
 
-  // ── MARKET REGIME FILTER ─────────────────────────────────
+  // ── BOLLINGER SQUEEZE / BREAKOUT — weight 2 ─────────────
+  if(ind.bb && atrPct!==null){
+    const bbWidthPct = ((ind.bb.upper-ind.bb.lower)/price)*100;
+    if(bbWidthPct < 2.5 && atrPct < 3){
+      // squeeze — directional breakout is high-quality
+      if(score >= 4){ score += 1.5; reasons.push('BB squeeze + bullish breakout setup ⚡'); }
+      else if(score <= -4){ score -= 1.5; reasons.push('BB squeeze + bearish breakdown setup ⚡'); }
+    }
+  }
+
+  // ── MARKET REGIME FILTER (sentiment) ─────────────────────
   const fg=S.fg?.val||50;
   if(fg<=15&&score<0){score+=1.5;reasons.push('Extreme Fear context — oversold bounce risk');}
   if(fg>=85&&score>0){score-=1.5;reasons.push('Extreme Greed context — overbought correction risk');}
@@ -1784,40 +1800,82 @@ function generateSignal(sym,tf){
   if(ch24>18&&score>0){score-=2;reasons.push('Extended 24h rally — overbought caution');}
   if(ch24<-18&&score<0){score+=2;reasons.push('Extended 24h drop — oversold bounce watch');}
 
-  // ── MULTI-TF ALIGNMENT BONUS ─────────────────────────────
-  let tfsAligned=0;
-  const allTFs=['5m','15m','1h','4h','1d','1w','1M'];
+  // ── REGIME-BASED DAMPENING ───────────────────────────────
+  if(regime==='volatile'){
+    score *= 0.85;
+    reasons.push(`Volatile regime (ATR ${atrPct.toFixed(1)}%) — signal weight reduced 15%`);
+  } else if(regime==='ranging'){
+    score *= 0.92;
+    reasons.push(`Ranging regime (ADX ${adxV.toFixed(0)}) — trend signals discounted`);
+  } else if(regime==='trending' && Math.abs(score)>=5){
+    score *= 1.08;
+    reasons.push(`Trending regime (ADX ${adxV.toFixed(0)}) — momentum boosted`);
+  }
+
+  // ── WEIGHTED MULTI-TF ALIGNMENT ──────────────────────────
+  const tfWeights = {'5m':0.4,'15m':0.7,'1h':1.0,'4h':1.5,'1d':2.0,'1w':1.5,'1M':1.0};
+  const allTFs=Object.keys(tfWeights);
   const dir=score>0?'bull':score<0?'bear':'neutral';
+  let tfsAligned=0, weightedAlign=0, totalWeight=0;
   allTFs.forEach(t=>{
     if(t===tf)return;
     const os=S.signals[sym]?.[t];
     if(!os)return;
     const od=os.score>0?'bull':os.score<0?'bear':'neutral';
-    if(od===dir)tfsAligned++;
+    const w = tfWeights[t]||1;
+    totalWeight += w;
+    if(od===dir){ tfsAligned++; weightedAlign += w; }
+    else if(od!=='neutral' && dir!=='neutral'){ weightedAlign -= w*0.5; }
   });
+  const alignRatio = totalWeight>0 ? weightedAlign/totalWeight : 0; // -0.5..1
 
-  // ── CALIBRATION ──────────────────────────────────────────
-  // Max theoretical score ~38+ with all indicators aligned
-  const maxPossible=38;
+  // ── CONTRADICTION / QUALITY DETECTION ────────────────────
+  // Count how many reasons push opposite to final direction
+  let contraCount = 0;
+  if(dir!=='neutral'){
+    reasons.forEach(r=>{
+      const isBull = /bullish|oversold|bounce|above|rising|inflow|support/i.test(r);
+      const isBear = /bearish|overbought|drop|below|falling|outflow|resistance|sell/i.test(r);
+      if(dir==='bull' && isBear) contraCount++;
+      if(dir==='bear' && isBull) contraCount++;
+    });
+  }
+  const quality = Math.max(0, 1 - contraCount*0.08); // 1=clean, drops with contradictions
+
+  // ── SIGMOID CONFIDENCE CALIBRATION ───────────────────────
+  // Spreads confidence more usefully than linear-vs-max-possible
   const absScore=Math.abs(score);
-  let conf=score===0?48:Math.min(96,Math.round(38+(absScore/maxPossible)*58));
+  let conf = score===0 ? 45 : Math.round(42 + 50*(1 - Math.exp(-absScore/7)));
 
-  // MTF alignment boost to confidence (now out of 6 other TFs)
-  if(tfsAligned>=5)conf=Math.min(96,conf+14);
-  else if(tfsAligned>=4)conf=Math.min(96,conf+10);
-  else if(tfsAligned>=3)conf=Math.min(96,conf+7);
-  else if(tfsAligned>=2)conf=Math.min(96,conf+4);
+  // MTF alignment contribution (weighted, up to +14)
+  if(alignRatio >= 0)      conf += Math.round(alignRatio * 14);
+  else                     conf += Math.round(alignRatio * 10); // negative drag
+
+  // Quality multiplier
+  conf = Math.round(conf * (0.8 + 0.2*quality));
+
+  // Regime confidence cap
+  if(regime==='volatile') conf = Math.min(conf, 78);
+  if(regime==='ranging' && absScore < 6) conf = Math.min(conf, 65);
+
+  conf = Math.max(20, Math.min(96, conf));
+
+  // ── ADAPTIVE SIGNAL THRESHOLDS ───────────────────────────
+  // tighter cutoffs in trending regime, wider in choppy/volatile
+  let t1=2, t2=7, t3=14;
+  if(regime==='trending'){ t1=2; t2=6; t3=12; }
+  else if(regime==='volatile' || regime==='ranging'){ t1=3; t2=8; t3=16; }
 
   let signal;
-  if     (score>=14)signal='STRONG BUY';
-  else if(score>=7) signal='BUY';
-  else if(score>=2) signal='WEAK BUY';
-  else if(score<=-14)signal='STRONG SELL';
-  else if(score<=-7) signal='SELL';
-  else if(score<=-2) signal='WEAK SELL';
+  if     (score>= t3)signal='STRONG BUY';
+  else if(score>= t2)signal='BUY';
+  else if(score>= t1)signal='WEAK BUY';
+  else if(score<=-t3)signal='STRONG SELL';
+  else if(score<=-t2)signal='SELL';
+  else if(score<=-t1)signal='WEAK SELL';
   else               signal='HOLD';
 
-  return{signal,score,conf,reasons:reasons.slice(0,9),tfsAligned};
+  return{signal,score:+score.toFixed(2),conf,reasons:reasons.slice(0,9),tfsAligned,regime,quality:+quality.toFixed(2),alignRatio:+alignRatio.toFixed(2)};
 }
 
 // ═══════════════════════════════════════════════════════════
