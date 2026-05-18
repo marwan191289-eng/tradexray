@@ -4,6 +4,7 @@
   "license": "MIT",
   "scripts": {
     "preinstall": "rm -f package-lock.json yarn.lock",
+    "dev": "pnpm --filter @workspace/war-room run dev",
     "build": "pnpm run typecheck || true && pnpm -r --if-present run build",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
