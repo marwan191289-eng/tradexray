@@ -5,6 +5,7 @@ import { createClerkClient } from "@clerk/backend";
 import { db } from "@workspace/db";
 import { profilesTable, userRolesTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
+import { requireAuth, type AuthedRequest } from "../middlewares/authz";
 
 const clerkClient = createClerkClient({
   secretKey: process.env.CLERK_SECRET_KEY,
