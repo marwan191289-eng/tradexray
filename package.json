@@ -4,7 +4,6 @@
   "license": "MIT",
   "scripts": {
     "preinstall": "rm -f package-lock.json yarn.lock",
-    "dev": "echo 'This monorepo uses pnpm. Run: pnpm --filter @workspace/war-room run dev' && exit 0",
     "build": "pnpm run typecheck || true && pnpm -r --if-present run build",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
