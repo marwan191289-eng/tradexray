@@ -1,3 +1,4 @@
+import { type IRouter, type Response } from "express";
 import { Router } from "express";
 import { getAuth } from "@clerk/express";
 import { createClerkClient } from "@clerk/backend";
@@ -9,9 +10,9 @@ const clerkClient = createClerkClient({
   secretKey: process.env.CLERK_SECRET_KEY,
 });
 
-const router = Router();
+const router: IRouter = Router();
 
-router.get("/", async (req: any, res) => {
+router.get("/", async (req: any, res: Response) => {
   try {
     const auth = getAuth(req);
     const userId = auth?.userId;

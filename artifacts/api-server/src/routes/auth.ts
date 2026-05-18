@@ -1,15 +1,16 @@
+import { type IRouter, type Response } from "express";
 import { Router } from "express";
 import { getAuth } from "@clerk/express";
 import { db } from "@workspace/db";
 import { userRolesTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
-const router = Router();
+const router: IRouter = Router();
 
 /**
  * Get current user info
  */
-router.get("/me", (req: any, res) => {
+router.get("/me", (req: any, res: Response) => {
   try {
     const auth = getAuth(req);
     const userId = auth?.userId;
@@ -32,7 +33,7 @@ router.get("/me", (req: any, res) => {
 /**
  * Get user role
  */
-router.get("/me/role", (req: any, res) => {
+router.get("/me/role", (req: any, res: Response) => {
   try {
     const auth = getAuth(req);
     const userId = auth?.userId;
@@ -54,7 +55,7 @@ router.get("/me/role", (req: any, res) => {
 /**
  * Update user profile
  */
-router.patch("/me/profile", (req: any, res) => {
+router.patch("/me/profile", (req: any, res: Response) => {
   try {
     const auth = getAuth(req);
     const userId = auth?.userId;
@@ -82,7 +83,7 @@ router.patch("/me/profile", (req: any, res) => {
 /**
  * Verify email
  */
-router.post("/verify-email", (req: any, res) => {
+router.post("/verify-email", (req: any, res: Response) => {
   try {
     const { email, code } = req.body;
 
@@ -104,7 +105,7 @@ router.post("/verify-email", (req: any, res) => {
 /**
  * Verify phone
  */
-router.post("/verify-phone", (req: any, res) => {
+router.post("/verify-phone", (req: any, res: Response) => {
   try {
     const { phone, code } = req.body;
 
@@ -126,7 +127,7 @@ router.post("/verify-phone", (req: any, res) => {
 /**
  * Send verification code to email
  */
-router.post("/send-email-code", (req: any, res) => {
+router.post("/send-email-code", (req: any, res: Response) => {
   try {
     const { email } = req.body;
 
@@ -149,7 +150,7 @@ router.post("/send-email-code", (req: any, res) => {
 /**
  * Send verification code to phone
  */
-router.post("/send-phone-code", (req: any, res) => {
+router.post("/send-phone-code", (req: any, res: Response) => {
   try {
     const { phone } = req.body;
 
@@ -173,7 +174,7 @@ router.post("/send-phone-code", (req: any, res) => {
  * OAuth callback handlers
  */
 
-router.post("/oauth/google/callback", (req: any, res) => {
+router.post("/oauth/google/callback", (req: any, res: Response) => {
   try {
     const { token } = req.body;
 
@@ -193,7 +194,7 @@ router.post("/oauth/google/callback", (req: any, res) => {
   }
 });
 
-router.post("/oauth/apple/callback", (req: any, res) => {
+router.post("/oauth/apple/callback", (req: any, res: Response) => {
   try {
     const { token } = req.body;
 
@@ -212,7 +213,7 @@ router.post("/oauth/apple/callback", (req: any, res) => {
   }
 });
 
-router.post("/oauth/facebook/callback", (req: any, res) => {
+router.post("/oauth/facebook/callback", (req: any, res: Response) => {
   try {
     const { token } = req.body;
 
@@ -231,7 +232,7 @@ router.post("/oauth/facebook/callback", (req: any, res) => {
   }
 });
 
-router.post("/oauth/twitter/callback", (req: any, res) => {
+router.post("/oauth/twitter/callback", (req: any, res: Response) => {
   try {
     const { token } = req.body;
 
@@ -253,7 +254,7 @@ router.post("/oauth/twitter/callback", (req: any, res) => {
 /**
  * Logout
  */
-router.post("/logout", (req: any, res) => {
+router.post("/logout", (req: any, res: Response) => {
   try {
     const auth = getAuth(req);
     const userId = auth?.userId;

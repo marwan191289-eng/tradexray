@@ -1,3 +1,4 @@
+import { type IRouter, type Response } from "express";
 import { Router } from "express";
 import { getAuth } from "@clerk/express";
 import { db } from "@workspace/db";
@@ -5,7 +6,7 @@ import { signalLogTable, userRolesTable } from "@workspace/db";
 import { desc, eq, and, gte, lte, sql, count, avg } from "drizzle-orm";
 import { CreateSignalBody } from "@workspace/api-zod";
 
-const router = Router();
+const router: IRouter = Router();
 
 function requireAuth(req: any, res: any, next: any) {
   const auth = getAuth(req);
@@ -77,7 +78,7 @@ function formatSignal(s: any) {
 
 // ─── GET /api/signals ─────────────────────────────────────────────────────────
 // List signals with filtering, pagination, and sorting
-router.get("/", requireAuth, async (req: any, res) => {
+router.get("/", requireAuth, async (req: any, res: Response) => {
   try {
     const {
       symbol,
@@ -136,7 +137,7 @@ router.get("/", requireAuth, async (req: any, res) => {
 
 // ─── GET /api/signals/analytics ───────────────────────────────────────────────
 // Advanced analytics with multiple metrics
-router.get("/analytics", requireAuth, async (req: any, res) => {
+router.get("/analytics", requireAuth, async (req: any, res: Response) => {
   try {
     const { days = 30, symbol } = req.query;
     const daysAgo = new Date();
@@ -353,7 +354,7 @@ router.get("/analytics", requireAuth, async (req: any, res) => {
 
 // ─── GET /api/signals/leaderboard ─────────────────────────────────────────────
 // Top performing symbols
-router.get("/leaderboard", requireAuth, async (req: any, res) => {
+router.get("/leaderboard", requireAuth, async (req: any, res: Response) => {
   try {
     const { days = 30, limit = 10 } = req.query;
     const daysAgo = new Date();
@@ -397,7 +398,7 @@ router.get("/leaderboard", requireAuth, async (req: any, res) => {
 });
 
 // ─── GET /api/signals/:id ──────────────────────────────────────────────────────
-router.get("/:id", requireAuth, async (req: any, res) => {
+router.get("/:id", requireAuth, async (req: any, res: Response) => {
   try {
     const { id } = req.params;
     const signal = await db
@@ -418,7 +419,7 @@ router.get("/:id", requireAuth, async (req: any, res) => {
 });
 
 // ─── POST /api/signals ────────────────────────────────────────────────────────
-router.post("/", requireAuth, requireAdmin, async (req: any, res) => {
+router.post("/", requireAuth, requireAdmin, async (req: any, res: Response) => {
   try {
     const parsed = CreateSignalBody.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: "Invalid body", details: parsed.error.errors });
@@ -460,7 +461,7 @@ router.post("/", requireAuth, requireAdmin, async (req: any, res) => {
 });
 
 // ─── PATCH /api/signals/:id/outcome ───────────────────────────────────────────
-router.patch("/:id/outcome", requireAuth, requireAdmin, async (req: any, res) => {
+router.patch("/:id/outcome", requireAuth, requireAdmin, async (req: any, res: Response) => {
   try {
     const { id } = req.params;
     const { outcome, pnlPct } = req.body;
@@ -492,7 +493,7 @@ router.patch("/:id/outcome", requireAuth, requireAdmin, async (req: any, res) =>
 });
 
 // ─── DELETE /api/signals/:id ───────────────────────────────────────────────────
-router.delete("/:id", requireAuth, requireAdmin, async (req: any, res) => {
+router.delete("/:id", requireAuth, requireAdmin, async (req: any, res: Response) => {
   try {
     const { id } = req.params;
     const [deleted] = await db

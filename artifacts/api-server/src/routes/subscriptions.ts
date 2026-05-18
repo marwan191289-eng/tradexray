@@ -1,4 +1,4 @@
-import { Router, Request, Response } from "express";
+import { Router, Request, Response, type IRouter } from "express";
 import { getAuth } from "@clerk/express";
 import { db } from "@workspace/db";
 import { eq } from "drizzle-orm";
@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 // import Stripe from "stripe";
 // const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2024-11-20.acacia" });
 
-const router = Router();
+const router: IRouter = Router();
 
 function requireAuth(req: any, res: any, next: any) {
   const auth = getAuth(req);
@@ -19,7 +19,7 @@ function requireAuth(req: any, res: any, next: any) {
 /**
  * Get available subscription plans
  */
-router.get("/plans", async (req: any, res) => {
+router.get("/plans", async (req: any, res: Response) => {
   try {
     // Mock subscription plans
     const plans = [
@@ -92,7 +92,7 @@ router.get("/plans", async (req: any, res) => {
 /**
  * Get user's current subscription
  */
-router.get("/me", requireAuth, async (req: any, res) => {
+router.get("/me", requireAuth, async (req: any, res: Response) => {
   try {
     const userId = req.userId;
 
@@ -118,7 +118,7 @@ router.get("/me", requireAuth, async (req: any, res) => {
 /**
  * Create subscription
  */
-router.post("/", requireAuth, async (req: any, res) => {
+router.post("/", requireAuth, async (req: any, res: Response) => {
   try {
     const userId = req.userId;
     const { planId, paymentMethodId, couponCode } = req.body;
@@ -149,7 +149,7 @@ router.post("/", requireAuth, async (req: any, res) => {
 /**
  * Update subscription
  */
-router.patch("/:id", requireAuth, async (req: any, res) => {
+router.patch("/:id", requireAuth, async (req: any, res: Response) => {
   try {
     const userId = req.userId;
     const { id } = req.params;
@@ -175,7 +175,7 @@ router.patch("/:id", requireAuth, async (req: any, res) => {
 /**
  * Cancel subscription
  */
-router.delete("/:id", requireAuth, async (req: any, res) => {
+router.delete("/:id", requireAuth, async (req: any, res: Response) => {
   try {
     const userId = req.userId;
     const { id } = req.params;
@@ -196,7 +196,7 @@ router.delete("/:id", requireAuth, async (req: any, res) => {
 /**
  * Get usage limits
  */
-router.get("/usage/limits", requireAuth, async (req: any, res) => {
+router.get("/usage/limits", requireAuth, async (req: any, res: Response) => {
   try {
     const userId = req.userId;
 
@@ -222,7 +222,7 @@ router.get("/usage/limits", requireAuth, async (req: any, res) => {
 /**
  * Get payment history
  */
-router.get("/payments", requireAuth, async (req: any, res) => {
+router.get("/payments", requireAuth, async (req: any, res: Response) => {
   try {
     const userId = req.userId;
     const { limit = 10, offset = 0 } = req.query;
@@ -268,7 +268,7 @@ router.get("/payments", requireAuth, async (req: any, res) => {
 /**
  * Get invoices
  */
-router.get("/invoices", requireAuth, async (req: any, res) => {
+router.get("/invoices", requireAuth, async (req: any, res: Response) => {
   try {
     const userId = req.userId;
     const { limit = 10, offset = 0 } = req.query;
@@ -303,7 +303,7 @@ router.get("/invoices", requireAuth, async (req: any, res) => {
 /**
  * Apply coupon code
  */
-router.post("/coupons/apply", requireAuth, async (req: any, res) => {
+router.post("/coupons/apply", requireAuth, async (req: any, res: Response) => {
   try {
     const userId = req.userId;
     const { code } = req.body;
@@ -339,7 +339,7 @@ router.post("/coupons/apply", requireAuth, async (req: any, res) => {
  * 4. Set STRIPE_PRO_MONTHLY_PRICE_ID, STRIPE_PRO_YEARLY_PRICE_ID, etc.
  * 5. Uncomment Stripe import at top of file
  */
-router.post("/checkout", requireAuth, async (req: any, res) => {
+router.post("/checkout", requireAuth, async (req: any, res: Response) => {
   try {
     const userId = req.userId;
     const { planId, period = "monthly", couponCode } = req.body;
@@ -374,7 +374,7 @@ router.post("/checkout", requireAuth, async (req: any, res) => {
  * Create Stripe Customer Portal session
  * POST /api/subscriptions/portal
  */
-router.post("/portal", requireAuth, async (req: any, res) => {
+router.post("/portal", requireAuth, async (req: any, res: Response) => {
   try {
     const userId = req.userId;
     const appUrl = process.env.APP_URL || "https://tradexray.vercel.app";
@@ -405,7 +405,7 @@ router.post("/portal", requireAuth, async (req: any, res) => {
  *
  * Set STRIPE_WEBHOOK_SECRET from: stripe listen --forward-to localhost:3000/api/webhooks/stripe
  */
-router.post("/webhooks/stripe", async (req: any, res) => {
+router.post("/webhooks/stripe", async (req: any, res: Response) => {
   const sig = req.headers["stripe-signature"];
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 

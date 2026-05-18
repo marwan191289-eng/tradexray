@@ -1,3 +1,4 @@
+import { type IRouter, type Response } from "express";
 import { Router } from "express";
 import { getAuth } from "@clerk/express";
 import { createClerkClient } from "@clerk/backend";
@@ -10,7 +11,7 @@ const clerkClient = createClerkClient({
   secretKey: process.env.CLERK_SECRET_KEY,
 });
 
-const router = Router();
+const router: IRouter = Router();
 
 function requireAuth(req: any, res: any, next: any) {
   const auth = getAuth(req);
@@ -33,7 +34,7 @@ async function requireAdmin(req: any, res: any, next: any) {
   next();
 }
 
-router.get("/check", requireAuth, async (req: any, res) => {
+router.get("/check", requireAuth, async (req: any, res: Response) => {
   try {
     const roles = await db
       .select()
@@ -47,7 +48,7 @@ router.get("/check", requireAuth, async (req: any, res) => {
   }
 });
 
-router.get("/users", requireAuth, requireAdmin, async (req: any, res) => {
+router.get("/users", requireAuth, requireAdmin, async (req: any, res: Response) => {
   try {
     const [clerkUsers, dbRoles] = await Promise.all([
       clerkClient.users.getUserList({ limit: 500 }),
@@ -84,7 +85,7 @@ router.get("/users", requireAuth, requireAdmin, async (req: any, res) => {
   }
 });
 
-router.patch("/users/:userId/role", requireAuth, requireAdmin, async (req: any, res) => {
+router.patch("/users/:userId/role", requireAuth, requireAdmin, async (req: any, res: Response) => {
   try {
     const parsed = AdminSetUserRoleBody.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: "Invalid body" });
@@ -102,7 +103,7 @@ router.patch("/users/:userId/role", requireAuth, requireAdmin, async (req: any, 
   }
 });
 
-router.delete("/users/:userId", requireAuth, requireAdmin, async (req: any, res) => {
+router.delete("/users/:userId", requireAuth, requireAdmin, async (req: any, res: Response) => {
   try {
     const { userId } = req.params;
 
