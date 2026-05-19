@@ -410,26 +410,38 @@ router.post("/webhooks/stripe", async (req: any, res: Response) => {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
   if (!webhookSecret) {
-    return res.status(500).json({ error: "Webhook secret not configured" });
+    req.log?.error("STRIPE_WEBHOOK_SECRET not configured");
+    return res.status(500).json({ error: "Webhook not configured" });
   }
 
-  // PRODUCTION: Verify webhook signature
-  // let event;
-  // try {
-  //   event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
-  // } catch (err: any) {
-  //   return res.status(400).json({ error: `Webhook Error: ${err.message}` });
-  // }
-  //
-  // switch (event.type) {
-  //   case "checkout.session.completed": ...
-  //   case "customer.subscription.updated": ...
-  //   case "customer.subscription.deleted": ...
-  //   case "invoice.payment_succeeded": ...
-  //   case "invoice.payment_failed": ...
-  // }
+  if (!sig) {
+    return res.status(400).json({ error: "Missing stripe-signature header" });
+  }
 
-  res.json({ received: true });
+  // Require raw body (must be mounted with express.raw({ type: 'application/json' }))
+  if (!Buffer.isBuffer(req.body)) {
+    req.log?.error("Stripe webhook requires raw body parser");
+    return res.status(500).json({ error: "Webhook misconfigured" });
+  }
+
+  try {
+    // Lazy-load stripe so the route stays mountable even if package isn't installed yet
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const Stripe = require("stripe");
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    if (!stripeKey) {
+      return res.status(500).json({ error: "Stripe not configured" });
+    }
+    const stripe = new Stripe(stripeKey);
+    const event = stripe.webhooks.constructEvent(req.body, sig as string, webhookSecret);
+
+    // TODO: handle event.type (checkout.session.completed, etc.) server-side
+    req.log?.info({ type: event.type, id: event.id }, "stripe webhook verified");
+    return res.json({ received: true });
+  } catch (err: any) {
+    req.log?.warn({ err: err?.message }, "stripe webhook verification failed");
+    return res.status(400).json({ error: "Invalid signature" });
+  }
 });
 
 export default router;
