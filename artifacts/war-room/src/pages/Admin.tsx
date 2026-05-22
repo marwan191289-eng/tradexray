@@ -134,7 +134,7 @@ export default function Admin() {
                               if (confirm("حذف نهائي لهذا المستخدم؟")) {
                                 deleteUserMutation.mutate({ userId: r.userId });
                               }
-                            }}>
+                            }} aria-label="حذف المستخدم">
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
                           )}

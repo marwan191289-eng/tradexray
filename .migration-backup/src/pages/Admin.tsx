@@ -154,7 +154,7 @@ export default function Admin() {
                             </SelectContent>
                           </Select>
                           {r.user_id !== user?.id && (
-                            <Button size="sm" variant="ghost" onClick={() => deleteUser(r.user_id)}>
+                            <Button size="sm" variant="ghost" onClick={() => deleteUser(r.user_id)} aria-label="حذف المستخدم">
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
                           )}
