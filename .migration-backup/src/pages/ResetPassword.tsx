@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { toast } from "@/components/ui/sonner";
 import { Loader2 } from "lucide-react";
 
@@ -42,10 +42,11 @@ export default function ResetPassword() {
   };
 
   return (
-    <div dir="rtl" className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div dir="rtl" className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
+      <h1 className="text-2xl font-bold mb-4">كلمة سر جديدة</h1>
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>كلمة سر جديدة</CardTitle>
+          <h2 className="text-2xl font-semibold leading-none tracking-tight">كلمة سر جديدة</h2>
           <CardDescription>أدخل كلمة سر جديدة لحسابك</CardDescription>
         </CardHeader>
         <CardContent>
@@ -62,7 +63,12 @@ export default function ResetPassword() {
                 <Input id="rp-pw2" type="password" dir="ltr" value={confirm} onChange={(e) => setConfirm(e.target.value)} required minLength={8} />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "حفظ"}
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="sr-only">جاري الحفظ...</span>
+                  </>
+                ) : "حفظ"}
               </Button>
             </form>
           )}

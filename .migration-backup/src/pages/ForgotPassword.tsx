@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { toast } from "@/components/ui/sonner";
 import { Loader2, ArrowRight } from "lucide-react";
 
@@ -32,10 +32,11 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div dir="rtl" className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div dir="rtl" className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
+      <h1 className="text-2xl font-bold mb-4">إعادة تعيين كلمة السر</h1>
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>إعادة تعيين كلمة السر</CardTitle>
+          <h2 className="text-2xl font-semibold leading-none tracking-tight">إعادة تعيين كلمة السر</h2>
           <CardDescription>
             {sent ? "تحقق من بريدك الإلكتروني" : "أدخل بريدك وسنرسل لك رابطاً لإعادة التعيين"}
           </CardDescription>
@@ -53,7 +54,12 @@ export default function ForgotPassword() {
                 <Input id="fp-email" type="email" dir="ltr" value={email} onChange={(e) => setEmail(e.target.value)} required />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "إرسال الرابط"}
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="sr-only">جاري الإرسال...</span>
+                  </>
+                ) : "إرسال الرابط"}
               </Button>
               <Link to="/auth" className="block text-center text-sm text-primary hover:underline">العودة لتسجيل الدخول</Link>
             </form>

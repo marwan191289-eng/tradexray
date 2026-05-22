@@ -1,15 +1,16 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
 
 export default function ForgotPassword() {
   return (
-    <div dir="rtl" className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div dir="rtl" className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
+      <h1 className="text-2xl font-bold mb-4">إعادة تعيين كلمة السر</h1>
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>إعادة تعيين كلمة السر</CardTitle>
-          <CardDescription>يُرجى استخدام خيار "نسيت كلمة السر" في صفحة تسجيل الدخول</CardDescription>
+          <h2 className="text-2xl font-semibold leading-none tracking-tight">إعادة تعيين كلمة السر</h2>
+          <CardDescription>يُرجى استخدام خيار &quot;نسيت كلمة السر&quot; في صفحة تسجيل الدخول</CardDescription>
         </CardHeader>
         <CardContent>
           <Link to="/auth">
