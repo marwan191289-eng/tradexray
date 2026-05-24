@@ -259,9 +259,9 @@
   }
 
   .status-dot { @apply inline-block w-2 h-2 rounded-full; }
-  .status-dot.live { @apply bg-bull animate-pulse; }
+  .status-dot.live { @apply bg-primary animate-pulse; }
   .status-dot.offline { @apply bg-muted-foreground; }
-  .status-dot.warning { @apply bg-neutral-trade animate-pulse; }
+  .status-dot.warning { @apply bg-accent animate-pulse; }
 }
 
 /* ── RTL Support ───────────────────────────────────────────────────────────── */
