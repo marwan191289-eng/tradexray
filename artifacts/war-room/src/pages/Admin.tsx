@@ -14,6 +14,11 @@ import { getAdminListUsersQueryKey } from "@workspace/api-client-react";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 
 export default function Admin() {
+  useDocumentMeta({
+    title: "Admin Console — TradeXRay AI",
+    description: "Manage users, roles, and signals in the TradeXRay AI admin console.",
+    canonicalPath: "/admin",
+  });
   const navigate = useNavigate();
   const { user, loading: authLoading, signOut } = useAuth();
   const queryClient = useQueryClient();

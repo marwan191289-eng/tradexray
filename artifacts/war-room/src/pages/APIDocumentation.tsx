@@ -16,6 +16,11 @@ interface APIEndpoint {
 }
 
 const APIDocumentation = () => {
+  useDocumentMeta({
+    title: "API Documentation — TradeXRay AI",
+    description: "REST API reference for TradeXRay AI: programmatic access to trading signals, auth, and account endpoints.",
+    canonicalPath: "/api-docs",
+  });
   const [copied, setCopied] = useState<string | null>(null);
 
   const copyToClipboard = (text: string, id: string) => {

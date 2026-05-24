@@ -70,6 +70,11 @@ const ApiKeyItem = ({ name, keyValue, createdAt, lastUsed, onRevoke }: any) => {
 };
 
 const Settings = () => {
+  useDocumentMeta({
+    title: "Settings — TradeXRay AI",
+    description: "Manage your TradeXRay AI account, notifications, connected exchanges, and preferences.",
+    canonicalPath: "/settings",
+  });
   const { user } = useUser();
   const { signOut } = useClerk();
   const [notifications, setNotifications] = useState({ emailSignals: true, emailWeeklyReport: true, emailMarketing: false, pushSignals: true, pushPriceAlerts: true, pushSystemUpdates: false, smsSignals: false, smsAlerts: false });

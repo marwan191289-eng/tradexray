@@ -1,5 +1,6 @@
 import { SignIn, SignUp } from "@clerk/react";
 import { useState } from "react";
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 import { Zap, TrendingUp, BarChart2, Shield, Sparkles } from "lucide-react";
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -13,7 +14,13 @@ const features = [
 ];
 
 export default function Auth() {
+  useDocumentMeta({
+    title: "Sign In or Sign Up — TradeXRay AI",
+    description: "Access your TradeXRay AI account to view real-time crypto signals, analytics, and portfolio insights.",
+    canonicalPath: "/auth",
+  });
   const [mode, setMode] = useState<"signin" | "signup">("signin");
+
 
   return (
     <div className="min-h-screen flex bg-background">

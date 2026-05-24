@@ -221,6 +221,11 @@ const PlanCard = ({
 
 // ─── Main Subscriptions Component ────────────────────────────────────────────
 const Subscriptions = () => {
+  useDocumentMeta({
+    title: "Subscriptions & Pricing — TradeXRay AI",
+    description: "Compare TradeXRay AI plans and pricing. Choose the right tier for your crypto trading workflow.",
+    canonicalPath: "/subscriptions",
+  });
   const { user } = useUser();
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("monthly");
   const [currentPlanId, setCurrentPlanId] = useState("pro");
