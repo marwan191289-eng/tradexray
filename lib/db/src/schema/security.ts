@@ -42,19 +42,28 @@ export const securityEventTypeEnum = pgEnum("security_event_type", [
 export const twoFactorTable = pgTable("two_factor", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: text("user_id").notNull().unique(),
-  
+
   method: twoFactorMethodEnum("method").notNull(),
-  
-  // For authenticator apps
-  secret: text("secret"),
-  backupCodes: jsonb("backup_codes"), // Array of backup codes
-  
+
+  // For authenticator apps.
+  // SECURITY: TOTP seed MUST be encrypted at rest (AES-256-GCM with a
+  // server-side key) before being written here, and decrypted only when
+  // validating a TOTP code. Never store the raw seed.
+  secretCiphertext: text("secret_ciphertext"),
+  secretIv: text("secret_iv"),
+  secretAuthTag: text("secret_auth_tag"),
+
+  // SECURITY: Each backup code MUST be hashed with bcrypt/argon2 before
+  // being stored. On redemption, hash the submitted code and compare,
+  // then invalidate the matching entry. Never store raw backup codes.
+  backupCodeHashes: jsonb("backup_code_hashes"), // string[] of hashes
+
   // For SMS/Email
   phoneNumber: text("phone_number"),
-  
+
   isEnabled: boolean("is_enabled").notNull().default(false),
   enabledAt: timestamp("enabled_at", { withTimezone: true }),
-  
+
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
@@ -62,25 +71,36 @@ export const twoFactorTable = pgTable("two_factor", {
 export const apiKeysTable = pgTable("api_keys", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: text("user_id").notNull(),
-  
+
   name: text("name").notNull(),
-  apiKey: text("api_key").notNull().unique(),
-  apiSecret: text("api_secret").notNull(),
-  
+
+  // Display-only prefix for the public api_key (e.g. "sk_live_abc..."),
+  // shown back to the user so they can recognize the key in lists.
+  apiKeyPrefix: text("api_key_prefix").notNull(),
+
+  // SECURITY: Store only a bcrypt/argon2 hash of the api_key. The raw
+  // value is shown to the user exactly once at creation time; on every
+  // subsequent request hash the incoming value and compare.
+  apiKeyHash: text("api_key_hash").notNull().unique(),
+
+  // SECURITY: api_secret is also hashed with bcrypt/argon2. The raw
+  // secret is shown to the user once at creation and never persisted.
+  apiSecretHash: text("api_secret_hash").notNull(),
+
   // Permissions
   permissions: jsonb("permissions").notNull(), // ["read", "trade", "withdraw"]
-  
+
   // IP Whitelist
   ipWhitelist: jsonb("ip_whitelist"), // Array of IPs
-  
+
   // Rate Limiting
   rateLimit: integer("rate_limit").default(1200), // requests per minute
-  
+
   // Status
   isActive: boolean("is_active").notNull().default(true),
-  
+
   lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
-  
+
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
