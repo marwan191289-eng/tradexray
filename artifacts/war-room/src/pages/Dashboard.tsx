@@ -16,6 +16,7 @@ import {
   ArrowDownRight, Minus, Clock, Shield, Flame,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface SignalStats {
@@ -186,6 +187,11 @@ const SignalRow = ({ signal }: { signal: any }) => {
 
 // ─── Main Dashboard Component ─────────────────────────────────────────────────
 const Dashboard = () => {
+  useDocumentMeta({
+    title: "Dashboard — TradeXRay AI",
+    description: "Live crypto trading signals, performance metrics, and portfolio analytics in your TradeXRay AI dashboard.",
+    canonicalPath: "/dashboard",
+  });
   const { data: rawData, isLoading, refetch } = useListSignals();
   const signals = useMemo(() => {
     if (!rawData) return [];

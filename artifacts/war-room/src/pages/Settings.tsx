@@ -18,6 +18,7 @@ import {
   Trash2, Download, Lock,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 
 const ConnectedAccount = ({ provider, icon: Icon, connected, email, onToggle }: any) => (
   <div className="flex items-center justify-between p-3.5 rounded-xl border bg-card hover:bg-muted/20 transition-colors">
@@ -69,6 +70,11 @@ const ApiKeyItem = ({ name, keyValue, createdAt, lastUsed, onRevoke }: any) => {
 };
 
 const Settings = () => {
+  useDocumentMeta({
+    title: "Settings — TradeXRay AI",
+    description: "Manage your TradeXRay AI account, notifications, connected exchanges, and preferences.",
+    canonicalPath: "/settings",
+  });
   const { user } = useUser();
   const { signOut } = useClerk();
   const [notifications, setNotifications] = useState({ emailSignals: true, emailWeeklyReport: true, emailMarketing: false, pushSignals: true, pushPriceAlerts: true, pushSystemUpdates: false, smsSignals: false, smsAlerts: false });

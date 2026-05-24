@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Code, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 
 interface APIEndpoint {
   method: string;
@@ -15,6 +16,11 @@ interface APIEndpoint {
 }
 
 const APIDocumentation = () => {
+  useDocumentMeta({
+    title: "API Documentation — TradeXRay AI",
+    description: "REST API reference for TradeXRay AI: programmatic access to trading signals, auth, and account endpoints.",
+    canonicalPath: "/api-docs",
+  });
   const [copied, setCopied] = useState<string | null>(null);
 
   const copyToClipboard = (text: string, id: string) => {
