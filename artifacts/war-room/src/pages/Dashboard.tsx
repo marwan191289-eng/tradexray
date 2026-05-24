@@ -16,6 +16,7 @@ import {
   ArrowDownRight, Minus, Clock, Shield, Flame,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface SignalStats {

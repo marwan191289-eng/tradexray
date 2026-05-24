@@ -11,6 +11,7 @@ import { toast } from "@/components/ui/sonner";
 import { Loader2, Shield, Trash2, LogOut, Users as UsersIcon, Activity } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getAdminListUsersQueryKey } from "@workspace/api-client-react";
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 
 export default function Admin() {
   const navigate = useNavigate();
