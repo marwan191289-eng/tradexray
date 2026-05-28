@@ -333,6 +333,10 @@ const Subscriptions = () => {
                 Monthly
               </span>
               <button
+                type="button"
+                role="switch"
+                aria-checked={billingPeriod === "yearly"}
+                aria-label="Toggle yearly billing"
                 onClick={() => setBillingPeriod(billingPeriod === "monthly" ? "yearly" : "monthly")}
                 className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
                   billingPeriod === "yearly" ? "bg-primary" : "bg-muted"
