@@ -4814,7 +4814,7 @@ function openSEOPreview() {
   // WhatsApp Preview
   html += '<div class="seo-platform">📱 WhatsApp Preview</div>';
   html += `<div class="seo-card" style="max-width:400px;border-radius:12px">
-    ${ogImage ? `<img class="seo-card-img" src="${fullOgImage}" alt="OG" onerror="this.style.display='none'">` : ''}
+    ${ogImage ? `<img class="seo-card-img" src="${fullOgImage}" alt="Open Graph social preview card" onerror="this.style.display='none'">` : ''}
     <div class="seo-card-body" style="background:#DCF8C6;border-radius:0 0 12px 12px">
       <div class="seo-card-url" style="color:#128C7E;font-size:10px">${domain}</div>
       <div class="seo-card-title" style="color:#000">${ogTitle}</div>
@@ -4825,7 +4825,7 @@ function openSEOPreview() {
   // Twitter/X Preview
   html += '<div class="seo-platform">🐦 X (Twitter) Preview — Summary Large Image</div>';
   html += `<div class="seo-card" style="max-width:500px;border-radius:16px">
-    ${twImage ? `<img class="seo-card-img" src="${twImage.startsWith('http')?twImage:window.location.origin+twImage}" alt="Twitter" onerror="this.style.display='none'" style="border-radius:16px 16px 0 0">` : ''}
+    ${twImage ? `<img class="seo-card-img" src="${twImage.startsWith('http')?twImage:window.location.origin+twImage}" alt="Twitter social preview card" onerror="this.style.display='none'" style="border-radius:16px 16px 0 0">` : ''}
     <div class="seo-card-body" style="background:#15202b;border-radius:0 0 16px 16px">
       <div class="seo-card-url" style="color:#8899a6;font-size:10px">${domain}</div>
       <div class="seo-card-title" style="color:#ffffff">${twTitle}</div>
@@ -4836,7 +4836,7 @@ function openSEOPreview() {
   // Facebook Preview
   html += '<div class="seo-platform">📘 Facebook Preview</div>';
   html += `<div class="seo-card" style="max-width:500px;border:1px solid #ddd">
-    ${ogImage ? `<img class="seo-card-img" src="${fullOgImage}" alt="Facebook" onerror="this.style.display='none'">` : ''}
+    ${ogImage ? `<img class="seo-card-img" src="${fullOgImage}" alt="Facebook social preview card" onerror="this.style.display='none'">` : ''}
     <div class="seo-card-body" style="background:#f0f2f5;border-top:1px solid #ddd">
       <div class="seo-card-url" style="color:#65676b;font-size:10px;text-transform:uppercase">${domain}</div>
       <div class="seo-card-title" style="color:#1c1e21;font-size:15px">${ogTitle}</div>

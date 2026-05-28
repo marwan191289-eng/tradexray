@@ -219,6 +219,7 @@ const APIDocumentation = () => {
                         <Button
                           size="sm"
                           variant="outline"
+                          aria-label="Copy example request"
                           className="absolute top-2 right-2 border-slate-600"
                           onClick={() => copyToClipboard(endpoint.example, `example-${idx}`)}
                         >
@@ -241,6 +242,7 @@ const APIDocumentation = () => {
                         <Button
                           size="sm"
                           variant="outline"
+                          aria-label="Copy example response"
                           className="absolute top-2 right-2 border-slate-600"
                           onClick={() => copyToClipboard(endpoint.response, `response-${idx}`)}
                         >
