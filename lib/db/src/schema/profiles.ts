@@ -6,6 +6,7 @@ export const profilesTable = pgTable("profiles", {
   displayName: text("display_name"),
   avatarUrl: text("avatar_url"),
   preferredLanguage: text("preferred_language").default("ar"),
+  stripeCustomerId: text("stripe_customer_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

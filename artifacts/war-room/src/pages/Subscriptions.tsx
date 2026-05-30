@@ -235,27 +235,93 @@ const Subscriptions = () => {
 
   const currentPlan = PLANS.find((p) => p.id === currentPlanId);
 
-  const handleSelectPlan = (planId: string) => {
+  // priceId map: planId+period → Stripe price ID (populated from API)
+  const [priceIds, setPriceIds] = useState<Record<string, string>>({});
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/subscriptions/products-with-prices")
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (!data?.data) return;
+        const map: Record<string, string> = {};
+        for (const product of data.data) {
+          const nameLower: string = (product.name as string).toLowerCase();
+          const planKey = nameLower.includes("pro") ? "pro"
+            : nameLower.includes("elite") ? "elite"
+            : null;
+          if (!planKey) continue;
+          for (const price of product.prices ?? []) {
+            const interval = price.recurring?.interval;
+            if (interval === "month") map[`${planKey}_monthly`] = price.id;
+            if (interval === "year") map[`${planKey}_yearly`] = price.id;
+          }
+        }
+        setPriceIds(map);
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleSelectPlan = async (planId: string) => {
     if (planId === "elite") {
       toast.info("Contact our sales team for Elite plan pricing and custom setup.");
       return;
     }
     if (planId === currentPlanId) return;
 
-    // In production: redirect to Stripe Checkout
-    // window.location.href = `/api/subscriptions/checkout?planId=${planId}&period=${billingPeriod}`;
-    toast.info(`Redirecting to payment for ${PLANS.find(p => p.id === planId)?.name} plan...`);
+    const priceKey = `${planId}_${billingPeriod}`;
+    const priceId = priceIds[priceKey];
+    if (!priceId) {
+      toast.error("Plan not available yet — Stripe products not configured. Run the seed script first.");
+      return;
+    }
+
+    setCheckoutLoading(true);
+    try {
+      const resp = await fetch("/api/subscriptions/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ priceId, couponCode: couponApplied ? couponCode : undefined }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || "Checkout failed");
+      if (data.url) window.location.href = data.url;
+    } catch (err: any) {
+      toast.error(err.message || "Failed to start checkout");
+    } finally {
+      setCheckoutLoading(false);
+    }
   };
 
-  const handleApplyCoupon = () => {
+  const handleManageSubscription = async () => {
+    try {
+      const resp = await fetch("/api/subscriptions/portal", { method: "POST" });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || "Failed to open portal");
+      if (data.url) window.location.href = data.url;
+    } catch (err: any) {
+      toast.error(err.message || "Could not open billing portal");
+    }
+  };
+
+  const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return;
     setLoading(true);
-    // In production: POST /api/subscriptions/coupons/apply
-    setTimeout(() => {
+    try {
+      const resp = await fetch("/api/subscriptions/coupons/apply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponCode }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || "Invalid coupon");
       setCouponApplied(true);
+      toast.success(`Coupon applied! ${data.discountValue}% discount activated.`);
+    } catch (err: any) {
+      toast.error(err.message || "Invalid coupon code");
+    } finally {
       setLoading(false);
-      toast.success("Coupon applied! 20% discount activated.");
-    }, 800);
+    }
   };
 
   const mockPayments = [
@@ -306,7 +372,7 @@ const Subscriptions = () => {
                     </p>
                     <p className="text-xs text-muted-foreground">per month</p>
                   </div>
-                  <Button variant="outline" size="sm" className="gap-1.5">
+                  <Button variant="outline" size="sm" className="gap-1.5" onClick={handleManageSubscription}>
                     <RefreshCw className="w-3.5 h-3.5" />
                     Manage
                   </Button>

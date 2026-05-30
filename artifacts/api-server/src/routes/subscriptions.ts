@@ -1,10 +1,8 @@
 import { Router, Request, Response, type IRouter } from "express";
 import { getAuth } from "@clerk/express";
-import { db } from "@workspace/db";
-import { eq } from "drizzle-orm";
-// Stripe integration — install with: pnpm add stripe
-// import Stripe from "stripe";
-// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2024-11-20.acacia" });
+import { stripeStorage } from "../lib/stripeStorage";
+import { stripeService } from "../lib/stripeService";
+import { clerkClient } from "@clerk/express";
 
 const router: IRouter = Router();
 
@@ -16,12 +14,69 @@ function requireAuth(req: any, res: any, next: any) {
   next();
 }
 
+function getAppUrl(req: Request): string {
+  const domains = process.env.REPLIT_DOMAINS?.split(',') ?? [];
+  if (domains[0]) return `https://${domains[0]}`;
+  return `${req.protocol}://${req.get('host')}`;
+}
+
 /**
- * Get available subscription plans
+ * GET /api/subscriptions/products
+ * List Stripe products synced to the DB
+ */
+router.get("/products", async (req: any, res: Response) => {
+  try {
+    const products = await stripeStorage.listProducts();
+    res.json({ data: products });
+  } catch (err: any) {
+    req.log?.error({ err }, "listProducts error");
+    res.json({ data: [] });
+  }
+});
+
+/**
+ * GET /api/subscriptions/products-with-prices
+ * List Stripe products with their active prices
+ */
+router.get("/products-with-prices", async (req: any, res: Response) => {
+  try {
+    const rows = await stripeStorage.listProductsWithPrices();
+
+    const productsMap = new Map<string, any>();
+    for (const row of rows as any[]) {
+      if (!productsMap.has(row.product_id)) {
+        productsMap.set(row.product_id, {
+          id: row.product_id,
+          name: row.product_name,
+          description: row.product_description,
+          active: row.product_active,
+          prices: [],
+        });
+      }
+      if (row.price_id) {
+        productsMap.get(row.product_id).prices.push({
+          id: row.price_id,
+          unit_amount: row.unit_amount,
+          currency: row.currency,
+          recurring: row.recurring,
+          active: row.price_active,
+        });
+      }
+    }
+
+    res.json({ data: Array.from(productsMap.values()) });
+  } catch (err: any) {
+    req.log?.error({ err }, "listProductsWithPrices error");
+    res.json({ data: [] });
+  }
+});
+
+/**
+ * GET /api/subscriptions/plans
+ * Static plan definitions (used by frontend for display)
  */
 router.get("/plans", async (req: any, res: Response) => {
   try {
-    // Mock subscription plans
     const plans = [
       {
         id: "free",
@@ -83,124 +138,114 @@ router.get("/plans", async (req: any, res: Response) => {
     ];
 
     res.json(plans);
-  } catch (err) {
-    req.log.error({ err }, "getPlans error");
+  } catch (err: any) {
+    req.log?.error({ err }, "getPlans error");
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
 /**
- * Get user's current subscription
+ * GET /api/subscriptions/me
+ * Get current user's active subscription
  */
 router.get("/me", requireAuth, async (req: any, res: Response) => {
   try {
     const userId = req.userId;
+    const profile = await stripeStorage.getProfileByUserId(userId);
 
-    // Mock user subscription
-    const subscription = {
-      id: "sub_123",
-      userId,
-      planId: "pro",
-      status: "active",
-      currentPeriodStart: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-      currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      autoRenew: true,
-      createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
-    };
-
-    res.json(subscription);
-  } catch (err) {
-    req.log.error({ err }, "getSubscription error");
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-/**
- * Create subscription
- */
-router.post("/", requireAuth, async (req: any, res: Response) => {
-  try {
-    const userId = req.userId;
-    const { planId, paymentMethodId, couponCode } = req.body;
-
-    if (!planId) {
-      return res.status(400).json({ error: "Plan ID is required" });
+    if (!profile?.stripeCustomerId) {
+      return res.json({ subscription: null });
     }
 
-    // Mock subscription creation
-    const subscription = {
-      id: `sub_${Date.now()}`,
-      userId,
-      planId,
-      status: "active",
-      currentPeriodStart: new Date().toISOString(),
-      currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      autoRenew: true,
-      createdAt: new Date().toISOString(),
-    };
-
-    res.status(201).json(subscription);
-  } catch (err) {
-    req.log.error({ err }, "createSubscription error");
+    const subs = await stripeStorage.getUserSubscriptions(profile.stripeCustomerId);
+    res.json({ subscription: subs[0] || null });
+  } catch (err: any) {
+    req.log?.error({ err }, "getSubscription error");
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
 /**
- * Update subscription
+ * POST /api/subscriptions/checkout
+ * Create a Stripe Checkout session
+ * Body: { priceId: string, couponCode?: string }
  */
-router.patch("/:id", requireAuth, async (req: any, res: Response) => {
+router.post("/checkout", requireAuth, async (req: any, res: Response) => {
   try {
     const userId = req.userId;
-    const { id } = req.params;
-    const { planId, autoRenew } = req.body;
+    const { priceId, couponCode } = req.body;
 
-    // Mock subscription update
-    const subscription = {
-      id,
-      userId,
-      planId: planId || "pro",
-      status: "active",
-      autoRenew: autoRenew !== undefined ? autoRenew : true,
-      updatedAt: new Date().toISOString(),
-    };
+    if (!priceId) {
+      return res.status(400).json({ error: "priceId is required" });
+    }
 
-    res.json(subscription);
-  } catch (err) {
-    req.log.error({ err }, "updateSubscription error");
-    res.status(500).json({ error: "Internal server error" });
+    const price = await stripeStorage.getPrice(priceId);
+    if (!price) {
+      return res.status(404).json({ error: "Price not found" });
+    }
+
+    let profile = await stripeStorage.getProfileByUserId(userId);
+
+    let stripeCustomerId = profile?.stripeCustomerId;
+    if (!stripeCustomerId) {
+      const clerkUser = await clerkClient().users.getUser(userId);
+      const email = clerkUser.emailAddresses[0]?.emailAddress ?? '';
+      const customer = await stripeService.createCustomer(email, userId);
+      stripeCustomerId = customer.id;
+
+      if (profile) {
+        await stripeStorage.updateProfileStripeCustomerId(userId, stripeCustomerId);
+      }
+    }
+
+    const appUrl = getAppUrl(req);
+    const session = await stripeService.createCheckoutSession(
+      stripeCustomerId,
+      priceId,
+      `${appUrl}/subscriptions?checkout=success`,
+      `${appUrl}/subscriptions?checkout=cancel`,
+      couponCode,
+    );
+
+    res.json({ url: session.url });
+  } catch (err: any) {
+    req.log?.error({ err }, "checkout error");
+    res.status(500).json({ error: err.message || "Internal server error" });
   }
 });
 
 /**
- * Cancel subscription
+ * POST /api/subscriptions/portal
+ * Create a Stripe Customer Portal session
  */
-router.delete("/:id", requireAuth, async (req: any, res: Response) => {
+router.post("/portal", requireAuth, async (req: any, res: Response) => {
   try {
     const userId = req.userId;
-    const { id } = req.params;
+    const profile = await stripeStorage.getProfileByUserId(userId);
 
-    // Mock subscription cancellation
-    res.json({
-      id,
-      userId,
-      status: "canceled",
-      canceledAt: new Date().toISOString(),
-    });
-  } catch (err) {
-    req.log.error({ err }, "cancelSubscription error");
-    res.status(500).json({ error: "Internal server error" });
+    if (!profile?.stripeCustomerId) {
+      return res.status(400).json({ error: "No Stripe customer found. Subscribe first." });
+    }
+
+    const appUrl = getAppUrl(req);
+    const session = await stripeService.createCustomerPortalSession(
+      profile.stripeCustomerId,
+      `${appUrl}/subscriptions`,
+    );
+
+    res.json({ url: session.url });
+  } catch (err: any) {
+    req.log?.error({ err }, "portal error");
+    res.status(500).json({ error: err.message || "Internal server error" });
   }
 });
 
 /**
- * Get usage limits
+ * GET /api/subscriptions/usage/limits
  */
 router.get("/usage/limits", requireAuth, async (req: any, res: Response) => {
   try {
     const userId = req.userId;
-
-    // Mock usage limits
     const limits = {
       userId,
       signalsUsed: 45,
@@ -211,236 +256,82 @@ router.get("/usage/limits", requireAuth, async (req: any, res: Response) => {
       maxStorageMb: 1000,
       resetDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
     };
-
     res.json(limits);
-  } catch (err) {
-    req.log.error({ err }, "getUsageLimits error");
+  } catch (err: any) {
+    req.log?.error({ err }, "getUsageLimits error");
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
 /**
- * Get payment history
+ * GET /api/subscriptions/payments
  */
 router.get("/payments", requireAuth, async (req: any, res: Response) => {
   try {
     const userId = req.userId;
-    const { limit = 10, offset = 0 } = req.query;
+    const profile = await stripeStorage.getProfileByUserId(userId);
 
-    // Mock payment history
-    const payments = [
-      {
-        id: "pay_123",
-        userId,
-        amount: 29.99,
-        currency: "USD",
-        status: "completed",
-        paymentMethod: "card",
-        description: "Professional Plan - Monthly",
-        paidAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-        createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-      },
-      {
-        id: "pay_122",
-        userId,
-        amount: 29.99,
-        currency: "USD",
-        status: "completed",
-        paymentMethod: "card",
-        description: "Professional Plan - Monthly",
-        paidAt: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString(),
-        createdAt: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString(),
-      },
-    ];
+    if (!profile?.stripeCustomerId) {
+      return res.json({ payments: [], total: 0, limit: 10, offset: 0 });
+    }
 
-    res.json({
-      payments: payments.slice(parseInt(offset), parseInt(offset) + parseInt(limit)),
-      total: payments.length,
-      limit: parseInt(limit),
-      offset: parseInt(offset),
-    });
-  } catch (err) {
-    req.log.error({ err }, "getPayments error");
-    res.status(500).json({ error: "Internal server error" });
+    const result = await import('drizzle-orm').then(({ sql }) =>
+      import('@workspace/db').then(({ db }) =>
+        db.execute(sql`
+          SELECT pi.id, pi.amount, pi.currency, pi.status, pi.created,
+                 pi.description
+          FROM stripe.payment_intents pi
+          WHERE pi.customer = ${profile.stripeCustomerId}
+            AND pi.status = 'succeeded'
+          ORDER BY pi.created DESC
+          LIMIT 20
+        `)
+      )
+    );
+
+    const payments = (result.rows as any[]).map((r) => ({
+      id: r.id,
+      amount: r.amount / 100,
+      currency: (r.currency as string).toUpperCase(),
+      status: 'completed',
+      description: r.description || 'Subscription Payment',
+      date: new Date(Number(r.created) * 1000).toISOString(),
+    }));
+
+    res.json({ payments, total: payments.length, limit: 20, offset: 0 });
+  } catch (err: any) {
+    req.log?.error({ err }, "getPayments error");
+    res.json({ payments: [], total: 0, limit: 10, offset: 0 });
   }
 });
 
 /**
- * Get invoices
- */
-router.get("/invoices", requireAuth, async (req: any, res: Response) => {
-  try {
-    const userId = req.userId;
-    const { limit = 10, offset = 0 } = req.query;
-
-    // Mock invoices
-    const invoices = [
-      {
-        id: "inv_123",
-        userId,
-        invoiceNumber: "INV-2024-001",
-        amount: 29.99,
-        currency: "USD",
-        status: "paid",
-        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        paidDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-        createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-      },
-    ];
-
-    res.json({
-      invoices: invoices.slice(parseInt(offset), parseInt(offset) + parseInt(limit)),
-      total: invoices.length,
-      limit: parseInt(limit),
-      offset: parseInt(offset),
-    });
-  } catch (err) {
-    req.log.error({ err }, "getInvoices error");
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-/**
- * Apply coupon code
+ * POST /api/subscriptions/coupons/apply
  */
 router.post("/coupons/apply", requireAuth, async (req: any, res: Response) => {
   try {
-    const userId = req.userId;
     const { code } = req.body;
 
     if (!code) {
       return res.status(400).json({ error: "Coupon code is required" });
     }
 
-    // Mock coupon validation (replace with Stripe coupon lookup in production)
-    const coupon = {
-      code,
-      discountType: "percentage",
-      discountValue: 20,
-      valid: true,
-    };
+    const stripe = await import('../lib/stripeClient').then((m) => m.getUncachableStripeClient());
+    const coupon = await stripe.coupons.retrieve(code).catch(() => null);
 
-    res.json(coupon);
-  } catch (err) {
-    req.log.error({ err }, "applyCoupon error");
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-/**
- * Create Stripe Checkout session
- * POST /api/subscriptions/checkout
- * Body: { planId: string, period: "monthly" | "yearly", couponCode?: string }
- *
- * PRODUCTION SETUP:
- * 1. Install Stripe: pnpm add stripe
- * 2. Set STRIPE_SECRET_KEY in environment
- * 3. Create products/prices in Stripe Dashboard
- * 4. Set STRIPE_PRO_MONTHLY_PRICE_ID, STRIPE_PRO_YEARLY_PRICE_ID, etc.
- * 5. Uncomment Stripe import at top of file
- */
-router.post("/checkout", requireAuth, async (req: any, res: Response) => {
-  try {
-    const userId = req.userId;
-    const { planId, period = "monthly", couponCode } = req.body;
-
-    if (!planId) return res.status(400).json({ error: "planId is required" });
-    if (planId === "free") return res.status(400).json({ error: "Cannot checkout free plan" });
-
-    const appUrl = process.env.APP_URL || "https://tradexray.vercel.app";
-
-    // PRODUCTION: Replace mock with actual Stripe checkout session creation
-    // const priceId = planId === "pro"
-    //   ? (period === "yearly" ? process.env.STRIPE_PRO_YEARLY_PRICE_ID : process.env.STRIPE_PRO_MONTHLY_PRICE_ID)
-    //   : (period === "yearly" ? process.env.STRIPE_ELITE_YEARLY_PRICE_ID : process.env.STRIPE_ELITE_MONTHLY_PRICE_ID);
-    // const session = await stripe.checkout.sessions.create({ ... });
-    // return res.json({ url: session.url });
-
-    // Mock response for development
-    res.json({
-      success: true,
-      data: {
-        url: `${appUrl}/subscriptions?success=true&plan=${planId}&period=${period}`,
-        sessionId: `cs_mock_${Date.now()}`,
-      },
-    });
-  } catch (err) {
-    req.log.error({ err }, "checkout error");
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-/**
- * Create Stripe Customer Portal session
- * POST /api/subscriptions/portal
- */
-router.post("/portal", requireAuth, async (req: any, res: Response) => {
-  try {
-    const userId = req.userId;
-    const appUrl = process.env.APP_URL || "https://tradexray.vercel.app";
-
-    // PRODUCTION: Replace mock with actual Stripe portal session
-    // const session = await stripe.billingPortal.sessions.create({
-    //   customer: stripeCustomerId,
-    //   return_url: `${appUrl}/subscriptions`,
-    // });
-    // return res.json({ url: session.url });
-
-    res.json({
-      success: true,
-      data: { url: `${appUrl}/subscriptions` },
-    });
-  } catch (err) {
-    req.log.error({ err }, "portal error");
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-/**
- * Stripe Webhook Handler
- * POST /api/webhooks/stripe
- *
- * IMPORTANT: Register this route BEFORE express.json() middleware
- * with express.raw({ type: "application/json" })
- *
- * Set STRIPE_WEBHOOK_SECRET from: stripe listen --forward-to localhost:3000/api/webhooks/stripe
- */
-router.post("/webhooks/stripe", async (req: any, res: Response) => {
-  const sig = req.headers["stripe-signature"];
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
-  if (!webhookSecret) {
-    req.log?.error("STRIPE_WEBHOOK_SECRET not configured");
-    return res.status(500).json({ error: "Webhook not configured" });
-  }
-
-  if (!sig) {
-    return res.status(400).json({ error: "Missing stripe-signature header" });
-  }
-
-  // Require raw body (must be mounted with express.raw({ type: 'application/json' }))
-  if (!Buffer.isBuffer(req.body)) {
-    req.log?.error("Stripe webhook requires raw body parser");
-    return res.status(500).json({ error: "Webhook misconfigured" });
-  }
-
-  try {
-    // Lazy-load stripe so the route stays mountable even if package isn't installed yet
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const Stripe = require("stripe");
-    const stripeKey = process.env.STRIPE_SECRET_KEY;
-    if (!stripeKey) {
-      return res.status(500).json({ error: "Stripe not configured" });
+    if (!coupon || !coupon.valid) {
+      return res.status(400).json({ error: "Invalid or expired coupon code" });
     }
-    const stripe = new Stripe(stripeKey);
-    const event = stripe.webhooks.constructEvent(req.body, sig as string, webhookSecret);
 
-    // TODO: handle event.type (checkout.session.completed, etc.) server-side
-    req.log?.info({ type: event.type, id: event.id }, "stripe webhook verified");
-    return res.json({ received: true });
+    res.json({
+      code: coupon.id,
+      discountType: coupon.percent_off ? "percentage" : "fixed",
+      discountValue: coupon.percent_off ?? (coupon.amount_off ? coupon.amount_off / 100 : 0),
+      valid: true,
+    });
   } catch (err: any) {
-    req.log?.warn({ err: err?.message }, "stripe webhook verification failed");
-    return res.status(400).json({ error: "Invalid signature" });
+    req.log?.error({ err }, "applyCoupon error");
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
