@@ -8,7 +8,7 @@ type Meta = {
   ogDescription?: string;
 };
 
-const SITE_URL = "https://tradexray.lovable.app";
+const SITE_URL = typeof window !== "undefined" ? window.location.origin : "";
 
 function setMeta(selector: string, attr: "name" | "property", key: string, value: string) {
   let el = document.head.querySelector<HTMLMetaElement>(selector);
