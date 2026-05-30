@@ -13009,7 +13009,7 @@ snapshots:
       pg: 8.20.0
       pg-node-migrations: 0.0.8
       stripe: 22.2.0(@types/node@25.6.2)
-      ws: 8.20.1
+      ws: 8.21.0
       yesql: 7.0.0
     transitivePeerDependencies:
       - bufferutil
