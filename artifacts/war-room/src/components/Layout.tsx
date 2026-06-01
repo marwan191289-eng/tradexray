@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 // ─── Nav Items ────────────────────────────────────────────────────────────────
 const navItems = [
   { path: "/", label: "War Room", icon: TrendingUp, badge: "LIVE" },
+  { path: "/trading", label: "Trading", icon: BarChart2, badge: "NEW" },
   { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { path: "/subscriptions", label: "Subscriptions", icon: CreditCard },
   { path: "/settings", label: "Settings", icon: Settings },

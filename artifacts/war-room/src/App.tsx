@@ -18,6 +18,7 @@ import Dashboard from "./pages/Dashboard.tsx";
 import Subscriptions from "./pages/Subscriptions.tsx";
 import Settings from "./pages/Settings.tsx";
 import APIDocumentation from "./pages/APIDocumentation.tsx";
+import Trading from "./pages/Trading.tsx";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +64,7 @@ function AppRoutes() {
         <Route path="/subscriptions" element={<Subscriptions />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/api-docs" element={<APIDocumentation />} />
+        <Route path="/trading" element={<Trading />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
