@@ -32,9 +32,10 @@ export default function Admin() {
     query: { enabled: isAdmin },
   });
 
-  const { data: signals = [], isLoading: signalsLoading } = useListSignals({
+  const { data: signalsRaw, isLoading: signalsLoading } = useListSignals({
     query: { enabled: isAdmin },
   });
+  const signals = Array.isArray(signalsRaw) ? signalsRaw : [];
 
   const setRoleMutation = useAdminSetUserRole({
     mutation: {
