@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Code, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
+import { Layout } from "@/components/Layout";
 
 interface APIEndpoint {
   method: string;
@@ -124,6 +125,7 @@ const APIDocumentation = () => {
   ];
 
   return (
+    <Layout>
     <div className="w-full h-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-6 overflow-auto">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
@@ -336,6 +338,7 @@ const APIDocumentation = () => {
         </Card>
       </div>
     </div>
+    </Layout>
   );
 };
 

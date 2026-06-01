@@ -18,6 +18,7 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
+import { Layout } from "@/components/Layout";
 
 // ─── Plan Definitions ─────────────────────────────────────────────────────────
 const PLANS = [
@@ -331,6 +332,7 @@ const Subscriptions = () => {
   ];
 
   return (
+    <Layout>
     <div className="w-full min-h-full bg-background p-4 md:p-6 overflow-auto">
       <div className="max-w-7xl mx-auto space-y-6">
 
@@ -673,6 +675,7 @@ const Subscriptions = () => {
         </Tabs>
       </div>
     </div>
+    </Layout>
   );
 };
 

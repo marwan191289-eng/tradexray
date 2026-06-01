@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
+import { Layout } from "@/components/Layout";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface SignalStats {
@@ -325,6 +326,7 @@ const Dashboard = () => {
   }, [signals]);
 
   return (
+    <Layout>
     <div className="w-full min-h-full bg-background p-4 md:p-6 overflow-auto">
       <div className="max-w-7xl mx-auto space-y-6">
 
@@ -740,6 +742,7 @@ const Dashboard = () => {
         </Tabs>
       </div>
     </div>
+    </Layout>
   );
 };
 

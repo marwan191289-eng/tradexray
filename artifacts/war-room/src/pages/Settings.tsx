@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
+import { Layout } from "@/components/Layout";
 
 const ConnectedAccount = ({ provider, icon: Icon, connected, email, onToggle }: any) => (
   <div className="flex items-center justify-between p-3.5 rounded-xl border bg-card hover:bg-muted/20 transition-colors">
@@ -85,6 +86,7 @@ const Settings = () => {
   const userInitials = user?.firstName ? `${user.firstName[0]}${user.lastName?.[0] || ""}`.toUpperCase() : user?.primaryEmailAddress?.emailAddress?.[0]?.toUpperCase() || "U";
 
   return (
+    <Layout>
     <div className="w-full min-h-full bg-background p-4 md:p-6 overflow-auto">
       <div className="max-w-4xl mx-auto space-y-6">
         <div>
@@ -314,6 +316,7 @@ const Settings = () => {
         </Tabs>
       </div>
     </div>
+    </Layout>
   );
 };
 
